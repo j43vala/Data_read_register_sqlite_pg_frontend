@@ -16,8 +16,7 @@
     },
     "mqtt":{
       "broker_host": "broker.hivemq.com",
-      "broker_port": 1883,
-      "topic": "plc_reg_data"
+      "broker_port": 1883
     },
     "sparkplug_b_topic":{
       "group_id": "g1",
@@ -27,42 +26,42 @@
       {
         "device_name": "plc",
         "slave_id": 3,
-        "registers": [
+        "parameters": [
           {
             "address": 1,
-            "column_name": "kwh",
-            "type": "Integer"
+            "parameter_name": "kwh",
+            "data_type": "Integer"
           },
           {
             "address": 5,
-            "column_name": "rpm",
-            "type": "Integer"
+            "parameter_name": "rpm",
+            "data_type": "Integer"
           },
           {
             "address": 7,
-            "column_name": "temp",
-            "type": "Integer"
+            "parameter_name": "temp",
+            "data_type": "Integer"
           }         
         ]
       },
       {
         "device_name": "plc_dummy",
         "slave_id": 3,
-        "registers": [
+        "parameters": [
           {
             "address": 100,
-            "column_name": "humidity",
-            "type": "Integer"
+            "parameter_name": "humidity",
+            "data_type": "Integer"
           },
           {
             "address": 200,
-            "column_name": "weight",
-            "type": "Integer"
+            "parameter_name": "weight",
+            "data_type": "Integer"
           },
           {
             "address": 400,
-            "column_name": "power",
-            "type": "Double"
+            "parameter_name": "power",
+            "data_type": "Double"
           }         
         ]
       }

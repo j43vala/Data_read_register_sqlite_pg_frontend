@@ -23,23 +23,23 @@ def initialize_modbus_client():
 
     return client
 
-def read_modbus_data(client,slave_id, reg_address, reg_type):
-    print(client,slave_id, reg_address, reg_type)
+def read_modbus_data(client,slave_id, reg_address, reg_data_type):
+    print(client,slave_id, reg_address, reg_data_type)
     try:
         function_code = 3
         data = None  # Initialize data variable
 
-        if reg_type == "Integer":
+        if reg_data_type == "Integer":
             data = read_integer(client, reg_address, slave_id)
             print('Integer > ', reg_address, ":", data)
-        elif reg_type == "Double":
+        elif reg_data_type == "Double":
             data = read_double(client, reg_address, slave_id)
             print('Double > ', reg_address, ":", data)
-        elif reg_type == "Float":
+        elif reg_data_type == "Float":
             data = read_float(client, reg_address, slave_id)
             print('Float > ', reg_address, ":", data)
         else:
-            print(f"Unsupported reg_type '{reg_type}' for register {reg_address}")
+            print(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
 
         return data
 

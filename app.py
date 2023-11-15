@@ -36,27 +36,27 @@ def main():
                         
                         slave_id = device.get("slave_id")
 
-                        for register in device["registers"]:
+                        for parameter in device["parameters"]:
                             try:
-                                column_name = register.get("column_name")
+                                parameter_name = parameter.get("parameter_name")
 
-                                reg_no = register.get("address")
-                                reg_type = register.get("type")
+                                reg_no = parameter.get("address")
+                                reg_data_type = parameter.get("data_type")
                                 
 
-                                if column_name is not None:
-                                    data = read_modbus_data(client, slave_id, reg_no, reg_type)
+                                if parameter_name is not None:
+                                    data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
                                    
                                     # Update the existing record instead of creating a new one
-                                    setattr(record, column_name, data)
-                                    print(f"Updated '{column_name}' with value: {data}")
+                                    setattr(record, parameter_name, data)
+                                    print(f"Updated '{parameter_name}' with value: {data}")
 
                                 else:
-                                    print(f"Attribute name is missing in the specification for register {register}")
+                                    print(f"Attribute name is missing in the specification for parameter {parameter}")
                             except Exception as e:
                                 import traceback
                                 traceback.print_exc()
-                                print(f"An error occurred processing register {register}: {e}")
+                                print(f"An error occurred processing parameter {parameter}: {e}")
 
                         session.add(record)
                         session.commit()

@@ -19,12 +19,12 @@ def initialize_modbus_client():
     return client
 
 def read_integer(client, reg_address, slave_id):
-    result = client.read_holding_registers(reg_address, 2, slave=slave_id)
+    result = client.read_holding_parameters(reg_address, 2, slave=slave_id)
     if result.isError():
         print(f"Error reading Modbus data: {result}")
         return None
     else:
-        data = result.registers[0]
+        data = result.parameters[0]
         return data
 
 client = initialize_modbus_client()

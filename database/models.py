@@ -13,16 +13,16 @@ class Device(Base):
     active = Column(Boolean, default=True)
     name = Column(String, unique=True)
     slave_id = Column(Integer)
-    # Add a one-to-many relationship to registers
-    registers = relationship('Register', backref='device', lazy=True)
+    # Add a one-to-many relationship to parameters
+    parameters = relationship('parameter', backref='device', lazy=True)
 
-class Register(Base):
-    __tablename__ = "register"
+class parameter(Base):
+    __tablename__ = "parameter"
     id = Column(Integer, primary_key=True, nullable=False)
     active = Column(Boolean, default=True)
     address = Column(Integer, nullable=False)
-    column_name = Column(String)
-    type = Column(String)
+    parameter_name = Column(String)
+    data_type = Column(String)
     device_id = Column(Integer, ForeignKey('device.id'))
 
 
@@ -35,25 +35,25 @@ def create_dynamic_model(table_name, column_specifications):
     }
 
     # Define columns dynamically based on the JSON specification
-    for register in column_specifications:
-        # for register_address, register_info in device_spec.get("register", {}).items():
-            col_name = register.get("column_name")
-            col_type = register.get("type")
+    for parameter in column_specifications:
+        # for parameter_address, parameter_info in device_spec.get("parameter", {}).items():
+            col_name = parameter.get("parameter_name")
+            col_data_type = parameter.get("data_type")
 
             if col_name is None:
                 raise ValueError("Column name is missing in the specification.")
 
-            if col_type is None:
-                raise ValueError(f"Column type is missing for column {col_name} in the specification.")
+            if col_data_type is None:
+                raise ValueError(f"Column data_type is missing for column {col_name} in the specification.")
 
-            if col_type == "Integer":
+            if col_data_type == "Integer":
                 col_class = Integer
-            elif col_type == "Double":
+            elif col_data_type == "Double":
                 col_class = Double
-            elif col_type == "Float":
+            elif col_data_type == "Float":
                 col_class = Float
             else:
-                raise ValueError(f"Unsupported column type '{col_type}' for column {col_name}.")
+                raise ValueError(f"Unsupported column data_type '{col_data_type}' for column {col_name}.")
 
             class_attributes[col_name] = Column(col_class)
 

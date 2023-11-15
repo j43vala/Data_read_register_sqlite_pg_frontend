@@ -33,12 +33,12 @@ def init_spb_device(config_device):
 
     # Attributes
     device.attribures.set_value("description", "Simple EoN Device node")
-    device.attribures.set_value("type", "Simulated-EoND-device")
+    device.attribures.set_value("data_type", "Simulated-EoND-device")
     device.attribures.set_value("version", "0.01")
 
     # Data / Telemetry
-    for reg in config_device["registers"]:
-        device.data.set_value(reg["column_name"], 0)
+    for reg in config_device["parameters"]:
+        device.data.set_value(reg["parameter_name"], 0)
 
     # Commands
     device.commands.set_value("rebirth", False)
@@ -70,34 +70,34 @@ def read_and_publish(device_dict, modbus_client, spb_device:MqttSpbEntityDevice)
     device_name = device_dict.get("device_name", "")
     # table_name = f"{socket.gethostname()}_{slave_id}_{device_name}"
 
-    print(f"device_name: {device_name} - Reading Modbus registers...")
+    print(f"device_name: {device_name} - Reading Modbus parameters...")
 
     if slave_id is None:
         print("Slave ID is missing for the device.")
         return
 
-    register_list = device_dict.get("registers", [])
+    parameter_list = device_dict.get("parameters", [])
 
-    for register in register_list:
-        reg_address = register.get("address")
-        column_name = register.get("column_name")
-        reg_type = register.get("type")
+    for parameter in parameter_list:
+        reg_address = parameter.get("address")
+        parameter_name = parameter.get("parameter_name")
+        reg_data_type = parameter.get("data_type")
 
         data = None  # Initialize data variable
-        if reg_type == "Integer":
+        if reg_data_type == "Integer":
             data = read_integer(client, reg_address, slave_id)
             print('Integer > ', reg_address, ":", data)
-        elif reg_type == "Double":
+        elif reg_data_type == "Double":
             data = read_double(client, reg_address, slave_id)
             print('Double > ', reg_address, ":", data)
-        elif reg_type == "Float":
+        elif reg_data_type == "Float":
             data = read_float(client, reg_address, slave_id)
             print('Float > ', reg_address, ":", data)
         else:
-            print(f"Unsupported reg_type '{reg_type}' for register {reg_address}")
+            print(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
                 
-            print(column_name, data)
-            spb_device.data.set_value(column_name, data)
+            print(parameter_name, data)
+            spb_device.data.set_value(parameter_name, data)
             print(spb_device.get_dictionary())
     spb_device.publish_data()
 

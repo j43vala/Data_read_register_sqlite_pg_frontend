@@ -11,9 +11,9 @@ def create_dynamic_models(devices, hostname):
         device_name = device.get("device_name", "")
         slave_id = device.get("slave_id", "")
         table_name = f"{hostname}_{slave_id}_{device_name}"
-        register_list = device.get("registers")
+        parameter_list = device.get("parameters")
 
-        model = create_dynamic_model(table_name, register_list)
+        model = create_dynamic_model(table_name, parameter_list)
         model.__table__.create(sqlite_engine, checkfirst=True)
 
         device["model"] = model

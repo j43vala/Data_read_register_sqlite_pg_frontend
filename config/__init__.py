@@ -45,17 +45,17 @@ def load_config_from_db():
         device_data = {
             'device_name': device.name,
             'slave_id': device.slave_id,
-            'registers': []
+            'parameters': []
         }
 
-        # Add registers for each device
-        for register in device.registers:
-            register_data = {
-                'address': register.address,
-                'column_name': register.column_name,
-                'type': register.type
+        # Add parameters for each device
+        for parameter in device.parameters:
+            parameter_data = {
+                'address': parameter.address,
+                'parameter_name': parameter.parameter_name,
+                'data_type': parameter.data_type
             }
-            device_data['registers'].append(register_data)
+            device_data['parameters'].append(parameter_data)
 
         devices_list.append(device_data)
 
