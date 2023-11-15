@@ -1,0 +1,70 @@
+{
+    "remote_db_connection": {
+      "host": "192.168.1.18",
+      "port": 5432,
+      "user": "postgres",
+      "password": "postgres",
+      "database": "test1"
+    },
+    "modbus": {
+      "port": "COM12",
+      "method": "rtu",
+      "parity": "N",
+      "baudrate": 9600,
+      "stopbits": 1,
+      "bytesize": 8
+    },
+    "mqtt":{
+      "broker_host": "broker.hivemq.com",
+      "broker_port": 1883,
+      "topic": "plc_reg_data"
+    },
+    "sparkplug_b_topic":{
+      "group_id": "g1",
+      "edge_node_id": "n1"
+    },
+    "devices": [
+      {
+        "device_name": "plc",
+        "slave_id": 3,
+        "registers": [
+          {
+            "address": 1,
+            "column_name": "kwh",
+            "type": "Integer"
+          },
+          {
+            "address": 5,
+            "column_name": "rpm",
+            "type": "Integer"
+          },
+          {
+            "address": 7,
+            "column_name": "temp",
+            "type": "Integer"
+          }         
+        ]
+      },
+      {
+        "device_name": "plc_dummy",
+        "slave_id": 3,
+        "registers": [
+          {
+            "address": 100,
+            "column_name": "humidity",
+            "type": "Integer"
+          },
+          {
+            "address": 200,
+            "column_name": "weight",
+            "type": "Integer"
+          },
+          {
+            "address": 400,
+            "column_name": "power",
+            "type": "Double"
+          }         
+        ]
+      }
+    ]
+  }
