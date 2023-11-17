@@ -1,10 +1,10 @@
-
 import time
 import socket
 from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
+# from sparkplug_b_final import create_dynamic_spb_devices
 
 def main():
     try:
@@ -26,17 +26,18 @@ def main():
 
             while True:
                 time.sleep(3)
-                for device in devices:
+                for device_dict in devices:
                     try:
                         # Move model creation outside of the loop
-                        model = device["model"]
+                        model = device_dict["model"]
 
                         # Move record creation outside the loop
                         record = model()
                         
-                        slave_id = device.get("slave_id")
+                        
+                        slave_id = device_dict.get("slave_id")
 
-                        for parameter in device["parameters"]:
+                        for parameter in device_dict["parameters"]:
                             try:
                                 parameter_name = parameter.get("parameter_name")
 
@@ -60,7 +61,7 @@ def main():
 
                         session.add(record)
                         session.commit()
-                        device_name = device["device_name"]
+                        device_name = device_dict["device_name"]
                         print(f"Record committed successfully for device : '{device_name}'\n")
 
                     except Exception as e:
