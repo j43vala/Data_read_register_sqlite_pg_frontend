@@ -20,8 +20,7 @@
     },
     "spb_parameter":{
       "group_id": "wzero",
-      "edge_node_id": "rpi1",
-      
+      "edge_node_id": "rpi1"
     },
     "node_attributes":[
       {"name":"description",
