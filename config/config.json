@@ -20,9 +20,17 @@
     },
     "spb_parameter":{
       "group_id": "wzero",
-      "edge_node_id": "rpi1"
+      "edge_node_id": "rpi1",
       
     },
+    "node_attributes":[
+      {"name":"description",
+        "value":"plc_Simple EoN Device node"
+      },
+      {"name":"version",
+        "value":"0.01"
+      }
+    ],
     "devices": [
       {
         "device_name": "plc",
