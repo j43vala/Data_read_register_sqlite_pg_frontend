@@ -15,6 +15,8 @@ class Device(Base):
     slave_id = Column(Integer)
     # Add a one-to-many relationship to parameters
     parameters = relationship('parameter', backref='device', lazy=True)
+    # Fix the relationship definition to DeviceAttribute
+    attributes = relationship('Attribute', backref='device', lazy=True)
 
 class parameter(Base):
     __tablename__ = "parameter"
