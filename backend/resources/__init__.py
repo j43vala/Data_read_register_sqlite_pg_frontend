@@ -29,6 +29,10 @@ api = Api(
 
 from .device_resource import ns as device_ns
 from .parameter_resource import ns as parameter_ns
+from .node_parameter_resource import ns as node_parameter_ns
+from .device_attribute_resource import ns as attribute_ns
 
 api.add_namespace(device_ns, path='/devices')
 api.add_namespace(parameter_ns, path='/parameter')
+api.add_namespace(node_parameter_ns, path='/node-parameter')
+api.add_namespace(attribute_ns, path='/attribute')

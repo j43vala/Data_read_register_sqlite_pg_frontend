@@ -83,6 +83,11 @@ const Header = () => {
               CloudStorage
             </Link>
           </NavItem>
+          <NavItem>
+            <Link to="/node-parameter" className="nav-link">
+              NodeParameter
+            </Link>
+          </NavItem>
           {/* <NavItem>
             <Link to="/create-device-and-register" className="nav-link">
               CreateDeviceAndRegister

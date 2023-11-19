@@ -14,6 +14,7 @@ const SparkPlug_B = lazy(() => import("../views/SparkPlug_B.js"))
 const Modbus = lazy(() => import("../views/Modbus.js"))
 const LocalStorage = lazy(() => import("../views/LocalStorage.js"))
 const CloudStorage = lazy(() => import("../views/CloudStorage.js"))
+const NodeParameter = lazy(() => import("../views/NodeParameter.js"))
 // const Alerts = lazy(() => import("../views/ui/Alerts"));
 // const Badges = lazy(() => import("../views/ui/Badges"));
 // const Buttons = lazy(() => import("../views/ui/Buttons"));
@@ -36,9 +37,12 @@ const ThemeRoutes = [
       { path: "/create-device-and-register", exact: true, element: <CreateDeviceAndRegister /> },
       { path: "/get-device", exact: true, element: <GetDevice /> },
       { path: "/modbus", exact: true, element: <Modbus /> },
+      // eslint-disable-next-line
       { path: "/spark-plug-b", exact: true, element: <SparkPlug_B /> },
       { path: "/local-storage", exact: true, element: <LocalStorage /> },
       { path: "/cloud-storage", exact: true, element: <CloudStorage /> },
+      { path: "/cloud-storage", exact: true, element: <CloudStorage /> },
+      { path: "/node-parameter", exact: true, element: <NodeParameter /> },
       // { path: "/alerts", exact: true, element: <Alerts /> },
       // { path: "/badges", exact: true, element: <Badges /> },
       // { path: "/buttons", exact: true, element: <Buttons /> },
