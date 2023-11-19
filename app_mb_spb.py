@@ -1,10 +1,8 @@
 import time
 import socket
 from config import config
-from config.db import get_sqlite_session
 from mqtt_spb_wrapper import MqttSpbEntityDevice
 from modbus_final import read_modbus_data, initialize_modbus_client
-from sqlite_final import create_dynamic_models
 from spb import init_spb_device
 
 def main():
@@ -18,10 +16,7 @@ def main():
             client = initialize_modbus_client()
             client.connect()
             # hostname = os.uname()[1]                   # linux
-            hostname = socket.gethostname()  # windows and linux both
-
-            # Initialize SQLite dynamic models
-            
+            hostname = socket.gethostname()  # windows and linux both        
             group_name = config.get("spb_parameter").get("group_id")
             edge_node_id = config.get("spb_parameter").get("edge_node_id")
 
@@ -47,12 +42,12 @@ def main():
                                 
 
                                 if parameter_name is not None:
-                                    data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
+                                    data = read_modbus_data(client,slave_id, reg_no, reg_data_type)
                                     spb_device.data.set_value(parameter_name, data)
-
+                                    
                                     # Update the existing record instead of creating a new one
                                     # setattr(record, parameter_name, data)
-                                    # print(f"Updated '{parameter_name}' with value: {data}")
+                                    print(f"Updated '{parameter_name}' with value: {data}")
 
 
                                 else:
@@ -62,11 +57,10 @@ def main():
                                 traceback.print_exc()
                                 print(f"An error occurred processing parameter {parameter}: {e}")
                         
-                        # spb_device.publish_data()
+                        spb_device.publish_data()
                         
 
                         # publish_data(device_dict, record)
-                        # print('publish_data: ', publish_data)
                         
                         device_name = device_dict["device_name"]
                         print(f"Record committed successfully for device : '{device_name}'\n")

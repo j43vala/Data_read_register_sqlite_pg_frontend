@@ -2,6 +2,7 @@ import time
 from mqtt_spb_wrapper import MqttSpbEntityDevice
 from config.data_conversion import read_integer, read_double, read_float
 from modbus_final import initialize_modbus_client
+from config import config
 
 
 device_meta = {}
@@ -30,6 +31,8 @@ def init_spb_device(group_name,edge_node_name, device_dict):
    
     device = MqttSpbEntityDevice(group_name, edge_node_name, device_name, _DEBUG)
     print('device: ', device)
+    device.publish_data()
+
 
     device.on_message = callback_message  # Received messages
     device.on_command = callback_command  # Callback for received commands

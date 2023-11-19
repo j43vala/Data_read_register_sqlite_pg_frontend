@@ -71,9 +71,9 @@ def load_config_from_db():
 
 config = load_config_from_json()
 
-print("config before update",json.dumps(config, indent=2))
-db_devices = load_config_from_db()
+# print("config before update",json.dumps(config, indent=2))
+# db_devices = load_config_from_db()
 
 
-config["devices"] = db_devices["devices"]
-print("config after update",json.dumps(config, indent=2))
+# config["devices"] = db_devices["devices"]
+# print("config after update",json.dumps(config, indent=2))
