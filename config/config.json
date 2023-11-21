@@ -7,7 +7,7 @@
       "database": "test1"
     },
     "modbus": {
-      "port": "COM12",
+      "port": "/dev/ttyUSB0",
       "method": "rtu",
       "parity": "N",
       "baudrate": 9600,
