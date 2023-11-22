@@ -5,7 +5,7 @@
 import time
 from pymodbus.client import ModbusSerialClient as ModbusClient
 from config import config
-from config.data_conversion import read_integer, read_double, read_float
+from config.data_conversion import read_integer, read_double, read_float, read_boolean
 
 def initialize_modbus_client():
     modbus_config = config.get("modbus")
@@ -38,6 +38,9 @@ def read_modbus_data(client,slave_id, reg_address, reg_data_type):
         elif reg_data_type == "Float":
             data = read_float(client, reg_address, slave_id)
             print('Float > ', reg_address, ":", data)
+        elif reg_data_type == "Boolean":
+            data = read_boolean(client, reg_address, slave_id)
+            print('Boolean > ', reg_address, ":", data)
         else:
             print(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
 

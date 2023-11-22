@@ -52,6 +52,8 @@ def create_dynamic_model(table_name, column_specifications):
                 col_class = Double
             elif col_data_type == "Float":
                 col_class = Float
+            elif col_data_type == "Boolean":
+                col_class = Boolean
             else:
                 raise ValueError(f"Unsupported column data_type '{col_data_type}' for column {col_name}.")
 
