@@ -7,7 +7,7 @@
     "database": "test1"
   },
   "modbus": {
-    "port": "/dev/ttyUSB0",
+    "port": "COM12",
     "method": "rtu",
     "parity": "N",
     "baudrate": 9600,
@@ -49,6 +49,11 @@
           "data_type": "Float"
         },
         {
+          "address": 108,
+          "parameter_name": "Var total",
+          "data_type": "Float"
+        },
+        {
           "address": 116,
           "parameter_name": "PF ave",
           "data_type": "Float"
@@ -76,6 +81,46 @@
         {
           "address": 156,
           "parameter_name": "freq",
+          "data_type": "Float"
+        },
+        {
+          "address": 158,
+          "parameter_name": "Wh received",
+          "data_type": "Float"
+        },
+        {
+          "address": 160,
+          "parameter_name": "Vah received",
+          "data_type": "Float"
+        },
+        {
+          "address": 162,
+          "parameter_name": "VARh Ind. Received",
+          "data_type": "Float"
+        },
+        {
+          "address": 164,
+          "parameter_name": "VARh Cap. received",
+          "data_type": "Float"
+        },
+        {
+          "address": 166,
+          "parameter_name": " Wh Delive",
+          "data_type": "Float"
+        },
+        {
+          "address": 168,
+          "parameter_name": "VAh Delivered",
+          "data_type": "Float"
+        },
+        {
+          "address": 170,
+          "parameter_name": "VARh Ind. delivered",
+          "data_type": "Float"
+        },
+        {
+          "address": 172,
+          "parameter_name": "7 VARh Cap. delivered",
           "data_type": "Float"
         }
       ]
