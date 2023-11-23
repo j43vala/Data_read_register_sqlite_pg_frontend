@@ -32,3 +32,12 @@ def read_float(client, reg_address, slave_id):
         reg_1, reg_2 = result.registers
         float_value = struct.unpack('<f', struct.pack('<HH', reg_1, reg_2))[0]
         return float_value
+
+
+def read_boolean(client, reg_address , slave_id):
+    result = client.read_coils(reg_address, 1, slave=slave_id)
+    if result.isError():
+        print(f"Error reading Modbus coil status: {result}")
+        return None
+    else:
+        return result.bits[0]
