@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import Column, ForeignKey, Float, Integer, DateTime, String, Boolean, Double
+from sqlalchemy import Column, ForeignKey, Float, Integer, DateTime, String, Boolean, Double, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -15,6 +15,8 @@ class Device(Base):
     slave_id = Column(Integer)
     # Add a one-to-many relationship to parameters
     parameters = relationship('parameter', backref='device', lazy=True)
+    # Fix the relationship definition to DeviceAttribute
+    attributes = relationship('Attribute', backref='device', lazy=True)
 
 class parameter(Base):
     __tablename__ = "parameter"
@@ -25,6 +27,18 @@ class parameter(Base):
     data_type = Column(String)
     device_id = Column(Integer, ForeignKey('device.id'))
 
+class Attribute(Base):
+    __tablename__ = "attribute"
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=False)
+    value = Column(String, nullable=False)
+    device_id = Column(Integer, ForeignKey('device.id'))
+
+class NodeParameter(Base):
+    __tablename__ = "node_parameter"
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=False)
+    value = Column(JSON, nullable=False)
 
 def create_dynamic_model(table_name, column_specifications):
     class_name = table_name

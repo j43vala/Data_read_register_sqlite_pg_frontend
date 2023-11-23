@@ -3,7 +3,7 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database.models import Device
+from database.models import Device, NodeParameter
 
 # Initialize the 'config' variable to None
 
@@ -30,13 +30,13 @@ def load_config_from_json():
 
 def load_config_from_db():
     # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI
-    engine = create_engine('postgresql://postgres:postgres@192.168.1.18/plc_2')
+    engine = create_engine(f"sqlite:////home/wzero/Public/Data_read_register_sqlite_pg_frontend/backend/local1.db", echo=False)
 
     # Create a session
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # Query devices from the database
+    # Query devices and associated parameters from the database
     devices = session.query(Device).all()
 
     # Convert devices to a list of dictionaries
@@ -45,8 +45,17 @@ def load_config_from_db():
         device_data = {
             'device_name': device.name,
             'slave_id': device.slave_id,
+            'attributes': [],
             'parameters': []
         }
+
+        # Add attributes for each device
+        for attribute in device.attributes:
+            attribute_data = {
+                'name': attribute.name,
+                'value': attribute.value
+            }
+            device_data['attributes'].append(attribute_data)
 
         # Add parameters for each device
         for parameter in device.parameters:
@@ -59,8 +68,22 @@ def load_config_from_db():
 
         devices_list.append(device_data)
 
-    # Create a dictionary with the devices list
-    config = {"devices": devices_list}
+    # Query node parameters for all devices
+    node_parameters = session.query(NodeParameter).all()
+
+    # Convert node parameters to the desired format
+    formatted_node_parameters = {}
+    for node_parameter in node_parameters:
+        formatted_node_parameters[node_parameter.name] = node_parameter.value
+
+    # Create a dictionary with the devices list, node parameters, and additional structure
+    config = {
+        "modbus": formatted_node_parameters.get("modbus", {}),
+        "mqtt": formatted_node_parameters.get("mqtt", {}),
+        "spb_parameter": formatted_node_parameters.get("spb_parameter", {}),
+        "node_attributes": formatted_node_parameters.get("node_attributes", []),
+        "devices": devices_list
+    }
 
     # Convert the dictionary to JSON format
     # config = json.dumps(result, indent=2)
@@ -69,10 +92,10 @@ def load_config_from_db():
     # print(config)
     return config
 
-config = load_config_from_json()
+# config = load_config_from_json()
 
 # print("config before update",json.dumps(config, indent=2))
-# db_devices = load_config_from_db()
+config = load_config_from_db()
 
 
 # config["devices"] = db_devices["devices"]
