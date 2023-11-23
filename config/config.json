@@ -26,6 +26,7 @@
     {"name":"description",
       "value":"plc_Simple EoN Device node"
     },
+<<<<<<< HEAD
     {"name":"version",
       "value":"0.01"
     }
@@ -82,3 +83,98 @@
     }
   ]
 }
+=======
+    "modbus": {
+      "port": "/dev/ttyUSB0",
+      "method": "rtu",
+      "parity": "N",
+      "baudrate": 9600,
+      "stopbits": 1,
+      "bytesize": 8
+    },
+    "mqtt":{
+      "broker_host": "broker.hivemq.com",
+      "broker_port": 1883
+    },
+    "spb_parameter":{
+      "group_id": "wzero",
+      "edge_node_id": "rpi1"
+    },
+    "node_attributes":[
+      {"name":"description",
+        "value":"plc_Simple EoN Device node"
+      },
+      {"name":"version",
+        "value":"0.01"
+      }
+    ],
+    "devices": [
+      {
+        "device_name": "plc",
+        "slave_id": 3,
+        "attributes":[
+          {"name":"description",
+            "value":"plc_Simple EoN Device node"
+          },
+          {"name":"version",
+            "value":"0.01"
+          }
+        ],
+        "parameters": [
+          {
+            "address": 1,
+            "parameter_name": "kwh",
+            "data_type": "Integer"
+          },
+          {
+            "address": 5,
+            "parameter_name": "rpm",
+            "data_type": "Integer"
+          },
+          {
+            "address": 7,
+            "parameter_name": "temp",
+            "data_type": "Float"
+          }         
+        ]
+      },
+      {
+        "device_name": "plc_dummy",
+        "slave_id": 3,
+        "attributes":[
+            {"name":"description",
+              "value":"dummy_plc_Simple EoN Device node"
+            },
+            {"name":"version",
+              "value":"0.01"
+            },
+            {"name":"random attr",
+              "value":2345
+            }
+        ],
+        "parameters": [
+          {
+            "address": 100,
+            "parameter_name": "humidity",
+            "data_type": "Integer"
+          },
+          {
+            "address": 200,
+            "parameter_name": "weight",
+            "data_type": "Integer"
+          },
+          {
+            "address": 400,
+            "parameter_name": "power",
+            "data_type": "Double"
+          },
+          {
+            "address": 404,
+            "parameter_name": "power actual",
+            "data_type": "Double"
+          }         
+        ]
+      }
+    ]
+  }
+>>>>>>> c9a3ed2b0b7300fb6c9b630bad87c96fe52ce114
