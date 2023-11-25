@@ -1,0 +1,12 @@
+[Unit]
+Description=Frontend Service
+After=network.target
+
+[Service]
+Type=simple
+User=wzero
+WorkingDirectory= /home/wzero/Data_read_register_sqlite_pg_frontend/frontend
+ExecStart=/usr/bin/serve -s build
+
+[Install]
+WantedBy=multi-user.target
