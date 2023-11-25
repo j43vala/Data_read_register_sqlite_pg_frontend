@@ -1,101 +1,129 @@
 {
-    "remote_db_connection": {
-      "host": "192.168.1.18",
-      "port": 5432,
-      "user": "postgres",
-      "password": "postgres",
-      "database": "test1"
+  "remote_db_connection": {
+    "host": "192.168.1.18",
+    "port": 5432,
+    "user": "postgres",
+    "password": "postgres",
+    "database": "test1"
+  },
+  "modbus": {
+    "port": "/dev/ttyUSB0",
+    "method": "rtu",
+    "parity": "N",
+    "baudrate": 9600,
+    "stopbits": 1,
+    "bytesize": 8
+  },
+  "mqtt":{
+    "broker_host": "broker.hivemq.com",
+    "broker_port": 1883
+  },
+  "spb_parameter":{
+    "group_id": "wzero",
+    "edge_node_id": "rpi1"
+  },
+  "node_attributes":[
+    {"name":"description",
+      "value":"plc_Simple EoN Device node"
     },
-    "modbus": {
-      "port": "/dev/ttyUSB0",
-      "method": "rtu",
-      "parity": "N",
-      "baudrate": 9600,
-      "stopbits": 1,
-      "bytesize": 8
-    },
-    "mqtt":{
-      "broker_host": "broker.hivemq.com",
-      "broker_port": 1883
-    },
-    "spb_parameter":{
-      "group_id": "wzero",
-      "edge_node_id": "rpi1"
-    },
-    "node_attributes":[
-      {"name":"description",
-        "value":"plc_Simple EoN Device node"
-      },
-      {"name":"version",
-        "value":"0.01"
-      }
-    ],
-    "devices": [
-      {
-        "device_name": "plc",
-        "slave_id": 3,
-        "attributes":[
-          {"name":"description",
-            "value":"plc_Simple EoN Device node"
-          },
-          {"name":"version",
-            "value":"0.01"
-          }
-        ],
-        "parameters": [
-          {
-            "address": 1,
-            "parameter_name": "kwh",
-            "data_type": "Integer"
-          },
-          {
-            "address": 5,
-            "parameter_name": "rpm",
-            "data_type": "Integer"
-          },
-          {
-            "address": 7,
-            "parameter_name": "temp",
-            "data_type": "Float"
-          }         
-        ]
-      },
-      {
-        "device_name": "plc_dummy",
-        "slave_id": 3,
-        "attributes":[
-            {"name":"description",
-              "value":"dummy_plc_Simple EoN Device node"
-            },
-            {"name":"version",
-              "value":"0.01"
-            },
-            {"name":"random attr",
-              "value":2345
-            }
-        ],
-        "parameters": [
-          {
-            "address": 100,
-            "parameter_name": "humidity",
-            "data_type": "Integer"
-          },
-          {
-            "address": 200,
-            "parameter_name": "weight",
-            "data_type": "Integer"
-          },
-          {
-            "address": 400,
-            "parameter_name": "power",
-            "data_type": "Double"
-          },
-          {
-            "address": 404,
-            "parameter_name": "power actual",
-            "data_type": "Double"
-          }         
-        ]
-      }
-    ]
-  }
+    {"name":"version",
+      "value":"0.01"
+    }
+  ],
+  "devices": [
+    {
+      "device_name": "plc",
+      "slave_id": 3,
+      "attributes":[
+        {"name":"description",
+          "value":"energy meter EoN Device node"
+        },
+        {"name":"version",
+          "value":"Elmeasure"
+        }
+      ],
+      "parameters": [
+        {
+          "address": 100,
+          "parameter_name": "Watts total",
+          "data_type": "Float"
+        },
+        {
+          "address": 108,
+          "parameter_name": "Var total",
+          "data_type": "Float"
+        },
+        {
+          "address": 116,
+          "parameter_name": "PF ave",
+          "data_type": "Float"
+        },
+        {
+          "address": 124,
+          "parameter_name": "VA total",
+          "data_type": "Float"
+        },
+        {
+          "address": 132,
+          "parameter_name": "VLL ave",
+          "data_type": "Float"
+        },
+        {
+          "address": 140,
+          "parameter_name": "VLN ave",
+          "data_type": "Float"
+        },
+        {
+          "address": 148,
+          "parameter_name": "AVG current",
+          "data_type": "Float"
+        },
+        {
+          "address": 156,
+          "parameter_name": "freq",
+          "data_type": "Float"
+        },
+        {
+          "address": 158,
+          "parameter_name": "Wh received",
+          "data_type": "Float"
+        },
+        {
+          "address": 160,
+          "parameter_name": "Vah received",
+          "data_type": "Float"
+        },
+        {
+          "address": 162,
+          "parameter_name": "VARh Ind. Received",
+          "data_type": "Float"
+        },
+        {
+          "address": 164,
+          "parameter_name": "VARh Cap. received",
+          "data_type": "Float"
+        },
+        {
+          "address": 166,
+          "parameter_name": " Wh Delive",
+          "data_type": "Float"
+        },
+        {
+          "address": 168,
+          "parameter_name": "VAh Delivered",
+          "data_type": "Float"
+        },
+        {
+          "address": 170,
+          "parameter_name": "VARh Ind. delivered",
+          "data_type": "Float"
+        },
+        {
+          "address": 172,
+          "parameter_name": "7 VARh Cap. delivered",
+          "data_type": "Float"
+        }
+      ]
+    }
+  ]
+}
