@@ -1,8 +1,9 @@
 from typing import List, Optional
-from sqlalchemy import Column, ForeignKey, Float, Integer, DateTime, String, Boolean, Double, JSON
+from sqlalchemy import Column, ForeignKey, Float, Integer, DateTime, String, Boolean, Double, JSON , text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from config.db import sqlite_engine
 
 Base = declarative_base()
 
@@ -39,6 +40,16 @@ class NodeParameter(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
     value = Column(JSON, nullable=False)
+
+def check_and_add_column(sqlite_engine, table_name, parameter_name, data_type):
+    query = f"SELECT {parameter_name} FROM {table_name} LIMIT 1"
+    with sqlite_engine.connect() as connection:
+        try:
+            connection.execute(text(query))
+        except Exception as e:
+            print(f"Column {parameter_name} does not exist. Adding it now.")
+            alter_query = f"ALTER TABLE {table_name} ADD COLUMN {parameter_name} {data_type}"
+            connection.execute(text(alter_query))
 
 def create_dynamic_model(table_name, column_specifications):
     class_name = table_name

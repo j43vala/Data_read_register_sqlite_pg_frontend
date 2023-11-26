@@ -7,7 +7,7 @@ import socket
 from config import config 
 from config.db import get_sqlite_session 
 from modbus_final import read_modbus_data, initialize_modbus_client
-from sqlite_final import create_dynamic_models
+from sqlite_final import create_dynamic_models 
 from spb import init_spb_device
 
 def main():
