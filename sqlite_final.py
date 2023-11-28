@@ -20,6 +20,7 @@ from database.models import create_dynamic_model , check_and_add_column
 #         device["model"] = model
 #     return device
 def create_dynamic_models(devices, hostname):
+    device = {}
     for device in devices:
         device_name = device.get("device_name", "")
         slave_id = device.get("slave_id", "")
@@ -36,4 +37,5 @@ def create_dynamic_models(devices, hostname):
             column_type = parameter["data_type"]
             check_and_add_column(sqlite_engine, table_name, column_name, column_type)
         device["model"] = model
+
     return device
