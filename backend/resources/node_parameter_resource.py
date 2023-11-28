@@ -16,7 +16,7 @@ def create_default_node_parameters():
         {
             "name": "modbus",
             "value": {
-                "port": "/dev/ttyUSB0",
+                "port": "COM12",
                 "method": "rtu",
                 "parity": "N",
                 "baudrate": 9600,

@@ -30,7 +30,7 @@ def load_config_from_json():
 
 def load_config_from_db():
     # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI
-    engine = create_engine(f"sqlite:////home/wzero/Data_read_register_sqlite_pg_frontend/backend/local1.db", echo=False)
+    engine = create_engine(f"sqlite:///D:/Python/Data_read_register_sqlite_pg_frontend/backend/local1.db", echo=False)
 
     # Create a session
     Session = sessionmaker(bind=engine)
