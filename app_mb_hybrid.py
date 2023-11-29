@@ -91,11 +91,11 @@ from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
-from spb import init_spb_device
+from spb import init_spb_device, connect_spb_device
 
 def main():
     last_check_time = datetime.datetime.now()
-    retention_interval = 10  # Set the retention interval in seconds (set to 0 for infinite storage)
+    retention_interval = 30  # Set the retention interval in seconds
 
     try:
         # check if the configuration is available or not
@@ -124,6 +124,8 @@ def main():
 
             for device_dict in config["devices"]:
                 init_spb_device(group_name, edge_node_id, device_dict)
+                connect_spb_device(device_dict)
+
 
             while True:
                 time.sleep(1.5)
@@ -133,6 +135,11 @@ def main():
                     record = model()
                     slave_id = device_dict.get("slave_id")
                     spb_device = device_dict["spb_device"]
+                    # Try to connect to the broker --------------------------------------------
+                    if not device_dict["spb_device_connected"]:
+                        print("connecting to broker from while loop......")
+                        connect_spb_device(device_dict)
+                        
 
                     for parameter in device_dict["parameters"]:
                         parameter_name = parameter.get("parameter_name")
@@ -160,16 +167,13 @@ def main():
                         print('success: ', success)
 
                         # Data retention logic based on the success of publishing
-                        if retention_interval == 0:
-                            # Infinite storage, no need for retention checks
-                            pass
-                        else:
-                            retention_period = datetime.datetime.utcnow() - datetime.timedelta(seconds = 40)
-                            elapsed_time = datetime.datetime.now() - last_check_time
+                        retention_period = datetime.datetime.utcnow() - datetime.timedelta(minutes=1)
+                        elapsed_time = datetime.datetime.now() - last_check_time
 
-                            if success and elapsed_time.total_seconds() >= retention_interval:
+                        if success:
+                            if elapsed_time.total_seconds() >= retention_interval:
                                 last_check_time = datetime.datetime.now()
-                                print("Check 40 sec...")
+                                print("Check 1 min...")
 
                                 # Assuming you have a timestamp in your data, modify the following code accordingly
                                 records_to_delete = session.query(model).filter(model.timestamp < retention_period).all()
@@ -181,28 +185,30 @@ def main():
 
                                 device_name = device_dict["device_name"]
                                 print(f"Record committed for device: '{device_name}'\n\n")
-                            elif not success:
-                                retention_period_failure = datetime.datetime.utcnow() - datetime.timedelta(seconds = 50)
-                                elapsed_time = datetime.datetime.now() - last_check_time
-                                if elapsed_time.total_seconds() >= retention_interval:
-                                    last_check_time = datetime.datetime.now()
-                                    print("Check  for 50 sec failure case...")
+                        else:
+                            retention_period_failure = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
+                            elapsed_time = datetime.datetime.now() - last_check_time
+                            if elapsed_time.total_seconds() >= retention_interval:
+                                last_check_time = datetime.datetime.now()
+                                print("Check 2 min for failure case...")
 
-                                    # Assuming you have a timestamp in your data, modify the following code accordingly
-                                    records_to_delete_failure = session.query(model).filter(model.timestamp < retention_period_failure).all()
+                                # Assuming you have a timestamp in your data, modify the following code accordingly
+                                records_to_delete_failure = session.query(model).filter(model.timestamp < retention_period_failure).all()
 
-                                    for record in records_to_delete_failure:
-                                        session.delete(record)
+                                for record in records_to_delete_failure:
+                                    session.delete(record)
 
-                                    session.commit()
+                                session.commit()
 
-                                    device_name = device_dict["device_name"]
-                                    print(f"Record committed for device (failure case): '{device_name}'\n\n")
+                                device_name = device_dict["device_name"]
+                                print(f"Record committed for device (failure case): '{device_name}'\n\n")
+
 
                     except Exception as e:
                         success = False
                         print(f"Failed to publish data to Sparkplug B: {e}")
 
+                   
     except KeyboardInterrupt:
         client.close()
         print("Exiting the loop...........")
