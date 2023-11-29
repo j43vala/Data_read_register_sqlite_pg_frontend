@@ -30,9 +30,7 @@ def init_spb_device(group_name,edge_node_name, device_dict):
     # Create the spB entity object
    
     device = MqttSpbEntityDevice(group_name, edge_node_name, device_name, _DEBUG)
-    print('device: ', device)
     device.publish_data()
-
 
     device.on_message = callback_message  # Received messages
     device.on_command = callback_command  # Callback for received commands
@@ -51,21 +49,32 @@ def init_spb_device(group_name,edge_node_name, device_dict):
     # Commands
     device.commands.set_value("rebirth", False)
 
-    # Try to connect to the broker --------------------------------------------
-    _connected = False
-    while not _connected:
-        print("Trying to connect to broker...")
-        _connected = device.connect("broker.hivemq.com", 1883)
-        if not _connected:
-            print("Error, could not connect. Trying again in a few seconds ...")
-            time.sleep(3)
-
-    # Send birth message
-    device.publish_birth()
-
     device_dict["spb_device"] = device
 
 
-# for config_device in config["devices"]:
-#     init_spb_device(config_device)
-#     # create_model(config_device)
+    # # Try to connect to the broker --------------------------------------------
+    # _connected = False
+    # while not _connected:
+    #     print("Trying to connect to broker...")
+    #     _connected = device.connect("broker.hivemq.com", 1883)
+    #     if not _connected:
+    #         print("Error, could not connect. Trying again in a few seconds ...")
+    #         time.sleep(3)
+
+    return device
+
+def connect_spb_device(device_dict, broker = "broker.hivemq.com", port = 1883):
+    print("Trying to connect to broker...")
+
+    device = device_dict["spb_device"]
+    _connected = device.connect(broker, port)
+
+    if _connected:
+        # Send birth message
+        device.publish_birth()
+    else:
+        print("Error, could not connect spb device to broker...")
+
+    device_dict["spb_device_connected"] = _connected
+    return _connected
+

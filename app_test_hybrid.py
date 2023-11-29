@@ -126,7 +126,7 @@ from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
-from spb import init_spb_device
+from spb import init_spb_device, connect_spb_device
 
 def main():
     last_check_time = datetime.datetime.now()
@@ -159,6 +159,8 @@ def main():
 
             for device_dict in config["devices"]:
                 init_spb_device(group_name, edge_node_id, device_dict)
+                connect_spb_device(device_dict)
+
 
             while True:
                 time.sleep(1.5)
@@ -168,6 +170,11 @@ def main():
                     record = model()
                     slave_id = device_dict.get("slave_id")
                     spb_device = device_dict["spb_device"]
+                    # Try to connect to the broker --------------------------------------------
+                    if not device_dict["spb_device_connected"]:
+                        print("connecting to broker from while loop......")
+                        connect_spb_device(device_dict)
+                        
 
                     for parameter in device_dict["parameters"]:
                         parameter_name = parameter.get("parameter_name")

@@ -2,7 +2,7 @@ from flask import request, jsonify, make_response
 from flask_restx import Resource, Namespace, fields
 from models import NodeParameter  # Import the NodeParameter model
 from db import db
-from services.modbus_port import get_usb_serial_ports
+from services.modbus_port import get_serial_ports
 from sqlalchemy.orm.attributes import  flag_modified
 
 ns = Namespace('NodeParameters', description='Node Parameter related operations')
@@ -13,7 +13,7 @@ node_parameter_fields = ns.model('NodeParameter', {
 })
 
 def create_default_node_parameters():
-    port_options = get_usb_serial_ports()
+    port_options = get_serial_ports()
     if type(port_options) == str:
         port_options = [""]        
     # Default values
@@ -27,7 +27,7 @@ def create_default_node_parameters():
                 "baudrate": 9600,
                 "stopbits": 1,
                 "wordlength": 8,
-                "port_options": get_usb_serial_ports(),
+                "port_options": get_serial_ports(),
                 "method_options": ["rtu", "ascii"],
                 "parity_options": ['ODD', 'EVEN', 'NONE'],
                 "baudrate_options": [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000],
@@ -86,7 +86,7 @@ class NodeParameterResourceList(Resource):
         node_parameter_list = []
         for node_parameter in node_parameters:
             if node_parameter.name == "modbus":
-                port_options = get_usb_serial_ports() 
+                port_options = get_serial_ports() 
                 if type(port_options) == str:
                     node_parameter.value['port_options'] = [""]
                 else:

@@ -9,6 +9,12 @@ from database.models import Device, NodeParameter
 
 config = None
 
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+main_path = os.path.dirname(dir_path)
+db_path = os.path.join(main_path, "backend", "local1.db")
+
+
 def load_config_from_json():
     # Specify the path to the configuration JSON file
     script_path = os.path.abspath(__file__)
@@ -30,7 +36,7 @@ def load_config_from_json():
 
 def load_config_from_db():
     # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI
-    engine = create_engine(f"sqlite:///D:/Python/Data_read_register_sqlite_pg_frontend/backend/local1.db", echo=False)
+    engine = create_engine(f"sqlite:///{db_path}", echo=False)
 
     # Create a session
     Session = sessionmaker(bind=engine)
