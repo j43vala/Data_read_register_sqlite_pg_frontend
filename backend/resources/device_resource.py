@@ -34,6 +34,7 @@ class DeviceResourceList(Resource):
             connected_parameters = []
             for parameter in device.parameters:
                 parameter_data = {
+                    "function_code" : parameter.function_code,                    
                     "address": parameter.address,
                     "parameter_name": parameter.parameter_name,
                     "data_type": parameter.data_type,
@@ -109,6 +110,7 @@ class DeviceResource(Resource):
         for parameter in device.parameters:
             parameter_data = {
                 "id" : parameter.id,
+                "function_code" : parameter.function_code,
                 "address": parameter.address,
                 "parameter_name": parameter.parameter_name,
                 "data_type": parameter.data_type,

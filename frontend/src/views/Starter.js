@@ -1,9 +1,10 @@
-// import { Col, Row } from "reactstrap";
+import { Col, Row } from "reactstrap";
 // import SalesChart from "../components/dashboard/SalesChart";
 // import Feeds from "../components/dashboard/Feeds";
 // import TopCards from "../components/dashboard/TopCards";
 // import Blog from "../components/dashboard/Blog";
-// import DeviceRegisterTable from "../components/dashboard/GetDevice";
+import DeviceRegisterTable from "../components/dashboard/GetDevice";
+import NodeParameterTable from "../components/dashboard/NodeParameter"
 import bg1 from "../assets/images/bg/bg1.jpg";
 import bg2 from "../assets/images/bg/bg2.jpg";
 import bg3 from "../assets/images/bg/bg3.jpg";
@@ -88,20 +89,23 @@ const Starter = () => {
         </Col>
       </Row> */}
       {/***Sales & Feed***/}
-      {/* <Row>
-        <Col xxl="12">
-          <SalesChart />
+      <Row>
+      <Col xxl="12">
+          <NodeParameterTable />
         </Col>
-      </Row> */}
+        <Col xxl="11">
+          <DeviceRegisterTable />
+        </Col>
+      </Row>
       {/***Table ***/}
       {/* <Row>
         <Col lg="7" xxl="8" md="12">
           <DeviceRegisterTable />
-        </Col> */}
-          {/* <Col md="12" lg="5" xxl="4">
-            <Feeds />
-          </Col> */}
-      {/* </Row> */}
+        </Col>
+        <Col md="12" lg="5" xxl="4">
+          <Feeds />
+        </Col>
+      </Row> */}
       
       {/***Blog Cards***/}
       {/* <Row>

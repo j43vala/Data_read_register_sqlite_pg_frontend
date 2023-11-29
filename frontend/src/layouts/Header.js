@@ -63,7 +63,7 @@ const Header = () => {
               GetDevice
             </Link>
           </NavItem>
-          <NavItem>
+          {/* <NavItem>
             <Link to="/modbus" className="nav-link">
               Modbus
             </Link>
@@ -82,7 +82,7 @@ const Header = () => {
             <Link to="/cloud-storage" className="nav-link">
               CloudStorage
             </Link>
-          </NavItem>
+          </NavItem> */}
           <NavItem>
             <Link to="/node-parameter" className="nav-link">
               NodeParameter

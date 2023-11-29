@@ -69,6 +69,7 @@ const DeviceParameterTable = () => {
   const [attributes, setAttributes] = useState([]);
   const [selectedParameter, setSelectedParameter] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [updatedFunctionCode, setUpdatedFunctionCode] = useState('');
   const [updatedAddress, setUpdatedAddress] = useState('');
   const [updatedParameterName, setUpdatedParameterName] = useState('');
   const [updatedDataType, setUpdatedDataType] = useState('');
@@ -91,15 +92,18 @@ const DeviceParameterTable = () => {
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [isDeleteAttributeConfirmationOpen, setIsDeleteAttributeConfirmationOpen] = useState(false);
   const [selectedDeviceName, setSelectedDeviceName] = useState('');
+  // eslint-disable-next-line
   const [selectedSlaveId, setSelectedSlaveId] = useState('');
   const [updateDeviceFormOpen, setUpdateDeviceFormOpen] = useState(false);
   const [updatedDeviceName, setUpdatedDeviceName] = useState('');
   const [updatedSlaveId, setUpdatedSlaveId] = useState('');
   const [isDeleteDeviceConfirmationOpen, setIsDeleteDeviceConfirmationOpen] = useState(false);
-  const [parameterFields, setParameterFields] = useState([{ address: '', ParameterName: '', data_type: '' }]);
+  const [parameterFields, setParameterFields] = useState([{ function_code: '', address: '', ParameterName: '', data_type: '' }]);
   const [attributeFields, setAttributeFields] = useState([{ name: '', value: ''}]);
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [openUpdateAttributeDialog, setOpenUpdateAttributeDialog] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [parameterTableData, setParameterTableData] = useState([]);
 
   const clearMessagesAfterDelay = () => {
     setTimeout(() => {
@@ -134,13 +138,15 @@ const DeviceParameterTable = () => {
     fetchDevices();
   }, []);
 
-  const handleDeviceChange = async (event) => {
-    const deviceId = event.target.value;
-
+  const handleDeviceChange = async (deviceId) => {
     try {
-      const response = await fetch(`http://localhost:5000/devices/${deviceId}`);
+      console.log('Fetching device details for deviceId:', deviceId);
+  
+      const response = await fetch(`http://localhost:5000/devices/${encodeURIComponent(deviceId)}`);
       const data = await response.json();
-
+  
+      setOpen(true);
+  
       if (data.device && Array.isArray(data.device.parameters)) {
         if (data.device.parameters.length > 0) {
           setParameters(data.device.parameters);
@@ -155,7 +161,7 @@ const DeviceParameterTable = () => {
         setParameters([]);
         setErrorMessage('Error fetching Parameters and Attributes or no Parameters and Attributes connected to the selected device');
       }
-
+  
       // Set selectedDeviceName and selectedSlaveId based on the selected device
       setSelectedDevice(deviceId);
       if (data.device) {
@@ -168,9 +174,16 @@ const DeviceParameterTable = () => {
       setErrorMessage('Error fetching Device details. Please try again.');
     }
   };
+  
+  const handleChange = (event) => {
+    const deviceId = event.target.value;
+    handleDeviceChange(deviceId);
+  }; 
+  
 
   const handleUpdateClick = (parameter) => {
     setSelectedParameter(parameter);
+    setUpdatedFunctionCode(parameter.function_code);
     setUpdatedAddress(parameter.address);
     setUpdatedParameterName(parameter.parameter_name);
     setUpdatedDataType(parameter.data_type);
@@ -180,6 +193,7 @@ const DeviceParameterTable = () => {
 
   const handleUpdateDialogClose = () => {
     setOpenUpdateDialog(false);
+    setUpdatedFunctionCode('');
     setUpdatedAddress('');
     setUpdatedParameterName('');
     setUpdatedDataType('');
@@ -210,7 +224,7 @@ const DeviceParameterTable = () => {
         throw new Error(`Failed to update Parameter: ${response.statusText}`);
       }
 
-      handleDeviceChange({ target: { value: selectedDevice } });
+      handleChange({ target: { value: selectedDevice } });
       handleUpdateDialogClose();
       setParameterSuccessMessage('Parameter updated successfully!');
     } catch (error) {
@@ -218,6 +232,7 @@ const DeviceParameterTable = () => {
       setErrorMessage(`Error updating Parameter. ${error.message}`);
     }
   };
+  
 
   const handleDeleteSubmit = async (parameter) => {
     setIsDeleteConfirmationOpen(false);
@@ -313,7 +328,7 @@ const DeviceParameterTable = () => {
     try {
       const updatedDevice = { name: updatedDeviceName, slave_id: updatedSlaveId };
   
-      await fetch(`http://localhost:5000/devices/${selectedDevice}`, {
+      await fetch(`http://localhost:5000/devices/${selectedDevice.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -345,7 +360,8 @@ const DeviceParameterTable = () => {
   };
   
   const handleDeleteDevice = async (deviceId) => {
-    try {
+    try {  
+      // Send DELETE request to the server
       await fetch(`http://localhost:5000/devices/${deviceId}`, {
         method: 'DELETE',
       });
@@ -355,10 +371,13 @@ const DeviceParameterTable = () => {
       const devicesData = await devicesResponse.json();
   
       if (Array.isArray(devicesData.devices)) {
+        // Update state with the updated list of devices
         setDevices(devicesData.devices);
         // Clear the Parameters when a device is deleted
         setParameters([]);
-        
+        // Clear the Attributes when a device is deleted
+        setAttributes([]);
+  
         // Reset selected device details
         setSelectedDevice(null);
         setSelectedDeviceName('');
@@ -372,16 +391,22 @@ const DeviceParameterTable = () => {
       console.error('Error deleting device:', error);
       setErrorMessage('Error deleting device. Please try again.');
     } finally {
+      // Close the confirmation dialog and any other necessary actions
       setIsDeleteDeviceConfirmationOpen(false);
       setOpenUpdateDialog(false);
       setSelectedParameter(null);
+      setSelectedAttribute(null);
     }
   };
+  
  
 
-  const handleOpenUpdateDeviceForm = () => {
-    setUpdatedDeviceName(selectedDeviceName);
-    setUpdatedSlaveId(selectedSlaveId);
+  const handleOpenUpdateDeviceForm = (deviceId) => {
+    const selectedDevice = devices.find((device) => device.id === deviceId);
+
+    setUpdatedDeviceName(selectedDevice.name);
+    setUpdatedSlaveId(selectedDevice.slave_id);
+    setSelectedDevice(selectedDevice);
     setUpdateDeviceFormOpen(true);
   };
 
@@ -389,7 +414,9 @@ const DeviceParameterTable = () => {
     setUpdateDeviceFormOpen(false);
   };
 
-  const handleDeleteDeviceClick = () => {
+  const handleDeleteDeviceClick = (deviceId, deviceName) => {
+    setSelectedDevice(deviceId);
+    setSelectedDeviceName(deviceName);
     setIsDeleteDeviceConfirmationOpen(true);
   };
 
@@ -421,7 +448,7 @@ const DeviceParameterTable = () => {
   
   const handleAddParameterFormClose = () => {
     setIsAddParameterFormOpen(false);
-    setParameterFields([{ address: '', ParameterName: '', data_type: '' }]); // Reset fields
+    setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '' }]); // Reset fields
     clearParameterForm();
   };
 
@@ -437,7 +464,7 @@ const DeviceParameterTable = () => {
 
   const clearParameterForm = () => {
     // Assuming you have state setters for address, ParameterName, and data_type
-    setParameterFields([{ address: '', ParameterName: '', data_type: '' }]);
+    setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '' }]);
     // Add any other state resetting logic if needed
   };
   
@@ -445,13 +472,14 @@ const DeviceParameterTable = () => {
 
   const handleAddParameterButtonClick = () => {
     console.log('Add Parameter button clicked');
-    setParameterFields([...parameterFields, { address: '', ParameterName: '', data_type: '' }]);
+    setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '' }]);
     setIsAddParameterFormOpen(true);
   };
 
 
   const handleUpdateParameterDialogClose = () => {
     setOpenUpdateDialog(false);
+    setUpdatedFunctionCode('');
     setUpdatedAddress('');
     setUpdatedParameterName('');
     setUpdatedDataType('');
@@ -507,29 +535,27 @@ const DeviceParameterTable = () => {
       setErrorMessage('Please select a device!');
       return;
     }
-  
+
     // Validate the fields for each row
     const invalidFields = parameterFields.some(
-      (field) => !field.address || !field.ParameterName || !field.data_type
+      (field) => !field.function_code || !field.address || !field.ParameterName || !field.data_type
     );
-  
+
     if (invalidFields) {
       setErrorMessage('Please fill in all the required fields for each parameter!');
       return;
     }
-  
+
     const parameterPayload = {
       parameters: parameterFields.map((field) => ({
         active: true,
+        function_code: field.function_code,
         address: field.address,
         parameter_name: field.ParameterName,
         data_type: field.data_type,
       })),
     };
-  
-    // Log the request body to the console
-    // console.log('Request Body:', JSON.stringify(parameterPayload));
-  
+
     fetch(`http://localhost:5000/parameter/devices/${selectedDevice}/parameter`, {
       method: 'POST',
       headers: {
@@ -537,23 +563,34 @@ const DeviceParameterTable = () => {
       },
       body: JSON.stringify(parameterPayload),
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('One or more parameters failed to create.');
-        }
-      })
-      .then(() => {
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('One or more parameters failed to create.');
+      }
+      return response.json();
+    })
+    .then((responseData) => {
+      console.log('API Response Data:', responseData);
+
+      // Check if responseData has the expected structure
+      if (responseData.created_parameters) {
+        // Update the table data with the new parameters
+        setParameterTableData([...parameterTableData, ...responseData.created_parameters]);
+
         setParameterSuccessMessage('Parameters created successfully!');
         clearParameterForm();
         setIsAddParameterFormOpen(false);
-        handleDeviceChange({ target: { value: selectedDevice } });
-      })
-      .catch((error) => {
-        console.error('Error creating Parameters:', error);
+        handleChange({ target: { value: selectedDevice } });
+      } else {
+        console.error('Unexpected response format:', responseData);
         setErrorMessage('Error creating Parameters. Please try again.');
-      });
-  };
-  
+      }
+    })
+    .catch((error) => {
+      console.error('Error creating Parameters:', error);
+      setErrorMessage('Error creating Parameters. Please try again.');
+    });
+};
 
   const handleFieldChange = (index, field, value) => {
     const updatedFields = [...parameterFields];
@@ -563,7 +600,7 @@ const DeviceParameterTable = () => {
 
   // eslint-disable-next-line
   const addEmptyRow = () => {
-    setParameterFields([...parameterFields, { address: '', ParameterName: '', data_type: '' }]);
+    setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '' }]);
   };
 
   const removeRow = (index) => {
@@ -633,7 +670,7 @@ const DeviceParameterTable = () => {
         setAttributeSuccessMessage('Attributes created successfully!');
         clearAttributeForm();
         setIsAddAttributeFormOpen(false);
-        handleDeviceChange({ target: { value: selectedDevice } });
+        handleChange({ target: { value: selectedDevice } });
       })
       .catch((error) => {
         console.error('Error creating Attributes:', error);
@@ -673,16 +710,16 @@ const DeviceParameterTable = () => {
   };
 
   const handleUpdateAttributeSubmit = async () => {
-    if (!selectedAttribute || !selectedAttribute.id) {
-      console.error('No Attribute selected for update');
+    if (!selectedAttribute || !selectedAttribute.id || !selectedDevice) {
+      console.error('No Attribute or Device selected for update');
       return;
     }
-
+  
     const updatedValues = {
       name: updatedName,
       value: updatedValue,
     };
-
+  
     try {
       const response = await fetch(`http://localhost:5000/attribute/devices/${selectedDevice}/attribute/${selectedAttribute.id}`, {
         method: 'PUT',
@@ -691,12 +728,12 @@ const DeviceParameterTable = () => {
         },
         body: JSON.stringify(updatedValues),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Failed to update Attribute: ${response.statusText}`);
       }
-
-      handleDeviceChange({ target: { value: selectedDevice } });
+  
+      handleChange({ target: { value: selectedDevice } });
       handleUpdateAttributeDialogClose();
       setAttributeSuccessMessage('Attribute updated successfully!');
     } catch (error) {
@@ -704,6 +741,8 @@ const DeviceParameterTable = () => {
       setErrorMessage(`Error updating Attribute. ${error.message}`);
     }
   };
+  
+  
 
   const handleDeleteAttributeSubmit = async (attribute) => {
     setIsDeleteConfirmationOpen(false);
@@ -762,44 +801,85 @@ const DeviceParameterTable = () => {
     setIsDeleteAttributeConfirmationOpen(true);
   }; 
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+  
+
   return (
     <div className={classes.root}>
       <div className={classes.header}>
-        <FormControl>
-          <InputLabel id="device-label">Select Device</InputLabel>
-          {devices.length > 0 ? (
-            <Select
-              labelId="device-label"
-              id="device-select"
-              value={selectedDevice}
-              label="Select Device"
-              onChange={handleDeviceChange}
-            >
-              {devices.map((device) => (
-                <MenuItem key={device.id} value={device.id}>
-                  {device.name}
-                </MenuItem>
-              ))}
-            </Select>
-          ) : (
-            <p>No devices available</p>
-          )}
-        </FormControl>
-  
-        <div style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body1" className={classes.body1}>
-            <span style={{ color: 'blue' }}>Device:</span>
-            <span style={{ color: 'red' }}>{selectedDeviceName}</span>
-            <span style={{ color: 'blue', marginLeft: '10px' }}>Slave ID:</span>
-            <span style={{ color: 'red', marginRight: '10px'  }}>{selectedSlaveId}</span>
-          </Typography>
-          <Button onClick={handleOpenUpdateDeviceForm} variant="contained" color="primary" style={{ marginRight: '10px' }}>Update</Button>
-          <Button onClick={handleDeleteDeviceClick} variant="contained" color="error">
-            Delete
+        {/* <div className={classes.buttonGroup}>
+          <Button onClick={handleAddDeviceClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
+            Add Device
           </Button>
-        </div>
+        </div>  */}
+
+        {/* Table section */}
+        <Grid container spacing={2} justifyContent="flex-end">
+        <Grid item>
+          <Button onClick={handleAddDeviceClick}
+            variant="contained"
+            color="secondary"
+          >
+            Add Device
+          </Button>
+        </Grid>
+
+        <Grid item xs={12}>
+          <TableContainer component={Paper}>
+            <Table>
+              {/* Table Header */}
+              <TableHead>
+                <TableRow>
+                  <TableCell>Device Name</TableCell>
+                  <TableCell>Slave ID</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+
+              {/* Table Body */}
+              <TableBody>
+                {devices.map((device) => (
+                  <TableRow key={device.id}>
+                    <TableCell>{device.name}</TableCell>
+                    <TableCell>{device.slave_id}</TableCell>
+                    <TableCell>
+                      {/* Show button */}
+                      <Button
+                        onClick={() => handleOpenUpdateDeviceForm(device.id)}
+                        variant="contained"
+                        color="primary"
+                        style={{ marginRight: '10px' }}
+                      >
+                        Update
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteDeviceClick(device.id, device.name)}
+                        variant="contained"
+                        color="error"
+                        style={{ marginRight: '10px' }}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        onClick={() => handleDeviceChange(device.id)}
+                        variant="contained"
+                        color="primary"
+                        style={{ marginRight: '10px' }}
+                      >
+                        Configuration
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
   
-        <div className={classes.buttonGroup}>
+        {/* <div className={classes.buttonGroup}>
         <Button onClick={handleAddDeviceClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
           Add Device
         </Button>
@@ -809,7 +889,7 @@ const DeviceParameterTable = () => {
         <Button onClick={handleAddAttributeClick} variant="contained" color="secondary">
           Add Attribute
         </Button>
-      </div>
+      </div> */}
       </div>
   
       {deviceSuccessMessage && (
@@ -836,74 +916,126 @@ const DeviceParameterTable = () => {
         </Alert>
       )}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell colSpan={4} align="center">
-                <Typography variant="h6">Parameter Table</Typography>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Address</TableCell>
-              <TableCell>Parameter Name</TableCell>
-              <TableCell>Data Type</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {parameters.map((parameter) => (
-              <TableRow key={parameter.id}>
-                <TableCell>{parameter.address}</TableCell>
-                <TableCell>{parameter.parameter_name}</TableCell>
-                <TableCell>{parameter.data_type}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleUpdateClick(parameter)} variant="contained" color="primary" style={{ marginRight: '10px' }}>Update</Button>
-                  <Button onClick={() => handleDeleteParameterClick(parameter)} variant="contained" color="error">
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <TableContainer component={Paper} style={{ marginTop: '20px' }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell colSpan={3} align="center">
-                <Typography variant="h6">Attribute Table</Typography>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Attribute Name</TableCell>
-              <TableCell>Attribute Value</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attributes.map((attribute) => (
-              <TableRow key={attribute.id}>
-                <TableCell>{attribute.name}</TableCell>
-                <TableCell>{attribute.value}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleUpdateAttributeClick(attribute)} variant="contained" color="primary" style={{ marginRight: '10px' }}>Update</Button>
-                  <Button onClick={() => handleDeleteAttributeClick(attribute)} variant="contained" color="error">
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle>Pop-up Form</DialogTitle>
+        <DialogContent>
+        <Button onClick={handleAddParameterClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
+          Add Parameter
+        </Button>
+        <Button onClick={handleAddAttributeClick} variant="contained" color="secondary">
+          Add Attribute
+        </Button>
+          <TableContainer component={Paper}>
+            {/* Parameter Table */}
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Typography variant="h6">Parameter Table</Typography>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Function Code</TableCell>
+                  <TableCell>Address</TableCell>
+                  <TableCell>Parameter Name</TableCell>
+                  <TableCell>Data Type</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {parameters.map((parameter) => (
+                  <TableRow key={parameter.id}>
+                    <TableCell>{parameter.function_code}</TableCell>
+                    <TableCell>{parameter.address}</TableCell>
+                    <TableCell>{parameter.parameter_name}</TableCell>
+                    <TableCell>{parameter.data_type}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleUpdateClick(parameter)}
+                        variant="contained"
+                        color="primary"
+                        style={{ marginRight: '10px' }}
+                      >
+                        Update
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteParameterClick(parameter)}
+                        variant="contained"
+                        color="error"
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          
+          <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+            {/* Attribute Table */}
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    <Typography variant="h6">Attribute Table</Typography>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Attribute Name</TableCell>
+                  <TableCell>Attribute Value</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {attributes.map((attribute) => (
+                  <TableRow key={attribute.id}>
+                    <TableCell>{attribute.name}</TableCell>
+                    <TableCell>{attribute.value}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleUpdateAttributeClick(attribute)}
+                        variant="contained"
+                        color="primary"
+                        style={{ marginRight: '10px' }}
+                      >
+                        Update
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteAttributeClick(attribute)}
+                        variant="contained"
+                        color="error"
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </DialogContent>
+      </Dialog>
+      
   
       <Dialog open={openUpdateDialog} onClose={handleUpdateParameterDialogClose}>
       <DialogTitle style={{ color: '#008080' }}>Update Parameter</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+              <InputLabel>Function Code</InputLabel>
+                <Select
+                  value={updatedFunctionCode}
+                  onChange={(e) => setUpdatedFunctionCode(e.target.value)}
+                >
+                  <MenuItem value="Coil Status">Coil Status</MenuItem>
+                  <MenuItem value="Input Status">Input Status</MenuItem>
+                  <MenuItem value="Holding Register">Holding Register</MenuItem>
+                  <MenuItem value="Input Register">Input Register</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
             <Grid item xs={6}>
               <TextField
                 label="Address"
@@ -1000,30 +1132,42 @@ const DeviceParameterTable = () => {
       <Dialog open={updateDeviceFormOpen} onClose={handleCloseUpdateDeviceForm}>
         <DialogTitle>Update Device</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Device Name"
-            value={updatedDeviceName}
-            onChange={(e) => setUpdatedDeviceName(e.target.value)}
-          />
-          <TextField
-            label="Slave ID"
-            value={updatedSlaveId}
-            onChange={(e) => setUpdatedSlaveId(e.target.value)}
-          />
+          {selectedDevice && (
+            <>
+              <TextField
+                label="Device Name"
+                value={updatedDeviceName}
+                onChange={(e) => setUpdatedDeviceName(e.target.value)}
+              />
+              <TextField
+                label="Slave ID"
+                value={updatedSlaveId}
+                onChange={(e) => setUpdatedSlaveId(e.target.value)}
+              />
+            </>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseUpdateDeviceForm} variant="outlined" color="error">Cancel</Button>
-          <Button onClick={handleUpdateDevice} variant="contained" color="primary">Update</Button>
+          <Button onClick={handleCloseUpdateDeviceForm} variant="outlined" color="error">
+            Cancel
+          </Button>
+          <Button onClick={handleUpdateDevice} variant="contained" color="primary">
+            Update
+          </Button>
         </DialogActions>
       </Dialog>
-  
+      
       <Dialog open={isDeleteDeviceConfirmationOpen} onClose={handleDeleteDeviceConfirmationClose}>
         <DialogTitle>Delete Device</DialogTitle>
         <DialogContent>
+          {/* Ensure selectedDeviceName is populated correctly */}
           <p>Are you sure you want to delete "{selectedDeviceName}"?</p>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteDeviceConfirmationClose} variant="outlined" color="error">Cancel</Button>
+          <Button onClick={handleDeleteDeviceConfirmationClose} variant="outlined" color="error">
+            Cancel
+          </Button>
+          {/* Pass selectedDevice.id to handleDeleteDevice */}
           <Button onClick={() => handleDeleteDevice(selectedDevice)} variant="contained" color="error">
             Delete
           </Button>
@@ -1037,14 +1181,24 @@ const DeviceParameterTable = () => {
             label="Device Name"
             value={deviceName}
             onChange={(e) => setDeviceName(e.target.value)}
+            style={{ marginRight: '10px' }}
           />
-          <TextField label="Slave ID" value={slaveId} onChange={(e) => setSlaveId(e.target.value)} />
+          <TextField
+            label="Slave ID"
+            value={slaveId}
+            onChange={(e) => setSlaveId(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddDeviceFormClose} variant="outlined" color="error">Cancel</Button>
-          <Button onClick={createDevice} variant="contained">Create Device</Button>
+          <Button onClick={handleAddDeviceFormClose} variant="outlined" color="error">
+            Cancel
+          </Button>
+          <Button onClick={createDevice} variant="contained">
+            Create Device
+          </Button>
         </DialogActions>
       </Dialog>
+
   
       <Dialog open={isAddParameterFormOpen} onClose={handleAddParameterFormClose}>
         <DialogTitle>
@@ -1053,6 +1207,20 @@ const DeviceParameterTable = () => {
         <DialogContent>
           {parameterFields.map((field, index) => (
             <Grid container spacing={2} key={index} alignItems="center">
+              <Grid item xs={2}>
+                <FormControl fullWidth>
+                  <InputLabel>Function Code</InputLabel>
+                  <Select
+                    value={field.function_code || ''} // Ensure a default value, e.g., an empty string
+                    onChange={(e) => handleFieldChange(index, 'function_code', e.target.value)}
+                  >
+                    <MenuItem value="Coil Status">Coil Status</MenuItem>
+                    <MenuItem value="Input Status">Input Status</MenuItem>
+                    <MenuItem value="Holding Register">Holding Register</MenuItem>
+                    <MenuItem value="Input Register">Input Register</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={3}>
                 <TextField
                   label="Address"
@@ -1088,7 +1256,7 @@ const DeviceParameterTable = () => {
                   </IconButton>
                 )}
               </Grid>
-              <Grid item xs={1}>
+              <Grid item xs={2}>
                 {index === parameterFields.length - 1 && (
                   <IconButton onClick={handleAddParameterButtonClick}>
                     <AddIcon style={{ color: 'green' }} />
@@ -1099,11 +1267,15 @@ const DeviceParameterTable = () => {
           ))}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddParameterFormClose} variant="outlined" color="error">Cancel</Button>
-          <Button onClick={parameterDevice} variant="contained">Create Parameter</Button>
+          <Button onClick={handleAddParameterFormClose} variant="outlined" color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={parameterDevice} variant="contained" color="primary">
+            Create Parameter
+          </Button>
         </DialogActions>
       </Dialog>
-
+      
       <Dialog open={isAddAttributeFormOpen} onClose={handleAddAttributeFormClose}>
         <DialogTitle>
           Add Attribute
