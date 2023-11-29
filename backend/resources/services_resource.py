@@ -7,7 +7,7 @@ ns = Namespace('Services', description='Services related operations')
 
 @ns.route('/restart-services')
 class RestartService(Resource):
-    def get():
+    def get(self):
         try:
             # Run 'systemctl daemon-reload' to reload units
             subprocess.run(['sudo', 'systemctl', 'restart', 'app_mb_hybrid.service'], check=True)
@@ -18,7 +18,7 @@ class RestartService(Resource):
         
 @ns.route('/stop-services')
 class StopService(Resource):
-    def get():
+    def get(self):
         try:
             subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
             return 'Services stopped successfully'

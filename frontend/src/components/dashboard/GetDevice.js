@@ -18,12 +18,14 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  Typography,
   Grid
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -825,7 +827,7 @@ const DeviceParameterTable = () => {
             Add Device
           </Button>
         </Grid>
-
+        
         <Grid item xs={12}>
           <TableContainer component={Paper}>
             <Table>
@@ -846,22 +848,20 @@ const DeviceParameterTable = () => {
                     <TableCell>{device.slave_id}</TableCell>
                     <TableCell>
                       {/* Show button */}
-                      <Button
+                      <IconButton
                         onClick={() => handleOpenUpdateDeviceForm(device.id)}
                         variant="contained"
-                        color="primary"
                         style={{ marginRight: '10px' }}
                       >
-                        Update
-                      </Button>
-                      <Button
+                        <EditIcon style={{ color: 'gray', fontSize : "medium" }}/>
+                      </IconButton>
+                      <IconButton 
                         onClick={() => handleDeleteDeviceClick(device.id, device.name)}
-                        variant="contained"
-                        color="error"
+                        variant="outlined"
                         style={{ marginRight: '10px' }}
                       >
-                        Delete
-                      </Button>
+                        <DeleteIcon style={{ color: 'gray', fontSize : "medium" }} />
+                      </IconButton>
                       <Button
                         onClick={() => handleDeviceChange(device.id)}
                         variant="contained"
@@ -917,23 +917,34 @@ const DeviceParameterTable = () => {
       )}
 
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>Pop-up Form</DialogTitle>
+        <DialogTitle>
+          {selectedDeviceName}
+        </DialogTitle>
+        <IconButton
+          onClick={handleClose}
+          color="inherit"
+          style={{ position: 'absolute', right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
         <DialogContent>
-        <Button onClick={handleAddParameterClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-          Add Parameter
-        </Button>
-        <Button onClick={handleAddAttributeClick} variant="contained" color="secondary">
-          Add Attribute
-        </Button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <DialogTitle>
+              Parameter
+            </DialogTitle>
+            <Button
+              onClick={handleAddParameterClick}
+              variant="contained"
+              color="secondary"
+              style={{ marginBottom: '10px' }}
+            >
+              Add
+            </Button>
+          </div>
           <TableContainer component={Paper}>
             {/* Parameter Table */}
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    <Typography variant="h6">Parameter Table</Typography>
-                  </TableCell>
-                </TableRow>
                 <TableRow>
                   <TableCell>Function Code</TableCell>
                   <TableCell>Address</TableCell>
@@ -950,21 +961,19 @@ const DeviceParameterTable = () => {
                     <TableCell>{parameter.parameter_name}</TableCell>
                     <TableCell>{parameter.data_type}</TableCell>
                     <TableCell>
-                      <Button
+                      <IconButton
                         onClick={() => handleUpdateClick(parameter)}
                         variant="contained"
-                        color="primary"
                         style={{ marginRight: '10px' }}
                       >
-                        Update
-                      </Button>
-                      <Button
+                        <EditIcon style={{ color: 'gray', fontSize : "medium" }}/>
+                      </IconButton>
+                      <IconButton
                         onClick={() => handleDeleteParameterClick(parameter)}
                         variant="contained"
-                        color="error"
                       >
-                        Delete
-                      </Button>
+                        <DeleteIcon style={{ color: 'gray', fontSize : "medium" }} />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -972,15 +981,23 @@ const DeviceParameterTable = () => {
             </Table>
           </TableContainer>
           
-          <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <DialogTitle>
+              Attribute
+            </DialogTitle>
+            <Button
+              onClick={handleAddAttributeClick}
+              variant="contained"
+              color="secondary"
+              style={{  marginTop: '10px' }}
+            >
+              Add
+            </Button>
+          </div>
+          <TableContainer component={Paper} style={{ marginTop: '10px' }}>
             {/* Attribute Table */}
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell colSpan={3} align="center">
-                    <Typography variant="h6">Attribute Table</Typography>
-                  </TableCell>
-                </TableRow>
                 <TableRow>
                   <TableCell>Attribute Name</TableCell>
                   <TableCell>Attribute Value</TableCell>
@@ -993,21 +1010,19 @@ const DeviceParameterTable = () => {
                     <TableCell>{attribute.name}</TableCell>
                     <TableCell>{attribute.value}</TableCell>
                     <TableCell>
-                      <Button
+                      <IconButton
                         onClick={() => handleUpdateAttributeClick(attribute)}
                         variant="contained"
-                        color="primary"
                         style={{ marginRight: '10px' }}
                       >
-                        Update
-                      </Button>
-                      <Button
+                        <EditIcon style={{ color: 'gray', fontSize : "medium" }}/>
+                      </IconButton>
+                      <IconButton
                         onClick={() => handleDeleteAttributeClick(attribute)}
                         variant="contained"
-                        color="error"
                       >
-                        Delete
-                      </Button>
+                        <DeleteIcon style={{ color: 'gray', fontSize : "medium" }} />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1024,9 +1039,10 @@ const DeviceParameterTable = () => {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <FormControl fullWidth>
-              <InputLabel>Function Code</InputLabel>
+              <InputLabel style={{ marginTop: '10px' }}>Function Code</InputLabel>
                 <Select
                   value={updatedFunctionCode}
+                  style={{ marginTop: '10px' }}
                   onChange={(e) => setUpdatedFunctionCode(e.target.value)}
                 >
                   <MenuItem value="Coil Status">Coil Status</MenuItem>
@@ -1040,6 +1056,7 @@ const DeviceParameterTable = () => {
               <TextField
                 label="Address"
                 value={updatedAddress}
+                style={{ marginTop: '10px' }}
                 onChange={(e) => setUpdatedAddress(e.target.value)}
                 fullWidth
               />
@@ -1137,11 +1154,13 @@ const DeviceParameterTable = () => {
               <TextField
                 label="Device Name"
                 value={updatedDeviceName}
+                style={{ marginTop: '5px', marginRight: '5px' }}
                 onChange={(e) => setUpdatedDeviceName(e.target.value)}
               />
               <TextField
                 label="Slave ID"
                 value={updatedSlaveId}
+                style={{ marginTop: '5px' }}
                 onChange={(e) => setUpdatedSlaveId(e.target.value)}
               />
             </>
@@ -1160,14 +1179,12 @@ const DeviceParameterTable = () => {
       <Dialog open={isDeleteDeviceConfirmationOpen} onClose={handleDeleteDeviceConfirmationClose}>
         <DialogTitle>Delete Device</DialogTitle>
         <DialogContent>
-          {/* Ensure selectedDeviceName is populated correctly */}
           <p>Are you sure you want to delete "{selectedDeviceName}"?</p>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDeviceConfirmationClose} variant="outlined" color="error">
             Cancel
           </Button>
-          {/* Pass selectedDevice.id to handleDeleteDevice */}
           <Button onClick={() => handleDeleteDevice(selectedDevice)} variant="contained" color="error">
             Delete
           </Button>
@@ -1181,11 +1198,12 @@ const DeviceParameterTable = () => {
             label="Device Name"
             value={deviceName}
             onChange={(e) => setDeviceName(e.target.value)}
-            style={{ marginRight: '10px' }}
+            style={{ marginRight: '5px', marginTop: '5px' }}
           />
           <TextField
             label="Slave ID"
             value={slaveId}
+            style={{ marginTop: '5px' }}
             onChange={(e) => setSlaveId(e.target.value)}
           />
         </DialogContent>
@@ -1201,17 +1219,16 @@ const DeviceParameterTable = () => {
 
   
       <Dialog open={isAddParameterFormOpen} onClose={handleAddParameterFormClose}>
-        <DialogTitle>
-          Add Parameter
-        </DialogTitle>
+        <DialogTitle>Add Parameter</DialogTitle>
         <DialogContent>
           {parameterFields.map((field, index) => (
             <Grid container spacing={2} key={index} alignItems="center">
               <Grid item xs={2}>
                 <FormControl fullWidth>
-                  <InputLabel>Function Code</InputLabel>
+                  <InputLabel style={{ minWidth: '120px' , marginTop: '5px' }}>Function Code</InputLabel>
                   <Select
-                    value={field.function_code || ''} // Ensure a default value, e.g., an empty string
+                    value={field.function_code || ''}
+                    style={{ marginTop: '10px', minWidth: '150px' }}
                     onChange={(e) => handleFieldChange(index, 'function_code', e.target.value)}
                   >
                     <MenuItem value="Coil Status">Coil Status</MenuItem>
@@ -1221,10 +1238,11 @@ const DeviceParameterTable = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={4}>
                 <TextField
                   label="Address"
                   value={field.address}
+                  style={{ marginLeft: '70px' , marginTop: '10px' }}
                   onChange={(e) => handleFieldChange(index, 'address', e.target.value)}
                 />
               </Grid>
@@ -1232,14 +1250,16 @@ const DeviceParameterTable = () => {
                 <TextField
                   label="Parameter Name"
                   value={field.ParameterName}
+                  style={{ marginTop: '10px' }}
                   onChange={(e) => handleFieldChange(index, 'ParameterName', e.target.value)}
                 />
               </Grid>
               <Grid item xs={2}>
-                <FormControl>
-                  <InputLabel>Data Type</InputLabel>
+                <FormControl fullWidth>
+                  <InputLabel style={{ minWidth: '80px', marginTop: '5px' }}>Data Type</InputLabel>
                   <Select
                     value={field.data_type}
+                    style={{ marginTop: '10px', minWidth: '100px' }}
                     onChange={(e) => handleFieldChange(index, 'data_type', e.target.value)}
                   >
                     <MenuItem value="Integer">Integer</MenuItem>
@@ -1275,6 +1295,7 @@ const DeviceParameterTable = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       
       <Dialog open={isAddAttributeFormOpen} onClose={handleAddAttributeFormClose}>
         <DialogTitle>
@@ -1287,6 +1308,7 @@ const DeviceParameterTable = () => {
                 <TextField
                   label="Name"
                   value={field.name}
+                  style={{ marginTop: '7px' }}
                   onChange={(e) => handleAttributeFieldChange(index, 'name', e.target.value)}
                 />
               </Grid>
@@ -1294,6 +1316,7 @@ const DeviceParameterTable = () => {
                 <TextField
                   label="Value"
                   value={field.value}
+                  style={{ marginTop: '7px' }}
                   onChange={(e) => handleAttributeFieldChange(index, 'value', e.target.value)}
                 />
               </Grid>

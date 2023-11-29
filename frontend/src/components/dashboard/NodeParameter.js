@@ -17,6 +17,8 @@ import {
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // import { Replay as ReplayIcon, Stop as StopIcon } from '@mui/icons-material';  
 
@@ -51,7 +53,7 @@ const NodeParameterTable = () => {
   const [updatedBrokerPort, setUpdatedBrokerPort] = useState('');
   const [isRestarting, setIsRestarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
-  const [restartButtonClicked, setRestartButtonClicked] = useState(false);
+  const [restartButtonClicked] = useState(false);
 
 
 
@@ -515,7 +517,7 @@ const NodeParameterTable = () => {
         </div>
       </Grid>
 
-      <Grid item xs={12}>
+      {/* <Grid item xs={4}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
           <Typography variant="h6">Node Attributes</Typography>
           <div style={{ marginTop: '1px' }}>
@@ -529,42 +531,93 @@ const NodeParameterTable = () => {
             <Button variant="outlined" style={{ marginRight: '10px' }} onClick={handleUpdateNodeAttributeFormOpen}>
               Edit
             </Button>
+            <IconButton
+              variant="outlined"
+              style={{ marginRight: '10px' }}
+              onClick={handleUpdateNodeAttributeFormOpen}
+            >
+              <EditIcon />
+            </IconButton>
             
-            {/* Add Node Attribute button */}
             <Button variant="outlined" onClick={handleAddNodeAttributeFormOpen}>
-              Add Node Attribute
+              Add
             </Button>
+          </div>
+        </Paper>
+      </Grid> */}
+
+      <Grid item xs={4}>
+        <Paper style={{ padding: '20px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="h6" >Node Attributes</Typography>
+            <div style={{ display: 'flex', gap: '0px' }}>
+              <IconButton
+                variant="outlined"
+                style={{ marginRight: '0px' }}
+                onClick={handleUpdateNodeAttributeFormOpen}
+              >
+                <EditIcon style={{ fontSize : "medium" }}/>
+              </IconButton>
+              <IconButton
+                variant="outlined"
+                style={{ marginLeft: '5px' }}
+                onClick={handleAddNodeAttributeFormOpen}
+              >
+                <AddIcon style={{ color: 'green', fontSize : "medium" }} />
+              </IconButton>
+            </div>
+          </div>
+          <div style={{ marginTop: '3px' }}>
+            {nodeAttributes && nodeAttributes.map(attr => (
+              <div key={attr.name}>
+                <Typography variant="body1">
+                  <strong>{attr.name}:</strong> {attr.value}
+                </Typography>
+              </div>
+            ))}
           </div>
         </Paper>
       </Grid>
 
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h6">SPB Parameter</Typography>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="h6">SPB Parameter</Typography>
+            <IconButton
+              variant="outlined"
+              style={{ marginLeft: '10px' }}
+              onClick={handleUpdateSpbParameterFormOpen}
+            >
+              <EditIcon style={{ fontSize : "medium" }}/>
+            </IconButton>
+          </div>
           <div>
             <strong>Edge Node Id:</strong> {spbParameter?.edge_node_id}
           </div>
           <div>
             <strong>Group Id:</strong> {spbParameter?.group_id}
           </div>
-          <Button variant="outlined" onClick={handleUpdateSpbParameterFormOpen}>
-            Update
-          </Button>
         </Paper>
       </Grid>
 
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h6">MQTT</Typography>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="h6">MQTT</Typography>
+            <IconButton
+              variant="outlined"
+              style={{ marginLeft: '10px' }}
+              onClick={handleUpdateMqttFormOpen}
+            >
+              <EditIcon style={{ fontSize : "medium" }}/>
+            </IconButton>
+          </div>
           <div>
             <strong>Broker Host:</strong> {mqtt?.broker_host}
           </div>
           <div>
             <strong>Broker Port:</strong> {mqtt?.broker_port}
           </div>
-          <Button variant="outlined" onClick={handleUpdateMqttFormOpen}>
-            Update
-          </Button>
         </Paper>
       </Grid>
 
@@ -573,7 +626,7 @@ const NodeParameterTable = () => {
           <Typography variant="h6">Modbus Parameters</Typography>
           <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
             {['Port', 'Method', 'Parity', 'Baudrate', 'Stopbits', 'WordLength'].map((label, index) => (
-              <div key={index} style={{ marginRight: '20px' }}>
+              <div key={index} style={{ marginRight: '20px', width: label === 'Method' ? '150px' : '120px' }}>
                 <FormControl fullWidth>
                   <InputLabel>{label}</InputLabel>
                   <Select
@@ -628,6 +681,7 @@ const NodeParameterTable = () => {
             value={updatedEdgeNodeId}
             onChange={(e) => setUpdatedEdgeNodeId(e.target.value)}
             fullWidth
+            style={{ marginBottom: '16px', marginTop: '5px' }} // Adjust values based on your preference
           />
           <TextField
             label="Group ID"
@@ -644,7 +698,6 @@ const NodeParameterTable = () => {
         </DialogActions>
       </Dialog>
 
-
       {/* Edit form for Node Attribute */}
       <Dialog open={updateNodeAttributeFormOpen} onClose={handleUpdateFormClose}>
         <DialogTitle>Edit Node Attribute</DialogTitle>
@@ -655,16 +708,16 @@ const NodeParameterTable = () => {
                 label="Attribute Name"
                 value={attr.name}
                 onChange={(e) => handleUpdateInputChange(index, { ...attr, name: e.target.value })}
-                style={{ marginRight: '10px' }}
+                style={{ marginRight: '10px', marginTop: '5px' }}
               />
               <TextField
                 label="Attribute Value"
                 value={attr.value}
                 onChange={(e) => handleUpdateInputChange(index, { ...attr, value: e.target.value })}
-                fullWidth
+                style={{ marginTop: '5px' }}
               />
               <IconButton onClick={() => handleRemoveAttribute(index)}>
-                <RemoveIcon style={{ color: 'red' }} />
+                <DeleteIcon style={{ color: 'black', fontSize : "medium" }} />
               </IconButton>
             </div>
           ))}
@@ -688,16 +741,18 @@ const NodeParameterTable = () => {
                 <TextField
                   label="Attribute Name"
                   value={formData.name}
+                  style={{ marginTop: '5px' }}
                   onChange={(e) => handleFormDataChange(index, 'name', e.target.value)}
-                  fullWidth
+                  // fullWidth
                 />
               </Grid>
               <Grid item xs={4}>
                 <TextField
                   label="Attribute Value"
                   value={formData.value}
+                  style={{ marginTop: '5px' }}
                   onChange={(e) => handleFormDataChange(index, 'value', e.target.value)}
-                  fullWidth
+                  // fullWidth
                 />
               </Grid>
               <Grid item xs={2}>
@@ -735,6 +790,7 @@ const NodeParameterTable = () => {
             value={updatedBrokerHost}
             onChange={(e) => setUpdatedBrokerHost(e.target.value)}
             fullWidth
+            style={{ marginBottom: '16px', marginTop: '5px' }} // Adjust the value based on your preference
           />
           <TextField
             label="Broker Port"
