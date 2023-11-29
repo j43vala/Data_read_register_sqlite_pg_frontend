@@ -233,13 +233,8 @@ const NodeParameterTable = () => {
   };
 
   const handleRemoveAttribute = (index) => {
-    // Create a copy of the updatedAttributes array
     const updatedAttributesCopy = [...updatedAttributes];
-  
-    // Remove the attribute at the specified index
     updatedAttributesCopy.splice(index, 1);
-  
-    // Update the state with the modified array
     setUpdatedAttributes(updatedAttributesCopy);
   };
   
@@ -422,18 +417,6 @@ const NodeParameterTable = () => {
     }
   };
   
-  
-  // const handleRestart = () => {
-  //   setRestartButtonClicked(true);
-  //   setIsRestarting(true);
-
-  //   // Simulate the restart process with a delay of 2 seconds
-  //   setTimeout(() => {
-  //     console.log('Service is restarting.');
-  //     setIsRestarting(false);
-  //   }, 2000);
-  // };
-
   const handleRestart = () => {
     // Add logic for restarting here
     setIsRestarting(true);
@@ -462,24 +445,11 @@ const NodeParameterTable = () => {
       });
   };
 
-  // const handleStop = () => {
-  //   // Enable the Restart button when the Stop button is clicked
-  //   setRestartButtonClicked(false);
-  //   setIsStopping(true);
-
-  //   // Simulate the stop process with a delay of 2 seconds
-  //   setTimeout(() => {
-  //     console.log('Service is stopped.');
-  //     setIsStopping(false);
-  //   }, 2000);
-  // };
 
   const handleStop = () => {
     // Add logic for stopping here
     setIsStopping(true);
   
-    // Perform your stop actions, then set isStopping to false
-    // For example, you can make a fetch request to a stop endpoint
     fetch('http://localhost:5000/service/stop-services', {
       method: 'GET',
       headers: {
@@ -505,7 +475,6 @@ const NodeParameterTable = () => {
   
   return (
     <Grid container spacing={1}>
-      {/* Buttons for Restart and Stop */}
       <Grid item xs={12}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
           <Button onClick={handleRestart} disabled={isRestarting || restartButtonClicked} variant="contained" color="primary">
@@ -516,35 +485,6 @@ const NodeParameterTable = () => {
           </Button>
         </div>
       </Grid>
-
-      {/* <Grid item xs={4}>
-        <Paper style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h6">Node Attributes</Typography>
-          <div style={{ marginTop: '1px' }}>
-            {nodeAttributes && nodeAttributes.map(attr => (
-              <div key={attr.name}>
-                <Typography variant="body1">
-                  <strong>{attr.name}:</strong> {attr.value}
-                </Typography>
-              </div>
-            ))}
-            <Button variant="outlined" style={{ marginRight: '10px' }} onClick={handleUpdateNodeAttributeFormOpen}>
-              Edit
-            </Button>
-            <IconButton
-              variant="outlined"
-              style={{ marginRight: '10px' }}
-              onClick={handleUpdateNodeAttributeFormOpen}
-            >
-              <EditIcon />
-            </IconButton>
-            
-            <Button variant="outlined" onClick={handleAddNodeAttributeFormOpen}>
-              Add
-            </Button>
-          </div>
-        </Paper>
-      </Grid> */}
 
       <Grid item xs={4}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
