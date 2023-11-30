@@ -82,7 +82,6 @@
 # if __name__ == "__main__":  # Fixed typo here
 #     main()
 
-
 import time
 import socket
 import datetime
@@ -106,6 +105,7 @@ def main():
             client = initialize_modbus_client()
             client.connect()
 
+
             # hostname = os.uname()[1]           # for linux
             hostname = socket.gethostname()     # for windows
 
@@ -117,13 +117,15 @@ def main():
             # sparkplug_b configuration
             group_name = config.get("spb_parameter").get("group_id")
             edge_node_id = config.get("spb_parameter").get("edge_node_id")
+            broker = config.get("mqtt").get("broker_host") 
+            port = config.get("mqtt").get("broker_port")
 
             # spb_dev initialized
             success = None  # Initialize success variable for the entire process
 
             for device_dict in config["devices"]:
                 init_spb_device(group_name, edge_node_id, device_dict)
-                connect_spb_device(device_dict)
+                connect_spb_device(device_dict, broker , port )
 
 
             while True:
@@ -137,7 +139,7 @@ def main():
                     # Try to connect to the broker --------------------------------------------
                     if not device_dict["spb_device_connected"]:
                         print("connecting to broker from while loop......")
-                        connect_spb_device(device_dict)
+                        connect_spb_device(device_dict, broker, port)
                         
 
                     for parameter in device_dict["parameters"]:
