@@ -68,7 +68,10 @@ def main():
                             try:
                                 data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
                                 setattr(record, parameter_name, data)
-                                spb_device.data.set_value(parameter_name, data)
+                                
+                                if spb_device.data.get_value(parameter_name) != data:
+                                    spb_device.data.set_value(parameter_name, data)
+                                
                                 print(f"updated '{parameter_name}' with value: {data}")
                             except Exception as e:
                                 success = False
