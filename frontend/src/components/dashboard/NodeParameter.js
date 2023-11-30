@@ -573,7 +573,7 @@ const NodeParameterTable = () => {
         </Paper>
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid item xs={9}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
           <Typography variant="h6">Modbus Parameters</Typography>
           <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>

@@ -131,7 +131,7 @@ const DeviceParameterTable = () => {
           setDevices(data.devices);
           // setDeviceSuccessMessage('Devices fetch Successfully.!');
         } else {
-          setErrorMessage(`Invalid response format for devices: ${data}`);
+          setErrorMessage(`No Devices Available.!`);
         }
       } catch (error) {
         setErrorMessage(`Error fetching devices: ${error}`);
