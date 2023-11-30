@@ -807,20 +807,31 @@ const DeviceParameterTable = () => {
     setOpen(false);
   };
 
+  // // Define SuccessMessage and ErrorMessage components
+  // const SuccessMessage = ({ message, onClose }) => (
+  //   <Alert severity="success" onClose={onClose}>
+  //     {message}
+  //   </Alert>
+  // );
+
+  // const ErrorMessage = ({ message, onClose }) => (
+  //   <Alert severity="error" onClose={onClose}>
+  //     {message}
+  //   </Alert>
+  // );
+
   // Define SuccessMessage and ErrorMessage components
-  const SuccessMessage = ({ message, onClose }) => (
-    <Alert severity="success" onClose={onClose}>
+  const SuccessMessage = ({ message }) => (
+    <Alert severity="success" >
       {message}
     </Alert>
   );
 
-  const ErrorMessage = ({ message, onClose }) => (
-    <Alert severity="error" onClose={onClose}>
+  const ErrorMessage = ({ message }) => (
+    <Alert severity="error" >
       {message}
     </Alert>
   );
-
-  
 
   return (
     <div className={classes.root}>

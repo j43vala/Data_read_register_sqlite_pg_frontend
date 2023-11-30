@@ -63,6 +63,7 @@ const NodeParameterTable = () => {
   const [ServiceStopSuccessMessage, setServiceStopSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [disableCloseButton, setDisableCloseButton] = useState(false);
 
   const clearMessagesAfterDelay = () => {
     setTimeout(() => {
@@ -450,21 +451,21 @@ const NodeParameterTable = () => {
   };
 
   // Define SuccessMessage and ErrorMessage components
-  const SuccessMessage = ({ message, onClose }) => (
-    <Alert severity="success" onClose={onClose}>
+  const SuccessMessage = ({ message}) => (
+    <Alert severity="success" >
       {message}
     </Alert>
   );
 
-  const ErrorMessage = ({ message, onClose }) => (
-    <Alert severity="error" onClose={onClose}>
+  const ErrorMessage = ({ message}) => (
+    <Alert severity="error">
       {message}
     </Alert>
   );
   
   return (
     <Grid container spacing={1}>
-      <Grid item xs={10}>
+      <Grid item xs={6}>
       {ServiceStartSuccessMessage && (
         <SuccessMessage message={ServiceStartSuccessMessage} onClose={() => setServiceStartSuccessMessage('')}/>
       )}
@@ -484,12 +485,10 @@ const NodeParameterTable = () => {
         <SuccessMessage message={ModbusSuccessMessage} onClose={() => setModbusSuccessMessage('')}/>
       )}
       {errorMessage && (
-        <Alert severity="error" onClose={() => setErrorMessage('')}>
-          {errorMessage}
-        </Alert>
+        <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
       )}
       </Grid>
-      <Grid item xs={2}>
+      <Grid item xs={6}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
           <Button onClick={handleRestart} disabled={isRestarting || restartButtonClicked} variant="contained" color="primary">
             Restart
@@ -573,12 +572,6 @@ const NodeParameterTable = () => {
             <strong>Broker Port:</strong> {mqtt?.broker_port}
           </div>
         </Paper>
-      </Grid>
-
-      <Grid item xs={12}>
-        {errorMessage && (
-          <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
-        )}
       </Grid>
 
       <Grid item xs={12}>
@@ -702,7 +695,6 @@ const NodeParameterTable = () => {
                   value={formData.name}
                   style={{ marginTop: '5px' }}
                   onChange={(e) => handleFormDataChange(index, 'name', e.target.value)}
-                  // fullWidth
                 />
               </Grid>
               <Grid item xs={4}>
@@ -711,7 +703,6 @@ const NodeParameterTable = () => {
                   value={formData.value}
                   style={{ marginTop: '5px' }}
                   onChange={(e) => handleFormDataChange(index, 'value', e.target.value)}
-                  // fullWidth
                 />
               </Grid>
               <Grid item xs={2}>
@@ -749,7 +740,7 @@ const NodeParameterTable = () => {
             value={updatedBrokerHost}
             onChange={(e) => setUpdatedBrokerHost(e.target.value)}
             fullWidth
-            style={{ marginBottom: '16px', marginTop: '5px' }} // Adjust the value based on your preference
+            style={{ marginBottom: '16px', marginTop: '5px' }}
           />
           <TextField
             label="Broker Port"
