@@ -129,7 +129,7 @@ const DeviceParameterTable = () => {
 
         if (Array.isArray(data.devices)) {
           setDevices(data.devices);
-          setDeviceSuccessMessage('Devices fetch Successfully.!');
+          // setDeviceSuccessMessage('Devices fetch Successfully.!');
         } else {
           setErrorMessage(`Invalid response format for devices: ${data}`);
         }
