@@ -63,7 +63,6 @@ const NodeParameterTable = () => {
   const [ServiceStopSuccessMessage, setServiceStopSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [disableCloseButton, setDisableCloseButton] = useState(false);
 
   const clearMessagesAfterDelay = () => {
     setTimeout(() => {

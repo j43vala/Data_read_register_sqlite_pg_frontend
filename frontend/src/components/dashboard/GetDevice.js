@@ -129,11 +129,12 @@ const DeviceParameterTable = () => {
 
         if (Array.isArray(data.devices)) {
           setDevices(data.devices);
+          setDeviceSuccessMessage('Devices fetch Successfully.!');
         } else {
-          console.error('Invalid response format for devices:', data);
+          setErrorMessage(`Invalid response format for devices: ${data}`);
         }
       } catch (error) {
-        console.error('Error fetching devices:', error);
+        setErrorMessage(`Error fetching devices: ${error}`);
       }
     };
 
@@ -203,16 +204,24 @@ const DeviceParameterTable = () => {
 
   const handleUpdateSubmit = async () => {
     if (!selectedParameter || !selectedParameter.id) {
-      console.error('No Parameter selected for update');
+      setErrorMessage('No Parameter selected for update');
       return;
     }
-
+  
+    // Validate that the updated address field contains only integer values
+    if (!Number.isInteger(parseInt(updatedAddress, 10))) {
+      setErrorMessage('Please Insert Only Integer Values in the Address field!');
+      handleUpdateDialogClose();
+      return;
+    }
+  
     const updatedValues = {
+      function_code: updatedFunctionCode,
       address: updatedAddress,
       parameter_name: updatedParameterName,
       data_type: updatedDataType,
     };
-
+  
     try {
       const response = await fetch(`http://localhost:5000/parameter/devices/${selectedDevice}/parameter/${selectedParameter.id}`, {
         method: 'PUT',
@@ -221,16 +230,19 @@ const DeviceParameterTable = () => {
         },
         body: JSON.stringify(updatedValues),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Failed to update Parameter: ${response.statusText}`);
       }
-
+  
       handleChange({ target: { value: selectedDevice } });
+      clearParameterForm();
       handleUpdateDialogClose();
       setParameterSuccessMessage('Parameter updated successfully!');
     } catch (error) {
       console.error('Error updating Parameter:', error);
+      clearParameterForm();
+      handleUpdateDialogClose();
       setErrorMessage(`Error updating Parameter. ${error.message}`);
     }
   };
@@ -315,14 +327,20 @@ const DeviceParameterTable = () => {
         if (Array.isArray(devicesData.devices)) {
           setDevices(devicesData.devices);
         } else {
-          console.error('Invalid response format for devices:', devicesData);
+          setErrorMessage(`Invalid response format for devices: ${devicesData}`);
+          clearDeviceForm();
+          setIsAddDeviceFormOpen(false);
         }
       } catch (error) {
         console.error('Error creating device:', error);
         setErrorMessage('Error creating device. Please try again.');
+        clearDeviceForm();
+        setIsAddDeviceFormOpen(false);
       }
     } else {
       setErrorMessage('Both device name and slave ID are required');
+      clearDeviceForm();
+      setIsAddDeviceFormOpen(false);
     }
   };
 
@@ -373,11 +391,8 @@ const DeviceParameterTable = () => {
       const devicesData = await devicesResponse.json();
   
       if (Array.isArray(devicesData.devices)) {
-        // Update state with the updated list of devices
         setDevices(devicesData.devices);
-        // Clear the Parameters when a device is deleted
         setParameters([]);
-        // Clear the Attributes when a device is deleted
         setAttributes([]);
   
         // Reset selected device details
@@ -401,8 +416,6 @@ const DeviceParameterTable = () => {
     }
   };
   
- 
-
   const handleOpenUpdateDeviceForm = (deviceId) => {
     const selectedDevice = devices.find((device) => device.id === deviceId);
 
@@ -465,13 +478,9 @@ const DeviceParameterTable = () => {
   }; 
 
   const clearParameterForm = () => {
-    // Assuming you have state setters for address, ParameterName, and data_type
     setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '' }]);
-    // Add any other state resetting logic if needed
   };
   
-  
-
   const handleAddParameterButtonClick = () => {
     console.log('Add Parameter button clicked');
     setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '' }]);
@@ -535,19 +544,34 @@ const DeviceParameterTable = () => {
   const parameterDevice = () => {
     if (!selectedDevice) {
       setErrorMessage('Please select a device!');
+      setIsAddParameterFormOpen(false);
       return;
     }
-
+  
     // Validate the fields for each row
     const invalidFields = parameterFields.some(
       (field) => !field.function_code || !field.address || !field.ParameterName || !field.data_type
     );
-
+  
     if (invalidFields) {
       setErrorMessage('Please fill in all the required fields for each parameter!');
+      setIsAddParameterFormOpen(false);
+      clearParameterForm();
       return;
     }
-
+  
+    // Validate that the address field contains only integer values
+    const invalidAddressFields = parameterFields.some(
+      (field) => !Number.isInteger(parseInt(field.address, 10))
+    );
+  
+    if (invalidAddressFields) {
+      setErrorMessage('Please Enter Only Integer Values in the Address Field!');
+      clearParameterForm();
+      setIsAddParameterFormOpen(false);
+      return;
+    }
+  
     const parameterPayload = {
       parameters: parameterFields.map((field) => ({
         active: true,
@@ -557,7 +581,7 @@ const DeviceParameterTable = () => {
         data_type: field.data_type,
       })),
     };
-
+  
     fetch(`http://localhost:5000/parameter/devices/${selectedDevice}/parameter`, {
       method: 'POST',
       headers: {
@@ -565,34 +589,39 @@ const DeviceParameterTable = () => {
       },
       body: JSON.stringify(parameterPayload),
     })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('One or more parameters failed to create.');
-      }
-      return response.json();
-    })
-    .then((responseData) => {
-      console.log('API Response Data:', responseData);
-
-      // Check if responseData has the expected structure
-      if (responseData.created_parameters) {
-        // Update the table data with the new parameters
-        setParameterTableData([...parameterTableData, ...responseData.created_parameters]);
-
-        setParameterSuccessMessage('Parameters created successfully!');
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('One or more parameters failed to create.');
+        }
+        return response.json();
+      })
+      .then((responseData) => {
+        console.log('API Response Data:', responseData);
+  
+        // Check if responseData has the expected structure
+        if (responseData.created_parameters) {
+          // Update the table data with the new parameters
+          setParameterTableData([...parameterTableData, ...responseData.created_parameters]);
+  
+          setParameterSuccessMessage('Parameters created successfully!');
+          clearParameterForm();
+          setIsAddParameterFormOpen(false);
+          handleChange({ target: { value: selectedDevice } });
+        } else {
+          console.error('Unexpected response format:', responseData);
+          setErrorMessage('Error creating Parameters. Please try again.');
+          clearParameterForm();
+          setIsAddParameterFormOpen(false);
+        }
+      })
+      .catch((error) => {
+        console.error('Error creating Parameters:', error);
+        setErrorMessage('Error creating Parameters. Please try again.');
         clearParameterForm();
         setIsAddParameterFormOpen(false);
-        handleChange({ target: { value: selectedDevice } });
-      } else {
-        console.error('Unexpected response format:', responseData);
-        setErrorMessage('Error creating Parameters. Please try again.');
-      }
-    })
-    .catch((error) => {
-      console.error('Error creating Parameters:', error);
-      setErrorMessage('Error creating Parameters. Please try again.');
-    });
-};
+      });
+  };
+  
 
   const handleFieldChange = (index, field, value) => {
     const updatedFields = [...parameterFields];
@@ -612,9 +641,7 @@ const DeviceParameterTable = () => {
   };
 
   const clearAttributeForm = () => {
-    // Assuming you have state setters for address, ParameterName, and data_type
     setAttributeFields([{ name: '', value: '' }]);
-    // Add any other state resetting logic if needed
   };
 
   const handleAddAttributeFormClose = () => {
@@ -646,6 +673,7 @@ const DeviceParameterTable = () => {
   
     if (invalidFields) {
       setErrorMessage('Please fill in all the required fields for each attribute!');
+      clearAttributeForm();
       return;
     }
   
@@ -677,6 +705,8 @@ const DeviceParameterTable = () => {
       .catch((error) => {
         console.error('Error creating Attributes:', error);
         setErrorMessage('Error creating Attributes. Please try again.');
+        clearAttributeForm();
+        setIsAddAttributeFormOpen(false);
       });
   };
   
@@ -737,10 +767,13 @@ const DeviceParameterTable = () => {
   
       handleChange({ target: { value: selectedDevice } });
       handleUpdateAttributeDialogClose();
+      clearAttributeForm();
       setAttributeSuccessMessage('Attribute updated successfully!');
     } catch (error) {
       console.error('Error updating Attribute:', error);
       setErrorMessage(`Error updating Attribute. ${error.message}`);
+      clearAttributeForm();
+      handleUpdateAttributeDialogClose();
     }
   };
   
