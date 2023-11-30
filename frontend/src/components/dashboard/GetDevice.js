@@ -839,18 +839,12 @@ const DeviceParameterTable = () => {
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={10}>
           {deviceSuccessMessage && (
-            <Alert severity="success" onClose={() => setDeviceSuccessMessage('')}>
-              {deviceSuccessMessage}
-            </Alert>
+            <SuccessMessage message={deviceSuccessMessage} onClose={() => setDeviceSuccessMessage('')}/>
           )}
-
           {errorMessage && (
-            <Alert severity="error" onClose={() => setErrorMessage('')}>
-              {errorMessage}
-            </Alert>
+            <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
           )}
         </Grid>
-        
         <Grid item xs={2} container justifyContent="flex-end">
           <Button
             onClick={handleAddDeviceClick}
