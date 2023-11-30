@@ -466,14 +466,10 @@ const NodeParameterTable = () => {
     <Grid container spacing={1}>
       <Grid item xs={10}>
       {ServiceStartSuccessMessage && (
-        <Alert severity="success" onClose={() => setServiceStartSuccessMessage('')}>
-          {ServiceStartSuccessMessage}
-        </Alert>
+        <SuccessMessage message={ServiceStartSuccessMessage} onClose={() => setServiceStartSuccessMessage('')}/>
       )}
       {ServiceStopSuccessMessage && (
-        <Alert severity="success" onClose={() => setServiceStopSuccessMessage('')}>
-          {ServiceStopSuccessMessage}
-        </Alert>
+        <SuccessMessage message={ServiceStopSuccessMessage} onClose={() => setServiceStopSuccessMessage('')}/>
       )}
       {NodeAttributeSuccessMessage && (
         <SuccessMessage message={NodeAttributeSuccessMessage} onClose={() => setNodeAttributeSuccessMessage('')}/>
