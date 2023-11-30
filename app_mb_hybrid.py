@@ -83,7 +83,6 @@
 #     main()
 
 
-
 import time
 import socket
 import datetime
@@ -95,7 +94,7 @@ from spb import init_spb_device, connect_spb_device
 
 def main():
     last_check_time = datetime.datetime.now()
-    retention_interval = 30  # Set the retention interval in seconds
+    retention_interval = 60  # Set the retention interval in seconds
 
     try:
         # check if the configuration is available or not
@@ -150,7 +149,10 @@ def main():
                             try:
                                 data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
                                 setattr(record, parameter_name, data)
-                                spb_device.data.set_value(parameter_name, data)
+                                
+                                if spb_device.data.get_value(parameter_name) != data:
+                                    spb_device.data.set_value(parameter_name, data)
+                                
                                 print(f"updated '{parameter_name}' with value: {data}")
                             except Exception as e:
                                 success = False
