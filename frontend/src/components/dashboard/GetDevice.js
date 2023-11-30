@@ -806,28 +806,50 @@ const DeviceParameterTable = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  // Define SuccessMessage and ErrorMessage components
+  const SuccessMessage = ({ message, onClose }) => (
+    <Alert severity="success" onClose={onClose}>
+      {message}
+    </Alert>
+  );
+
+  const ErrorMessage = ({ message, onClose }) => (
+    <Alert severity="error" onClose={onClose}>
+      {message}
+    </Alert>
+  );
+
   
 
   return (
     <div className={classes.root}>
       <div className={classes.header}>
-        {/* <div className={classes.buttonGroup}>
-          <Button onClick={handleAddDeviceClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-            Add Device
-          </Button>
-        </div>  */}
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={10}>
+          {deviceSuccessMessage && (
+            <Alert severity="success" onClose={() => setDeviceSuccessMessage('')}>
+              {deviceSuccessMessage}
+            </Alert>
+          )}
 
-        {/* Table section */}
-        <Grid container spacing={2} justifyContent="flex-end">
-        <Grid item>
-          <Button onClick={handleAddDeviceClick}
+          {errorMessage && (
+            <Alert severity="error" onClose={() => setErrorMessage('')}>
+              {errorMessage}
+            </Alert>
+          )}
+        </Grid>
+        
+        <Grid item xs={2} container justifyContent="flex-end">
+          <Button
+            onClick={handleAddDeviceClick}
             variant="contained"
             color="secondary"
           >
             Add Device
           </Button>
         </Grid>
-        
+    
         <Grid item xs={12}>
           <TableContainer component={Paper}>
             <Table>
@@ -878,43 +900,7 @@ const DeviceParameterTable = () => {
           </TableContainer>
         </Grid>
       </Grid>
-  
-        {/* <div className={classes.buttonGroup}>
-        <Button onClick={handleAddDeviceClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-          Add Device
-        </Button>
-        <Button onClick={handleAddParameterClick} variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-          Add Parameter
-        </Button>
-        <Button onClick={handleAddAttributeClick} variant="contained" color="secondary">
-          Add Attribute
-        </Button>
-      </div> */}
-      </div>
-  
-      {deviceSuccessMessage && (
-        <Alert severity="success" onClose={() => setDeviceSuccessMessage('')}>
-          {deviceSuccessMessage}
-        </Alert>
-      )}
-  
-      {parameterSuccessMessage && (
-        <Alert severity="success" onClose={() => setParameterSuccessMessage('')}>
-          {parameterSuccessMessage}
-        </Alert>
-      )}
-
-      {attributeSuccessMessage && (
-        <Alert severity="success" onClose={() => setParameterSuccessMessage('')}>
-          {attributeSuccessMessage}
-        </Alert>
-      )}
-  
-      {errorMessage && (
-        <Alert severity="error" onClose={() => setErrorMessage('')}>
-          {errorMessage}
-        </Alert>
-      )}
+      </div> 
 
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -941,6 +927,13 @@ const DeviceParameterTable = () => {
               Add
             </Button>
           </div>
+          {/* Display Parameter Success and Error Messages */}
+          {parameterSuccessMessage && (
+            <SuccessMessage message={parameterSuccessMessage} onClose={() => setParameterSuccessMessage('')} />
+          )}
+          {errorMessage && (
+            <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')} />
+          )}
           <TableContainer component={Paper}>
             {/* Parameter Table */}
             <Table>
@@ -982,18 +975,22 @@ const DeviceParameterTable = () => {
           </TableContainer>
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <DialogTitle>
+            <DialogTitle style={{  marginTop: '30px' }} >
               Attribute
             </DialogTitle>
             <Button
               onClick={handleAddAttributeClick}
               variant="contained"
               color="secondary"
-              style={{  marginTop: '10px' }}
+              style={{  marginTop: '30px' }}
             >
               Add
             </Button>
           </div>
+          {/* Display Attribute Success and Error Messages */}
+          {attributeSuccessMessage && (
+            <SuccessMessage message={attributeSuccessMessage} onClose={() => setAttributeSuccessMessage('')} />
+          )}
           <TableContainer component={Paper} style={{ marginTop: '10px' }}>
             {/* Attribute Table */}
             <Table>

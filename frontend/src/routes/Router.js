@@ -6,7 +6,7 @@ const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
 
 /***** Pages ****/
 
-const Starter = lazy(() => import("../views/Starter.js"));
+const Home = lazy(() => import("../views/Home.js"));
 const About = lazy(() => import("../views/About.js"));
 const CreateDeviceAndRegister = lazy(() => import("../views/CreateDeviceAndRegister.js"))
 const GetDevice = lazy(() => import("../views/GetDevice.js"))
@@ -31,8 +31,8 @@ const ThemeRoutes = [
     path: "/",
     element: <FullLayout />,
     children: [
-      { path: "/", element: <Navigate to="/starter" /> },
-      { path: "/starter", exact: true, element: <Starter /> },
+      { path: "/", element: <Navigate to="/home" /> },
+      { path: "/home", exact: true, element: <Home /> },
       { path: "/about", exact: true, element: <About /> },
       { path: "/create-device-and-register", exact: true, element: <CreateDeviceAndRegister /> },
       { path: "/get-device", exact: true, element: <GetDevice /> },
