@@ -22,8 +22,6 @@ def init_spb_device(group_name,edge_node_name, device_dict):
     def callback_message(topic, payload):
         print("Received MESSAGE: %s - %s" % (topic, payload))
 
-    # Call the new function to initialize Sparkplug B entity
-    # device = initialize_sp_client(config_device["device_name"], _DEBUG)
     
     
     device_name = device_dict.get("device_name")
@@ -51,19 +49,12 @@ def init_spb_device(group_name,edge_node_name, device_dict):
 
     device_dict["spb_device"] = device
 
-
-    # # Try to connect to the broker --------------------------------------------
-    # _connected = False
-    # while not _connected:
-    #     print("Trying to connect to broker...")
-    #     _connected = device.connect("broker.hivemq.com", 1883)
-    #     if not _connected:
-    #         print("Error, could not connect. Trying again in a few seconds ...")
-    #         time.sleep(3)
-
     return device
 
-def connect_spb_device(device_dict, broker = "broker.hivemq.com", port = 1883):
+
+def connect_spb_device(device_dict, broker , port):
+   
+    
     print("Trying to connect to broker...")
 
     device = device_dict["spb_device"]
@@ -77,4 +68,3 @@ def connect_spb_device(device_dict, broker = "broker.hivemq.com", port = 1883):
 
     device_dict["spb_device_connected"] = _connected
     return _connected
-
