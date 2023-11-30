@@ -6,6 +6,7 @@ import {
   FormControl,
   InputLabel,
   Grid,
+  Alert,
   Paper,
   Button,
   TextField,
@@ -54,8 +55,31 @@ const NodeParameterTable = () => {
   const [isRestarting, setIsRestarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
   const [restartButtonClicked] = useState(false);
+  const [ModbusSuccessMessage, setModbusSuccessMessage] = useState('');
+  const [SPBSuccessMessage, setSPBSuccessMessage] = useState('');
+  const [NodeAttributeSuccessMessage, setNodeAttributeSuccessMessage] = useState('');
+  const [MqttSuccessMessage, setMqttSuccessMessage] = useState('');
+  const [ServiceStartSuccessMessage, setServiceStartSuccessMessage] = useState('');
+  const [ServiceStopSuccessMessage, setServiceStopSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
+  const clearMessagesAfterDelay = () => {
+    setTimeout(() => {
+      setModbusSuccessMessage('');
+      setSPBSuccessMessage('');
+      setNodeAttributeSuccessMessage('');
+      setMqttSuccessMessage('');
+      setServiceStartSuccessMessage('');
+      setServiceStopSuccessMessage('');
+      setErrorMessage('');
+      setSuccessMessage('');
+    }, 5000);
+  };
 
+  useEffect(() => {
+    clearMessagesAfterDelay();
+  }, [ModbusSuccessMessage, SPBSuccessMessage, NodeAttributeSuccessMessage, MqttSuccessMessage, ServiceStartSuccessMessage, ServiceStopSuccessMessage, errorMessage, successMessage]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,7 +167,7 @@ const NodeParameterTable = () => {
         group_id: updatedGroupId,
       },
     };
-  
+
     try {
       const response = await fetch(`${baseUrl}3`, {
         method: 'PUT',
@@ -152,40 +176,26 @@ const NodeParameterTable = () => {
         },
         body: JSON.stringify(updatedData),
       });
-  
+
       if (response.ok) {
-        console.log('SPB Parameter updated successfully.');
-  
-        // Update local state with the new values
-        setData(prevData => {
-          const updatedNodeParameters = prevData.node_parameters.map(param => {
-            if (param.name === 'spb_parameter') {
-              return {
-                ...param,
-                value: {
-                  edge_node_id: updatedEdgeNodeId,
-                  group_id: updatedGroupId,
-                },
-              };
-            }
-            return param;
-          });
-  
-          return {
-            ...prevData,
-            node_parameters: updatedNodeParameters,
-          };
-        });
+        setSPBSuccessMessage('SPB Parameter updated successfully.');
+        setData((prevData) => ({
+          ...prevData,
+          node_parameters: prevData.node_parameters.map((param) => (
+            param.name === 'spb_parameter' ?
+              { ...param, value: { edge_node_id: updatedEdgeNodeId, group_id: updatedGroupId } }
+              : param
+          )),
+        }));
       } else {
-        console.error('Failed to update SPB Parameter:', response.statusText);
+        setErrorMessage(`Failed to update SPB Parameter: ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error updating SPB Parameter:', error);
+      setErrorMessage(`Error updating SPB Parameter: ${error}`);
     }
-  
+
     handleUpdateFormClose();
   };
-
 
   // Add this function to handle the change in form data
   const handleFormDataChange = (index, key, value) => {
@@ -241,55 +251,37 @@ const NodeParameterTable = () => {
 
   const handleAddNodeAttributeSubmit = async () => {
     try {
-      // Create a list of new attributes from the formDataList
-      const newAttributes = formDataList.map(formData => ({
-        name: formData.name,
-        value: formData.value,
-      }));
-
-      // Send a POST request to create or append new node attributes
+      const newAttributes = formDataList.map(formData => ({ name: formData.name, value: formData.value }));
       const response = await fetch(`${baseUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: 'node_attributes', // Assuming the name is 'node_attributes'
-          value: newAttributes,     // Use the list of new attributes
+          name: 'node_attributes',
+          value: newAttributes,
         }),
       });
 
       if (response.ok) {
-        console.log('Node Attributes added successfully.');
-
-        // Update local state with the new attributes
-        setData((prevData) => {
-          const updatedNodeParameters = prevData.node_parameters.map((param) => {
-            if (param.name === 'node_attributes') {
-              return {
-                ...param,
-                value: [...(param.value || []), ...newAttributes],
-              };
-            }
-            return param;
-          });
-
-          return {
-            ...prevData,
-            node_parameters: updatedNodeParameters,
-          };
-        });
-
-        // Clear the formDataList after successful submission
+        setNodeAttributeSuccessMessage('Node Attributes added successfully.');
+        setData((prevData) => ({
+          ...prevData,
+          node_parameters: prevData.node_parameters.map((param) => (
+            param.name === 'node_attributes' ?
+              { ...param, value: [...(param.value || []), ...newAttributes] }
+              : param
+          )),
+        }));
         setFormDataList([]);
       } else {
-        console.error('Failed to add Node Attributes:', response.statusText);
+        setErrorMessage(`Failed to add Node Attributes: ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error adding Node Attributes:', error);
+      setErrorMessage(`Error adding Node Attributes: ${error}`);
     }
 
-    handleUpdateFormClose(); // Close the form after submission
+    handleUpdateFormClose();
   };
 
 
@@ -326,12 +318,12 @@ const NodeParameterTable = () => {
       });
   
       if (response.ok) {
-        console.log('Node Attribute updated successfully.');
+        setNodeAttributeSuccessMessage('Node Attribute updated successfully.');
       } else {
-        console.error('Failed to update Node Attribute:', response.statusText);
+        setErrorMessage(`Failed to update Node Attribute: ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error updating Node Attribute:', error);
+      setErrorMessage(`Error updating Node Attribute:  ${error}`);
     }
   
     handleUpdateFormClose();
@@ -345,7 +337,7 @@ const NodeParameterTable = () => {
         broker_port: updatedBrokerPort,
       },
     };
-  
+
     try {
       const response = await fetch(`${baseUrl}2`, {
         method: 'PUT',
@@ -354,44 +346,30 @@ const NodeParameterTable = () => {
         },
         body: JSON.stringify(updatedData),
       });
-  
+
       if (response.ok) {
-        console.log('Mqtt updated successfully.');
-  
-        // Update local state with the new values
-        setData(prevData => {
-          const updatedNodeParameters = prevData.node_parameters.map(param => {
-            if (param.name === 'mqtt') {
-              return {
-                ...param,
-                value: {
-                  broker_host: updatedBrokerHost,
-                  broker_port: updatedBrokerPort,
-                },
-              };
-            }
-            return param;
-          });
-  
-          return {
-            ...prevData,
-            node_parameters: updatedNodeParameters,
-          };
-        });
+        setMqttSuccessMessage('Mqtt updated successfully.');
+        setData((prevData) => ({
+          ...prevData,
+          node_parameters: prevData.node_parameters.map((param) => (
+            param.name === 'mqtt' ?
+              { ...param, value: { broker_host: updatedBrokerHost, broker_port: updatedBrokerPort } }
+              : param
+          )),
+        }));
       } else {
-        console.error('Failed to update Mqtt:', response.statusText);
+        setErrorMessage(`Failed to update Mqtt: ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error updating Mqtt:', error);
+      setErrorMessage(`Error updating Mqtt: ${error}`);
     }
-  
+
     handleUpdateFormClose();
   };
 
-  const handleModbusChange = async (paramName, value) => {    
+  const handleModbusChange = async (paramName, value) => {
     try {
-      // Make a PUT request to update the backend
-      const response = await fetch('http://localhost:5000/node-parameter/1', {
+      const response = await fetch(`${baseUrl}1`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -400,22 +378,21 @@ const NodeParameterTable = () => {
           modbus: { ...selectedModbus, [paramName]: value },
         }),
       });
-         
+
       if (response.ok) {
-        console.log('Modbus updated successfully.');
-  
-        // Update the selectedModbus state with the new parity value
+        setModbusSuccessMessage('Modbus updated successfully.');
         setSelectedModbus((prevState) => ({
           ...prevState,
           [paramName]: value,
         }));
       } else {
-        console.error('Failed to update Modbus:', response.statusText);
+        setErrorMessage(`Failed to update Modbus: ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error updating Modbus:', error);
+      setErrorMessage(`Error updating Modbus: ${error}`);
     }
   };
+
   
   const handleRestart = () => {
     // Add logic for restarting here
@@ -431,14 +408,14 @@ const NodeParameterTable = () => {
     })
       .then((response) => {
         if (response.ok) {
-          console.log('Service is restarting.');
+          setServiceStartSuccessMessage('Service is restarting.');
           // Add any additional logic if needed
         } else {
-          console.error('Failed to restart service:', response.statusText);
+          setErrorMessage(`Failed to restart service: ${response.statusText}`);
         }
       })
       .catch((error) => {
-        console.error('Error restarting service:', error);
+        setErrorMessage(`Error restarting service: ${error}`);
       })
       .finally(() => {
         setIsRestarting(false);
@@ -458,24 +435,59 @@ const NodeParameterTable = () => {
     })
       .then((response) => {
         if (response.ok) {
-          console.log('Service is stopped.');
+          setServiceStopSuccessMessage('Service is stopped.');
           // Add any additional logic if needed
         } else {
-          console.error('Failed to stop service:', response.statusText);
+          setErrorMessage(`Failed to stop service: ${response.statusText}`);
         }
       })
       .catch((error) => {
-        console.error('Error stopping service:', error);
+        setErrorMessage(`Error stopping service: ${error}`);
       })
       .finally(() => {
         setIsStopping(false);
       });
   };
 
+  // Define SuccessMessage and ErrorMessage components
+  const SuccessMessage = ({ message}) => (
+    <Alert severity="success" >
+      {message}
+    </Alert>
+  );
+
+  const ErrorMessage = ({ message}) => (
+    <Alert severity="error">
+      {message}
+    </Alert>
+  );
   
   return (
     <Grid container spacing={1}>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
+      {ServiceStartSuccessMessage && (
+        <SuccessMessage message={ServiceStartSuccessMessage} onClose={() => setServiceStartSuccessMessage('')}/>
+      )}
+      {ServiceStopSuccessMessage && (
+        <SuccessMessage message={ServiceStopSuccessMessage} onClose={() => setServiceStopSuccessMessage('')}/>
+      )}
+      {NodeAttributeSuccessMessage && (
+        <SuccessMessage message={NodeAttributeSuccessMessage} onClose={() => setNodeAttributeSuccessMessage('')}/>
+      )}
+      {SPBSuccessMessage && (
+        <SuccessMessage message={SPBSuccessMessage} onClose={() => setSPBSuccessMessage('')}/>  
+      )}
+      {MqttSuccessMessage && (
+        <SuccessMessage message={MqttSuccessMessage} onClose={() => setMqttSuccessMessage('')}/>
+      )}
+      {ModbusSuccessMessage && (
+        <SuccessMessage message={ModbusSuccessMessage} onClose={() => setModbusSuccessMessage('')}/>
+      )}
+      {errorMessage && (
+        <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
+      )}
+      </Grid>
+      <Grid item xs={6}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
           <Button onClick={handleRestart} disabled={isRestarting || restartButtonClicked} variant="contained" color="primary">
             Restart
@@ -611,7 +623,6 @@ const NodeParameterTable = () => {
         </Paper>
       </Grid>
 
-
       {/* Update form for SPB Parameter */}
       <Dialog open={updateSpbParameterFormOpen} onClose={handleUpdateFormClose}>
         <DialogTitle>Update SPB Parameter</DialogTitle>
@@ -683,7 +694,6 @@ const NodeParameterTable = () => {
                   value={formData.name}
                   style={{ marginTop: '5px' }}
                   onChange={(e) => handleFormDataChange(index, 'name', e.target.value)}
-                  // fullWidth
                 />
               </Grid>
               <Grid item xs={4}>
@@ -692,7 +702,6 @@ const NodeParameterTable = () => {
                   value={formData.value}
                   style={{ marginTop: '5px' }}
                   onChange={(e) => handleFormDataChange(index, 'value', e.target.value)}
-                  // fullWidth
                 />
               </Grid>
               <Grid item xs={2}>
@@ -730,7 +739,7 @@ const NodeParameterTable = () => {
             value={updatedBrokerHost}
             onChange={(e) => setUpdatedBrokerHost(e.target.value)}
             fullWidth
-            style={{ marginBottom: '16px', marginTop: '5px' }} // Adjust the value based on your preference
+            style={{ marginBottom: '16px', marginTop: '5px' }}
           />
           <TextField
             label="Broker Port"
