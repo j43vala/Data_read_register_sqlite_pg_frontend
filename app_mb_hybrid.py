@@ -93,7 +93,11 @@ from spb import init_spb_device,connect_spb_node, connect_spb_device, init_spb_e
 
 def main():
     last_check_time = datetime.datetime.now()
-    retention_interval = 60  # Set the retention interval in seconds
+    check_frequency = datetime.datetime.utcnow() - datetime.timedelta(days = check_frequency_days, hours = check_frequency_hours, minutes = check_frequency_minutes, seconds = check_frequency_seconds)
+    check_frequency_days = config.get("retention_parameter").get("check_frequency").get("days")
+    check_frequency_hours =config.get("retention_parameter").get("check_frequency").get("hours")
+    check_frequency_minutes =config.get("retention_parameter").get("check_frequency").get("minutes")
+    check_frequency_seconds = config.get("retention_parameter").get("check_frequency").get("seconds")
 
     try:
         # check if the configuration is available or not
@@ -132,10 +136,11 @@ def main():
                 init_spb_device(group_id, edge_node_id, device_dict)
                 connect_spb_device(device_dict, broker , port )
 
-            
+            time_sleep_minutes =config.get("retention_parameter").get("time_delay").get("minutes")
+            time_sleep_seconds = config.get("retention_parameter").get("time_delay").get("seconds")
 
             while True:
-                time.sleep(1.5)
+                time.sleep(minutes = time_sleep_minutes, seconds = time_sleep_seconds) 
 
                 for device_dict in devices:
                     model = device_dict["model"]
@@ -177,11 +182,17 @@ def main():
                         print('success: ', success)
 
                         # Data retention logic based on the success of publishing
-                        retention_period = datetime.datetime.utcnow() - datetime.timedelta(minutes=1)
+
+                        retention_period = datetime.datetime.utcnow() - datetime.timedelta(days = success_retention_days, hours = success_retention_hours, minutes = success_retention_minutes, seconds = success_retention_seconds)
+                        success_retention_days = config.get("retention_parameter").get("success_retention").get("days")
+                        success_retention_hours =config.get("retention_parameter").get("success_retention").get("hours")
+                        success_retention_minutes =config.get("retention_parameter").get("success_retention").get("minutes")
+                        success_retention_seconds = config.get("retention_parameter").get("success_retention").get("seconds")
+
                         elapsed_time = datetime.datetime.now() - last_check_time
 
                         if success:
-                            if elapsed_time.total_seconds() >= retention_interval:
+                            if elapsed_time.total_seconds() >= check_frequency:
                                 last_check_time = datetime.datetime.now()
                                 print("Check 1 min...")
 
@@ -196,9 +207,14 @@ def main():
                                 device_name = device_dict["device_name"]
                                 print(f"Record committed for device: '{device_name}'\n\n")
                         else:
-                            retention_period_failure = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
+                            retention_period_failure = datetime.datetime.utcnow() - datetime.timedelta(days = failure_retention_days, hours = failure_retention_hours, minutes = failure_retention_minutes, seconds = failure_retention_seconds)
+                            failure_retention_days = config.get("retention_parameter").get("failure_retention").get("days")
+                            failure_retention_hours =config.get("retention_parameter").get("failure_retention").get("hours")
+                            failure_retention_minutes =config.get("retention_parameter").get("failure_retention").get("minutes")
+                            failure_retention_seconds = config.get("retention_parameter").get("failure_retention").get("seconds")
+
                             elapsed_time = datetime.datetime.now() - last_check_time
-                            if elapsed_time.total_seconds() >= retention_interval:
+                            if elapsed_time.total_seconds() >= check_frequency:
                                 last_check_time = datetime.datetime.now()
                                 print("Check 2 min for failure case...")
 
