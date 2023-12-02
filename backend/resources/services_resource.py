@@ -10,7 +10,8 @@ class RestartService(Resource):
     def get(self):
         try:
             # Run 'systemctl daemon-reload' to reload units
-            subprocess.run(['sudo', 'systemctl', 'restart', 'app_mb_hybrid.service'], check=True)
+            # subprocess.run(['sudo', 'systemctl', 'restart', 'app_mb_hybrid.service'], check=True)
+            subprocess.run(['sc', 'restart', 'app_mb_hybrid'], check=True)
             return 'Services restarted successfully'
         except subprocess.CalledProcessError as e:
             return f'Error restarting services: {str(e)}'
@@ -20,7 +21,8 @@ class RestartService(Resource):
 class StopService(Resource):
     def get(self):
         try:
-            subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
+            # subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
+            subprocess.run(['sc', 'stop', 'app_mb_hybrid'], check=True)
             return 'Services stopped successfully'
         except subprocess.CalledProcessError as e:
             return f'Error stopping services: {str(e)}'

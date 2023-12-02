@@ -9,7 +9,7 @@ from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
-from spb import init_spb_device, connect_spb_device
+from spb import init_spb_device, connect_spb_device, init_spb_edge_node
 
 def main():
     last_check_time = datetime.datetime.now()
@@ -42,6 +42,8 @@ def main():
 
             # spb_dev initialized
             success = None  # Initialize success variable for the entire process
+
+            
 
             for device_dict in config["devices"]:
                 init_spb_device(group_name, edge_node_id, device_dict)

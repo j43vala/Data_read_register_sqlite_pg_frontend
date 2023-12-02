@@ -1,11 +1,56 @@
 import time
-from mqtt_spb_wrapper import MqttSpbEntityDevice
+from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
 from config.data_conversion import read_integer, read_double, read_float
 from modbus_final import initialize_modbus_client
-from config import config
 
 
 device_meta = {}
+node_meta = {}
+
+def init_spb_edge_node(group_id, edge_node_id, node_dict):
+    
+    _DEBUG = True  # Enable debug messages
+
+    print("--- Sparkplug B example - End of Node Attribute - Simple")
+
+
+    def callback_command(payload):
+        print("Node Attribute received CMD: %s" % (payload))
+
+
+    def callback_message(topic, payload):
+        print("Node Attribute Received MESSAGE: %s - %s" % (topic, payload))
+    
+    
+    # Create the spB entity object
+   
+    node = MqttSpbEntityEdgeNode(group_id, edge_node_id)
+   
+   
+    node.on_message = callback_message  # Received messages
+    node.on_command = callback_command  # Callback for received commands
+
+    # Set the node Attributes, Data and Commands that will be sent on the DBIRTH message --------------------------
+
+    attributes = node_dict["node_attributes"]
+    for attribute in attributes:
+        node.attribures.set_value(attribute["name"],attribute["value"])
+
+
+    # Commands
+    node.commands.set_value("rebirth", False)
+
+    
+    node_dict["spb_node"] = node
+
+    
+    
+    return node
+
+
+
+
+
 
 
 def init_spb_device(group_name,edge_node_name, device_dict):
@@ -21,14 +66,13 @@ def init_spb_device(group_name,edge_node_name, device_dict):
 
     def callback_message(topic, payload):
         print("Received MESSAGE: %s - %s" % (topic, payload))
-
     
     
     device_name = device_dict.get("device_name")
     # Create the spB entity object
    
     device = MqttSpbEntityDevice(group_name, edge_node_name, device_name, _DEBUG)
-    device.publish_data()
+    # device.publish_data()
 
     device.on_message = callback_message  # Received messages
     device.on_command = callback_command  # Callback for received commands
@@ -52,6 +96,8 @@ def init_spb_device(group_name,edge_node_name, device_dict):
     return device
 
 
+
+
 def connect_spb_device(device_dict, broker , port):
    
     
@@ -67,4 +113,22 @@ def connect_spb_device(device_dict, broker , port):
         print("Error, could not connect spb device to broker...")
 
     device_dict["spb_device_connected"] = _connected
+    return _connected
+
+
+def connect_spb_node(node_dict, broker , port):
+   
+    
+    print("Trying to connect to broker...")
+
+    node = node_dict["spb_node"]
+    _connected = node.connect(broker, port)
+
+    if _connected:
+        # Send birth message
+        node.publish_birth()
+    else:
+        print("Error, could not connect spb node to broker...")
+
+    node_dict["spb_node_connected"] = _connected
     return _connected
