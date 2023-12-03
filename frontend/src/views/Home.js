@@ -49,6 +49,7 @@ const BlogData = [
 const Home = () => {
   return (
     <div>
+      {/* <p>{config}</p> */}
       {/***Top Cards***/}
       {/* <Row>
         <Col sm="6" lg="3">

@@ -20,12 +20,12 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import config from './config';
+// import config from './config';
 
 // import { Replay as ReplayIcon, Stop as StopIcon } from '@mui/icons-material';  
 
 
-const baseUrl = config.backendUrl;
+const baseUrl = process.env.REACT_APP_BASEURL;
 
 const NodeParameterTable = () => {
   const [data, setData] = useState(null);

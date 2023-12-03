@@ -27,7 +27,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit';
 import { makeStyles } from '@material-ui/core/styles';
-import config from './config';
+
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const baseUrl = config.backendUrl;
+const baseUrl = process.env.REACT_APP_BASEURL;
 
 const DeviceParameterTable = () => {
   const classes = useStyles();
