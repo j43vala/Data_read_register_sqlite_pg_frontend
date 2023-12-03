@@ -88,6 +88,8 @@ def load_config_from_db():
         "mqtt": formatted_node_parameters.get("mqtt", {}),
         "spb_parameter": formatted_node_parameters.get("spb_parameter", {}),
         "node_attributes": formatted_node_parameters.get("node_attributes", []),
+        "retention_parameter": formatted_node_parameters.get("retention_parameter", []),
+        "time_delay": formatted_node_parameters.get("time_delay", []),
         "devices": devices_list
     }
 

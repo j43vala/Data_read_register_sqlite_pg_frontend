@@ -15,7 +15,7 @@ node_parameter_fields = ns.model('NodeParameter', {
 def create_default_node_parameters():
     port_options = get_serial_ports()
     if type(port_options) == str:
-        port_options = [""]        
+        port_options = [""]
     # Default values
     default_values = [
         {
@@ -55,6 +55,36 @@ def create_default_node_parameters():
                 # {"name": "description", "value": "plc_Simple EoN Device node"},
                 # {"name": "version", "value": "0.01"}
             ]
+        },
+        {
+            "name": "retention_parameter",
+            "value": {
+                "check_frequency": {
+                    "days": 00,
+                    "hours": 00,
+                    "minutes": 00,
+                    "seconds": 00
+                },
+                "success_retention": {
+                    "days": 00,
+                    "hours": 00,
+                    "minutes": 00,
+                    "seconds": 00
+                },
+                "failure_retention": {
+                    "days": 00,
+                    "hours": 00,
+                    "minutes": 00,
+                    "seconds": 00
+                }
+            }
+        },
+        {
+            "name": "time_delay",
+            "value": {
+                "minutes": 00,
+                "seconds": 00
+            }
         }
     ]
 

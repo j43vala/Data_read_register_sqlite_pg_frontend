@@ -27,6 +27,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit';
 import { makeStyles } from '@material-ui/core/styles';
+import config from './config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const baseUrl = config.backendUrl;
 
 const DeviceParameterTable = () => {
   const classes = useStyles();
@@ -124,7 +126,7 @@ const DeviceParameterTable = () => {
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const response = await fetch('http://localhost:5000/devices/');
+        const response = await fetch(`${baseUrl}/devices/`);
         const data = await response.json();
 
         if (Array.isArray(data.devices)) {
@@ -145,7 +147,7 @@ const DeviceParameterTable = () => {
     try {
       console.log('Fetching device details for deviceId:', deviceId);
   
-      const response = await fetch(`http://localhost:5000/devices/${encodeURIComponent(deviceId)}`);
+      const response = await fetch(`${baseUrl}/devices/${encodeURIComponent(deviceId)}`);
       const data = await response.json();
   
       setOpen(true);
@@ -223,7 +225,7 @@ const DeviceParameterTable = () => {
     };
   
     try {
-      const response = await fetch(`http://localhost:5000/parameter/devices/${selectedDevice}/parameter/${selectedParameter.id}`, {
+      const response = await fetch(`${baseUrl}/parameter/devices/${selectedDevice}/parameter/${selectedParameter.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +255,7 @@ const DeviceParameterTable = () => {
 
     try {
       if (selectedDevice && parameter && parameter.id) {
-        const response = await fetch(`http://localhost:5000/parameter/devices/${selectedDevice}/parameter/${parameter.id}`, {
+        const response = await fetch(`${baseUrl}/parameter/devices/${selectedDevice}/parameter/${parameter.id}`, {
           method: 'DELETE',
         });
 
@@ -265,7 +267,7 @@ const DeviceParameterTable = () => {
         setErrorMessage('');
 
         // Update the device list
-        const deviceResponse = await fetch(`http://localhost:5000/devices/${selectedDevice}`);
+        const deviceResponse = await fetch(`${baseUrl}/devices/${selectedDevice}`);
         const deviceData = await deviceResponse.json();
 
         if (deviceData.device && Array.isArray(deviceData.device.parameters)) {
@@ -275,7 +277,7 @@ const DeviceParameterTable = () => {
         }
 
         // Fetch devices to update the list
-        const devicesResponse = await fetch('http://localhost:5000/devices/');
+        const devicesResponse = await fetch(`${baseUrl}/devices/`);
         const devicesData = await devicesResponse.json();
 
         if (Array.isArray(devicesData.devices)) {
@@ -304,7 +306,7 @@ const DeviceParameterTable = () => {
       const newDevice = { name: deviceName, slave_id: slaveId };
 
       try {
-        const response = await fetch('http://localhost:5000/devices/', {
+        const response = await fetch(`${baseUrl}/devices/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -321,7 +323,7 @@ const DeviceParameterTable = () => {
         setIsAddDeviceFormOpen(false);
 
         // Fetch the updated list of devices
-        const devicesResponse = await fetch('http://localhost:5000/devices/');
+        const devicesResponse = await fetch(`${baseUrl}/devices/`);
         const devicesData = await devicesResponse.json();
 
         if (Array.isArray(devicesData.devices)) {
@@ -348,7 +350,7 @@ const DeviceParameterTable = () => {
     try {
       const updatedDevice = { name: updatedDeviceName, slave_id: updatedSlaveId };
   
-      await fetch(`http://localhost:5000/devices/${selectedDevice.id}`, {
+      await fetch(`${baseUrl}/devices/${selectedDevice.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -357,7 +359,7 @@ const DeviceParameterTable = () => {
       });
   
       // Fetch the updated list of devices
-      const devicesResponse = await fetch('http://localhost:5000/devices/');
+      const devicesResponse = await fetch(`${baseUrl}/devices/`);
       const devicesData = await devicesResponse.json();
   
       if (Array.isArray(devicesData.devices)) {
@@ -382,12 +384,12 @@ const DeviceParameterTable = () => {
   const handleDeleteDevice = async (deviceId) => {
     try {  
       // Send DELETE request to the server
-      await fetch(`http://localhost:5000/devices/${deviceId}`, {
+      await fetch(`${baseUrl}/devices/${deviceId}`, {
         method: 'DELETE',
       });
   
       // Fetch the updated list of devices
-      const devicesResponse = await fetch('http://localhost:5000/devices/');
+      const devicesResponse = await fetch(`${baseUrl}/devices/`);
       const devicesData = await devicesResponse.json();
   
       if (Array.isArray(devicesData.devices)) {
@@ -582,7 +584,7 @@ const DeviceParameterTable = () => {
       })),
     };
   
-    fetch(`http://localhost:5000/parameter/devices/${selectedDevice}/parameter`, {
+    fetch(`${baseUrl}/parameter/devices/${selectedDevice}/parameter`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -684,7 +686,7 @@ const DeviceParameterTable = () => {
       })),
     };
   
-    fetch(`http://localhost:5000/attribute/devices/${selectedDevice}/attribute`, {
+    fetch(`${baseUrl}/attribute/devices/${selectedDevice}/attribute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -753,7 +755,7 @@ const DeviceParameterTable = () => {
     };
   
     try {
-      const response = await fetch(`http://localhost:5000/attribute/devices/${selectedDevice}/attribute/${selectedAttribute.id}`, {
+      const response = await fetch(`${baseUrl}/attribute/devices/${selectedDevice}/attribute/${selectedAttribute.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -784,7 +786,7 @@ const DeviceParameterTable = () => {
 
     try {
       if (selectedDevice && attribute && attribute.id) {
-        const response = await fetch(`http://localhost:5000/attribute/devices/${selectedDevice}/attribute/${attribute.id}`, {
+        const response = await fetch(`${baseUrl}/attribute/devices/${selectedDevice}/attribute/${attribute.id}`, {
           method: 'DELETE',
         });
 
@@ -796,7 +798,7 @@ const DeviceParameterTable = () => {
         setErrorMessage('');
 
         // Update the device list
-        const deviceResponse = await fetch(`http://localhost:5000/devices/${selectedDevice}`);
+        const deviceResponse = await fetch(`${baseUrl}/devices/${selectedDevice}`);
         const deviceData = await deviceResponse.json();
 
         if (deviceData.device && Array.isArray(deviceData.device.attributes)) {
@@ -806,7 +808,7 @@ const DeviceParameterTable = () => {
         }
 
         // Fetch devices to update the list
-        const devicesResponse = await fetch('http://localhost:5000/devices/');
+        const devicesResponse = await fetch(`${baseUrl}/devices/`);
         const devicesData = await devicesResponse.json();
 
         if (Array.isArray(devicesData.devices)) {

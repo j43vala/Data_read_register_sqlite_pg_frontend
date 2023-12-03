@@ -20,11 +20,12 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import config from './config';
 
 // import { Replay as ReplayIcon, Stop as StopIcon } from '@mui/icons-material';  
 
 
-const baseUrl = 'http://localhost:5000/node-parameter/';
+const baseUrl = config.backendUrl;
 
 const NodeParameterTable = () => {
   const [data, setData] = useState(null);
@@ -61,8 +62,21 @@ const NodeParameterTable = () => {
   const [MqttSuccessMessage, setMqttSuccessMessage] = useState('');
   const [ServiceStartSuccessMessage, setServiceStartSuccessMessage] = useState('');
   const [ServiceStopSuccessMessage, setServiceStopSuccessMessage] = useState('');
+  const [RetentionParameterSuccessMessage, setRetentionParameterSuccessMessage] = useState('');
+  const [TimeDelaySuccessMessage, setTimeDelaySuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [retentionParameters, setRetentionParameters] = useState({
+    checkFrequency: { days: '', hours: '', minutes: '', seconds: '' },
+    successRetention: { days: '', hours: '', minutes: '', seconds: '' },
+    failureRetention: { days: '', hours: '', minutes: '', seconds: '' },
+  });
+  const [timeDelayParameters, setTimeDelayParameters] = useState({
+    minutes: '',
+    seconds: '',
+  });
+  
+  
 
   const clearMessagesAfterDelay = () => {
     setTimeout(() => {
@@ -72,6 +86,8 @@ const NodeParameterTable = () => {
       setMqttSuccessMessage('');
       setServiceStartSuccessMessage('');
       setServiceStopSuccessMessage('');
+      setRetentionParameterSuccessMessage('');
+      setTimeDelaySuccessMessage('');
       setErrorMessage('');
       setSuccessMessage('');
     }, 5000);
@@ -79,15 +95,15 @@ const NodeParameterTable = () => {
 
   useEffect(() => {
     clearMessagesAfterDelay();
-  }, [ModbusSuccessMessage, SPBSuccessMessage, NodeAttributeSuccessMessage, MqttSuccessMessage, ServiceStartSuccessMessage, ServiceStopSuccessMessage, errorMessage, successMessage]);
+  }, [ModbusSuccessMessage, SPBSuccessMessage, NodeAttributeSuccessMessage, MqttSuccessMessage, ServiceStartSuccessMessage, ServiceStopSuccessMessage, RetentionParameterSuccessMessage, TimeDelaySuccessMessage, errorMessage, successMessage]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${baseUrl}`);
+        const response = await fetch(`${baseUrl}/node-parameter`);
         const responseData = await response.json();
         setData(responseData);
-
+  
         // Initialize selectedModbus state with modbus values
         if (responseData.node_parameters) {
           const modbusValues = responseData.node_parameters.find(param => param.name === 'modbus')?.value;
@@ -95,14 +111,27 @@ const NodeParameterTable = () => {
           if (modbusValues) {
             setSelectedModbus(modbusValues);
           }
+  
+          // Initialize retention parameters
+          const retentionValues = responseData.node_parameters.find(param => param.name === 'retention_parameter')?.value;
+          if (retentionValues) {
+            setRetentionParameters(retentionValues);
+          }
+
+          const timeDelayValues = responseData.node_parameters.find(param => param.name === 'time_delay')?.value;
+          if (timeDelayValues) {
+            setTimeDelayParameters(timeDelayValues);
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-
+  
     fetchData();
   }, []);
+  
+  
 
   if (!data) {
     return <p>Loading...</p>;
@@ -169,7 +198,7 @@ const NodeParameterTable = () => {
     };
 
     try {
-      const response = await fetch(`${baseUrl}3`, {
+      const response = await fetch(`${baseUrl}/node-parameter/3`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +281,7 @@ const NodeParameterTable = () => {
   const handleAddNodeAttributeSubmit = async () => {
     try {
       const newAttributes = formDataList.map(formData => ({ name: formData.name, value: formData.value }));
-      const response = await fetch(`${baseUrl}`, {
+      const response = await fetch(`${baseUrl}/node-parameter/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -309,7 +338,7 @@ const NodeParameterTable = () => {
     };
   
     try {
-      const response = await fetch(`${baseUrl}4`, {
+      const response = await fetch(`${baseUrl}/node-parameter/4`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -339,7 +368,7 @@ const NodeParameterTable = () => {
     };
 
     try {
-      const response = await fetch(`${baseUrl}2`, {
+      const response = await fetch(`${baseUrl}/node-parameter/2`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -369,7 +398,7 @@ const NodeParameterTable = () => {
 
   const handleModbusChange = async (paramName, value) => {
     try {
-      const response = await fetch(`${baseUrl}1`, {
+      const response = await fetch(`${baseUrl}/node-parameter/1`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -400,7 +429,7 @@ const NodeParameterTable = () => {
   
     // Perform your restart actions, then set isRestarting to false
     // For example, you can make a fetch request to a restart endpoint
-    fetch('http://localhost:5000/service/restart-services', {
+    fetch(`${baseUrl}/service/restart-services`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -427,7 +456,7 @@ const NodeParameterTable = () => {
     // Add logic for stopping here
     setIsStopping(true);
   
-    fetch('http://localhost:5000/service/stop-services', {
+    fetch(`${baseUrl}/service/stop-services`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -462,6 +491,85 @@ const NodeParameterTable = () => {
     </Alert>
   );
   
+  const handleRetentionParameterChange = (param, unit, value) => {
+    // Parse the input value as an integer
+    const integerValue = parseInt(value, 10);
+  
+    // Check if the parsed value is a valid integer
+    if (!isNaN(integerValue)) {
+      setRetentionParameters((prevParameters) => ({
+        ...prevParameters,
+        [param]: { ...prevParameters[param], [unit]: integerValue },
+      }));
+    }
+    // You may add an else statement here to handle invalid input if needed
+  };
+  
+  
+  const handleRetentionParameterSubmit = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/node-parameter/5`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          retention_parameter: retentionParameters,
+        }),
+      });
+  
+      if (response.ok) {
+        setRetentionParameterSuccessMessage('Retention Parameters updated successfully.');
+      } else {
+        setErrorMessage(`Failed to update Retention Parameters: ${response.statusText}`);
+      }
+    } catch (error) {
+      setErrorMessage(`Error updating Retention Parameters: ${error}`);
+    }
+  };
+
+  const handleTimeDelayChange = (unit, value) => {
+    // Parse the input value as an integer
+    const integerValue = parseInt(value, 10);
+  
+    // Check if the parsed value is a valid integer
+    if (!isNaN(integerValue)) {
+      setTimeDelayParameters((prevParameters) => ({
+        ...prevParameters,
+        [unit]: integerValue,
+      }));
+    }
+    // You may add an else statement here to handle invalid input if needed
+  };
+  
+
+  const handleTimeDelayParameterSubmit = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/node-parameter/6`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          time_delay: timeDelayParameters,
+        }),
+      });
+
+      if (response.ok) {
+        // Display success message or handle as needed
+        setTimeDelaySuccessMessage('Time Delay updated successfully.');
+      } else {
+        // Display error message or handle as needed
+        setErrorMessage(`Failed to update Time Delay: ${response.statusText}`);
+      }
+    } catch (error) {
+      // Display error message or handle as needed
+      setErrorMessage(`Error updating Time Delay: ${error}`);
+    }
+  };
+
+  
+
   return (
     <Grid container spacing={1}>
       <Grid item xs={6}>
@@ -482,6 +590,12 @@ const NodeParameterTable = () => {
       )}
       {ModbusSuccessMessage && (
         <SuccessMessage message={ModbusSuccessMessage} onClose={() => setModbusSuccessMessage('')}/>
+      )}
+      {RetentionParameterSuccessMessage && (
+        <SuccessMessage message={RetentionParameterSuccessMessage} onClose={() => setRetentionParameterSuccessMessage('')}/>
+      )}
+      {TimeDelaySuccessMessage && (
+        <SuccessMessage message={TimeDelaySuccessMessage} onClose={() => setTimeDelaySuccessMessage('')}/>
       )}
       {errorMessage && (
         <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
@@ -573,7 +687,7 @@ const NodeParameterTable = () => {
         </Paper>
       </Grid>
 
-      <Grid item xs={9}>
+      <Grid item xs={12}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
           <Typography variant="h6">Modbus Parameters</Typography>
           <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
@@ -620,6 +734,61 @@ const NodeParameterTable = () => {
               </div>
             ))}
           </div>
+        </Paper>
+      </Grid>
+
+      <Grid item xs={4}>
+        <Paper style={{ padding: '20px', marginBottom: '20px' }}>
+          <Typography variant="h6">Retention Parameters</Typography>
+          <form>
+            {['check_frequency', 'success_retention', 'failure_retention'].map((param, index) => (
+              <div key={index} style={{ marginBottom: '20px' }}>
+                <Typography variant="subtitle1">{param.replace('_', ' ')}</Typography>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                  {['days', 'hours', 'minutes', 'seconds'].map((unit, unitIndex) => (
+                    <TextField
+                      key={unitIndex}
+                      label={unit.charAt(0).toUpperCase() + unit.slice(1)}
+                      type="number"
+                      value={retentionParameters[param][unit]}
+                      onChange={(e) => handleRetentionParameterChange(param, unit, e.target.value)}
+                      fullWidth
+                      style={{ marginRight: '10px' }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+            <Button onClick={handleRetentionParameterSubmit} color="primary">
+              Submit
+            </Button>
+          </form>
+        </Paper>
+      </Grid>
+
+      <Grid item xs={4}>
+        <Paper style={{ padding: '20px', marginBottom: '20px' }}>
+          <Typography variant="h6">Time Delay Parameters</Typography>
+          <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+            <TextField
+              label="Minutes"
+              type="number"
+              value={timeDelayParameters.minutes}
+              onChange={(e) => setTimeDelayParameters(prev => ({ ...prev, minutes: parseInt(e.target.value) || 0 }))}
+              fullWidth
+              style={{ marginRight: '20px' }}
+            />
+            <TextField
+              label="Seconds"
+              type="number"
+              value={timeDelayParameters.seconds}
+              onChange={(e) => setTimeDelayParameters(prev => ({ ...prev, seconds: parseInt(e.target.value) || 0 }))}
+              fullWidth
+            />
+          </div>
+          <Button onClick={handleTimeDelayParameterSubmit} color="primary">
+            Submit
+          </Button>
         </Paper>
       </Grid>
 
