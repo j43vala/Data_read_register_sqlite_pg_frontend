@@ -23,7 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 // import { Replay as ReplayIcon, Stop as StopIcon } from '@mui/icons-material';  
 
 
-// const baseUrl = process.env.REACT_APP_BASEURL;
+const baseUrl = process.env.REACT_APP_BASEURL;
 
 const NodeParameterTable = () => {
   const [data, setData] = useState(null);
@@ -98,7 +98,7 @@ const NodeParameterTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/node-parameter/`);
+        const response = await fetch(`${baseUrl}/node-parameter/`);
         const responseData = await response.json();
         setData(responseData);
   
@@ -196,7 +196,7 @@ const NodeParameterTable = () => {
     };
 
     try {
-      const response = await fetch(`/node-parameter/3`, {
+      const response = await fetch(`${baseUrl}/node-parameter/3`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -279,7 +279,7 @@ const NodeParameterTable = () => {
   const handleAddNodeAttributeSubmit = async () => {
     try {
       const newAttributes = formDataList.map(formData => ({ name: formData.name, value: formData.value }));
-      const response = await fetch(`/node-parameter/`, {
+      const response = await fetch(`${baseUrl}/node-parameter/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -336,7 +336,7 @@ const NodeParameterTable = () => {
     };
   
     try {
-      const response = await fetch(`/node-parameter/4`, {
+      const response = await fetch(`${baseUrl}/node-parameter/4`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -366,7 +366,7 @@ const NodeParameterTable = () => {
     };
 
     try {
-      const response = await fetch(`/node-parameter/2`, {
+      const response = await fetch(`${baseUrl}/node-parameter/2`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -396,7 +396,7 @@ const NodeParameterTable = () => {
 
   const handleModbusChange = async (paramName, value) => {
     try {
-      const response = await fetch(`/node-parameter/1`, {
+      const response = await fetch(`${baseUrl}/node-parameter/1`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -427,7 +427,7 @@ const NodeParameterTable = () => {
   
     // Perform your restart actions, then set isRestarting to false
     // For example, you can make a fetch request to a restart endpoint
-    fetch(`/service/restart-services`, {
+    fetch(`${baseUrl}/service/restart-services`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -454,7 +454,7 @@ const NodeParameterTable = () => {
     // Add logic for stopping here
     setIsStopping(true);
   
-    fetch(`/service/stop-services`, {
+    fetch(`${baseUrl}/service/stop-services`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -506,7 +506,7 @@ const NodeParameterTable = () => {
   
   const handleRetentionParameterSubmit = async () => {
     try {
-      const response = await fetch(`/node-parameter/5`, {
+      const response = await fetch(`${baseUrl}/node-parameter/5`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -543,7 +543,7 @@ const NodeParameterTable = () => {
 
   const handleTimeDelayParameterSubmit = async () => {
     try {
-      const response = await fetch(`/node-parameter/6`, {
+      const response = await fetch(`${baseUrl}/node-parameter/6`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
