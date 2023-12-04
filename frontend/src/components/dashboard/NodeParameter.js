@@ -98,7 +98,7 @@ const NodeParameterTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/node-parameter`);
+        const response = await fetch(`/node-parameter/`);
         const responseData = await response.json();
         setData(responseData);
   
