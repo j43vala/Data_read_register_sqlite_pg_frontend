@@ -45,37 +45,37 @@
       "parameters": [
         {
           "address": 100,
-          "parameter_name": "Watts total",
+          "parameter_name": "Watts_total",
           "data_type": "Float"
         },
         {
           "address": 108,
-          "parameter_name": "Var total",
+          "parameter_name": "Var_total",
           "data_type": "Float"
         },
         {
           "address": 116,
-          "parameter_name": "PF ave",
+          "parameter_name": "PF_ave",
           "data_type": "Float"
         },
         {
           "address": 124,
-          "parameter_name": "VA total",
+          "parameter_name": "VA_total",
           "data_type": "Float"
         },
         {
           "address": 132,
-          "parameter_name": "VLL ave",
+          "parameter_name": "VLL_ave",
           "data_type": "Float"
         },
         {
           "address": 140,
-          "parameter_name": "VLN ave",
+          "parameter_name": "VLN_ave",
           "data_type": "Float"
         },
         {
           "address": 148,
-          "parameter_name": "AVG current",
+          "parameter_name": "AVG_current",
           "data_type": "Float"
         },
         {
@@ -85,42 +85,42 @@
         },
         {
           "address": 158,
-          "parameter_name": "Wh received",
+          "parameter_name": "Wh_received",
           "data_type": "Float"
         },
         {
           "address": 160,
-          "parameter_name": "Vah received",
+          "parameter_name": "Vah_received",
           "data_type": "Float"
         },
         {
           "address": 162,
-          "parameter_name": "VARh Ind. Received",
+          "parameter_name": "VARh_Ind._Received",
           "data_type": "Float"
         },
         {
           "address": 164,
-          "parameter_name": "VARh Cap. received",
+          "parameter_name": "VARh_Cap._received",
           "data_type": "Float"
         },
         {
           "address": 166,
-          "parameter_name": " Wh Delive",
+          "parameter_name": " Wh_Delive",
           "data_type": "Float"
         },
         {
           "address": 168,
-          "parameter_name": "VAh Delivered",
+          "parameter_name": "VAh_Delivered",
           "data_type": "Float"
         },
         {
           "address": 170,
-          "parameter_name": "VARh Ind. delivered",
+          "parameter_name": "VARh_Ind._delivered",
           "data_type": "Float"
         },
         {
           "address": 172,
-          "parameter_name": "7 VARh Cap. delivered",
+          "parameter_name": "VARh_Cap._delivered",
           "data_type": "Float"
         }
       ]
