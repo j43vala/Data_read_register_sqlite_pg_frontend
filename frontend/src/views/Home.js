@@ -9,6 +9,7 @@ import bg1 from "../assets/images/bg/bg1.jpg";
 import bg2 from "../assets/images/bg/bg2.jpg";
 import bg3 from "../assets/images/bg/bg3.jpg";
 import bg4 from "../assets/images/bg/bg4.jpg";
+import RetentionParameterForm from "../components/dashboard/Retention";
 
 // eslint-disable-next-line
 const BlogData = [
@@ -96,6 +97,9 @@ const Home = () => {
         </Col>
         <Col xxl="12">
           <DeviceRegisterTable />
+        </Col>
+        <Col xxl="12">
+          <RetentionParameterForm />
         </Col>
       </Row>
       {/***Table ***/}

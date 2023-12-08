@@ -60,21 +60,21 @@ const NodeParameterTable = () => {
   const [MqttSuccessMessage, setMqttSuccessMessage] = useState('');
   const [ServiceStartSuccessMessage, setServiceStartSuccessMessage] = useState('');
   const [ServiceStopSuccessMessage, setServiceStopSuccessMessage] = useState('');
-  const [RetentionParameterSuccessMessage, setRetentionParameterSuccessMessage] = useState('');
-  const [TimeDelaySuccessMessage, setTimeDelaySuccessMessage] = useState('');
+  // const [RetentionParameterSuccessMessage, setRetentionParameterSuccessMessage] = useState('');
+  // const [TimeDelaySuccessMessage, setTimeDelaySuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [retentionParameters, setRetentionParameters] = useState({
-    checkFrequency: { days: '', hours: '', minutes: '', seconds: '' },
-    successRetention: { days: '', hours: '', minutes: '', seconds: '' },
-    failureRetention: { days: '', hours: '', minutes: '', seconds: '' },
-  });
-  const [valuesChanged, setValuesChanged] = useState(false);
-  const [timeDelayParameters, setTimeDelayParameters] = useState({
-    minutes: '',
-    seconds: '',
-  });
-  const [isFormValid, setIsFormValid] = useState(false);
+  // const [retentionParameters, setRetentionParameters] = useState({
+  //   checkFrequency: { days: '', hours: '', minutes: '', seconds: '' },
+  //   successRetention: { days: '', hours: '', minutes: '', seconds: '' },
+  //   failureRetention: { days: '', hours: '', minutes: '', seconds: '' },
+  // });
+  // const [valuesChanged, setValuesChanged] = useState(false);
+  // const [timeDelayParameters, setTimeDelayParameters] = useState({
+  //   minutes: '',
+  //   seconds: '',
+  // });
+  // const [isFormValid, setIsFormValid] = useState(false);
   
   
 
@@ -86,8 +86,8 @@ const NodeParameterTable = () => {
       setMqttSuccessMessage('');
       setServiceStartSuccessMessage('');
       setServiceStopSuccessMessage('');
-      setRetentionParameterSuccessMessage('');
-      setTimeDelaySuccessMessage('');
+      // setRetentionParameterSuccessMessage('');
+      // setTimeDelaySuccessMessage('');
       setErrorMessage('');
       setSuccessMessage('');
     }, 5000);
@@ -95,7 +95,7 @@ const NodeParameterTable = () => {
 
   useEffect(() => {
     clearMessagesAfterDelay();
-  }, [ModbusSuccessMessage, SPBSuccessMessage, NodeAttributeSuccessMessage, MqttSuccessMessage, ServiceStartSuccessMessage, ServiceStopSuccessMessage, RetentionParameterSuccessMessage, TimeDelaySuccessMessage, errorMessage, successMessage]);
+  }, [ModbusSuccessMessage, SPBSuccessMessage, NodeAttributeSuccessMessage, MqttSuccessMessage, ServiceStartSuccessMessage, ServiceStopSuccessMessage, errorMessage, successMessage]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,16 +112,16 @@ const NodeParameterTable = () => {
             setSelectedModbus(modbusValues);
           }
   
-          // Initialize retention parameters
-          const retentionValues = responseData.node_parameters.find(param => param.name === 'retention_parameter')?.value;
-          if (retentionValues) {
-            setRetentionParameters(retentionValues);
-          }
+          // // Initialize retention parameters
+          // const retentionValues = responseData.node_parameters.find(param => param.name === 'retention_parameter')?.value;
+          // if (retentionValues) {
+          //   setRetentionParameters(retentionValues);
+          // }
 
-          const timeDelayValues = responseData.node_parameters.find(param => param.name === 'time_delay')?.value;
-          if (timeDelayValues) {
-            setTimeDelayParameters(timeDelayValues);
-          }
+          // const timeDelayValues = responseData.node_parameters.find(param => param.name === 'time_delay')?.value;
+          // if (timeDelayValues) {
+          //   setTimeDelayParameters(timeDelayValues);
+          // }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -491,100 +491,100 @@ const NodeParameterTable = () => {
     </Alert>
   );
   
-  const handleRetentionParameterChange = (param, unit, value) => {
-    // Parse the input value as an integer
-    const integerValue = parseInt(value, 10);
+  // const handleRetentionParameterChange = (param, unit, value) => {
+  //   // Parse the input value as an integer
+  //   const integerValue = parseInt(value, 10);
   
-    // Check if the parsed value is a valid integer
-    if (!isNaN(integerValue)) {
-      setRetentionParameters((prevParameters) => ({
-        ...prevParameters,
-        [param]: { ...prevParameters[param], [unit]: integerValue },
-      }));
-    }
-    // Set valuesChanged to true when any value changes
-    setValuesChanged(true);
-  };
+  //   // Check if the parsed value is a valid integer
+  //   if (!isNaN(integerValue)) {
+  //     setRetentionParameters((prevParameters) => ({
+  //       ...prevParameters,
+  //       [param]: { ...prevParameters[param], [unit]: integerValue },
+  //     }));
+  //   }
+  //   // Set valuesChanged to true when any value changes
+  //   setValuesChanged(true);
+  // };
   
   
-  const handleRetentionParameterSubmit = async () => {
-    try {
-      const response = await fetch(`${baseUrl}/node-parameter/5`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          retention_parameter: retentionParameters,
-        }),
-      });
-      // After successful submission, reset valuesChanged to false
-      setValuesChanged(false);
+  // const handleRetentionParameterSubmit = async () => {
+  //   try {
+  //     const response = await fetch(`${baseUrl}/node-parameter/5`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         retention_parameter: retentionParameters,
+  //       }),
+  //     });
+  //     // After successful submission, reset valuesChanged to false
+  //     setValuesChanged(false);
 
-      if (response.ok) {
-        setRetentionParameterSuccessMessage('Retention Parameters updated successfully.');
-      } else {
-        setErrorMessage(`Failed to update Retention Parameters: ${response.statusText}`);
-      }
-    } catch (error) {
-      setErrorMessage(`Error updating Retention Parameters: ${error}`);
-    }
-  };
+  //     if (response.ok) {
+  //       setRetentionParameterSuccessMessage('Retention Parameters updated successfully.');
+  //     } else {
+  //       setErrorMessage(`Failed to update Retention Parameters: ${response.statusText}`);
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage(`Error updating Retention Parameters: ${error}`);
+  //   }
+  // };
 
-  const handleReset = () => {
-    // Replace the initialValues with your actual initial values
-    const initialValues = {
-      check_frequency: {
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-      },
-      success_retention: {
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-      },
-      failure_retention: {
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-      },
-    };
+  // const handleReset = () => {
+  //   // Replace the initialValues with your actual initial values
+  //   const initialValues = {
+  //     check_frequency: {
+  //       days: 0,
+  //       hours: 0,
+  //       minutes: 0,
+  //       seconds: 0,
+  //     },
+  //     success_retention: {
+  //       days: 0,
+  //       hours: 0,
+  //       minutes: 0,
+  //       seconds: 0,
+  //     },
+  //     failure_retention: {
+  //       days: 0,
+  //       hours: 0,
+  //       minutes: 0,
+  //       seconds: 0,
+  //     },
+  //   };
   
-    setRetentionParameters(initialValues);
-    setValuesChanged(false);
-  };
+  //   setRetentionParameters(initialValues);
+  //   setValuesChanged(false);
+  // };
   
 
-  const handleTimeDelayParameterSubmit = async () => {
-    try {
-      const response = await fetch(`${baseUrl}/node-parameter/6`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          time_delay: timeDelayParameters,
-        }),
-      });
-      // Assuming the submission is successful, disable the submit button
-      setIsFormValid(false);
+  // const handleTimeDelayParameterSubmit = async () => {
+  //   try {
+  //     const response = await fetch(`${baseUrl}/node-parameter/6`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         time_delay: timeDelayParameters,
+  //       }),
+  //     });
+  //     // Assuming the submission is successful, disable the submit button
+  //     setIsFormValid(false);
 
-      if (response.ok) {
-        // Display success message or handle as needed
-        setTimeDelaySuccessMessage('Time Delay updated successfully.');
-      } else {
-        // Display error message or handle as needed
-        setErrorMessage(`Failed to update Time Delay: ${response.statusText}`);
-      }
-    } catch (error) {
-      // Display error message or handle as needed
-      setErrorMessage(`Error updating Time Delay: ${error}`);
-    }
-  };
+  //     if (response.ok) {
+  //       // Display success message or handle as needed
+  //       setTimeDelaySuccessMessage('Time Delay updated successfully.');
+  //     } else {
+  //       // Display error message or handle as needed
+  //       setErrorMessage(`Failed to update Time Delay: ${response.statusText}`);
+  //     }
+  //   } catch (error) {
+  //     // Display error message or handle as needed
+  //     setErrorMessage(`Error updating Time Delay: ${error}`);
+  //   }
+  // };
 
 
   return (
@@ -608,12 +608,12 @@ const NodeParameterTable = () => {
       {ModbusSuccessMessage && (
         <SuccessMessage message={ModbusSuccessMessage} onClose={() => setModbusSuccessMessage('')}/>
       )}
-      {RetentionParameterSuccessMessage && (
+      {/* {RetentionParameterSuccessMessage && (
         <SuccessMessage message={RetentionParameterSuccessMessage} onClose={() => setRetentionParameterSuccessMessage('')}/>
       )}
       {TimeDelaySuccessMessage && (
         <SuccessMessage message={TimeDelaySuccessMessage} onClose={() => setTimeDelaySuccessMessage('')}/>
-      )}
+      )} */}
       {errorMessage && (
         <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
       )}
@@ -754,7 +754,7 @@ const NodeParameterTable = () => {
         </Paper>
       </Grid>
 
-      <Grid item xs={4}>
+      {/* <Grid item xs={4}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
           <Typography variant="h6">Retention Parameters</Typography>
           <form>
@@ -865,7 +865,7 @@ const NodeParameterTable = () => {
             </Button>
           </div>
         </Paper>
-      </Grid>
+      </Grid> */}
 
       {/* Update form for SPB Parameter */}
       <Dialog open={updateSpbParameterFormOpen} onClose={handleUpdateFormClose}>

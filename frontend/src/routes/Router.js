@@ -15,6 +15,7 @@ const Modbus = lazy(() => import("../views/Modbus.js"))
 const LocalStorage = lazy(() => import("../views/LocalStorage.js"))
 const CloudStorage = lazy(() => import("../views/CloudStorage.js"))
 const NodeParameter = lazy(() => import("../views/NodeParameter.js"))
+const Retention = lazy(() => import("../views/Retention.js"))
 // const Alerts = lazy(() => import("../views/ui/Alerts"));
 // const Badges = lazy(() => import("../views/ui/Badges"));
 // const Buttons = lazy(() => import("../views/ui/Buttons"));
@@ -43,6 +44,7 @@ const ThemeRoutes = [
       { path: "/cloud-storage", exact: true, element: <CloudStorage /> },
       { path: "/cloud-storage", exact: true, element: <CloudStorage /> },
       { path: "/node-parameter", exact: true, element: <NodeParameter /> },
+      { path: "/retention-parameter", exact: true, element: <Retention /> },
       // { path: "/alerts", exact: true, element: <Alerts /> },
       // { path: "/badges", exact: true, element: <Badges /> },
       // { path: "/buttons", exact: true, element: <Buttons /> },
