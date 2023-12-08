@@ -94,7 +94,7 @@ const Home = () => {
       <Col xxl="12">
           <NodeParameterTable />
         </Col>
-        <Col xxl="11">
+        <Col xxl="12">
           <DeviceRegisterTable />
         </Col>
       </Row>

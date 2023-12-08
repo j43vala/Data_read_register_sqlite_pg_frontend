@@ -870,9 +870,9 @@ const DeviceParameterTable = () => {
   );
 
   return (
-    <div className={classes.root}>
+    <div>
       <div className={classes.header}>
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={1} alignItems="center">
         <Grid item xs={10}>
           {deviceSuccessMessage && (
             <SuccessMessage message={deviceSuccessMessage} onClose={() => setDeviceSuccessMessage('')}/>

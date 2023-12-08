@@ -52,8 +52,8 @@ def create_default_node_parameters():
         {
             "name": "node_attributes",
             "value": [
-                # {"name": "description", "value": "plc_Simple EoN Device node"},
-                # {"name": "version", "value": "0.01"}
+                {"name": "description", "value": "plc_Simple EoN Device"},
+                {"name": "version", "value": "0.01"}
             ]
         },
         {

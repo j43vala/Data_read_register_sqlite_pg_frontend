@@ -69,10 +69,12 @@ const NodeParameterTable = () => {
     successRetention: { days: '', hours: '', minutes: '', seconds: '' },
     failureRetention: { days: '', hours: '', minutes: '', seconds: '' },
   });
+  const [valuesChanged, setValuesChanged] = useState(false);
   const [timeDelayParameters, setTimeDelayParameters] = useState({
     minutes: '',
     seconds: '',
   });
+  const [isFormValid, setIsFormValid] = useState(false);
   
   
 
@@ -500,7 +502,8 @@ const NodeParameterTable = () => {
         [param]: { ...prevParameters[param], [unit]: integerValue },
       }));
     }
-    // You may add an else statement here to handle invalid input if needed
+    // Set valuesChanged to true when any value changes
+    setValuesChanged(true);
   };
   
   
@@ -515,7 +518,9 @@ const NodeParameterTable = () => {
           retention_parameter: retentionParameters,
         }),
       });
-  
+      // After successful submission, reset valuesChanged to false
+      setValuesChanged(false);
+
       if (response.ok) {
         setRetentionParameterSuccessMessage('Retention Parameters updated successfully.');
       } else {
@@ -526,18 +531,31 @@ const NodeParameterTable = () => {
     }
   };
 
-  const handleTimeDelayChange = (unit, value) => {
-    // Parse the input value as an integer
-    const integerValue = parseInt(value, 10);
+  const handleReset = () => {
+    // Replace the initialValues with your actual initial values
+    const initialValues = {
+      check_frequency: {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      },
+      success_retention: {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      },
+      failure_retention: {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      },
+    };
   
-    // Check if the parsed value is a valid integer
-    if (!isNaN(integerValue)) {
-      setTimeDelayParameters((prevParameters) => ({
-        ...prevParameters,
-        [unit]: integerValue,
-      }));
-    }
-    // You may add an else statement here to handle invalid input if needed
+    setRetentionParameters(initialValues);
+    setValuesChanged(false);
   };
   
 
@@ -552,6 +570,8 @@ const NodeParameterTable = () => {
           time_delay: timeDelayParameters,
         }),
       });
+      // Assuming the submission is successful, disable the submit button
+      setIsFormValid(false);
 
       if (response.ok) {
         // Display success message or handle as needed
@@ -566,7 +586,6 @@ const NodeParameterTable = () => {
     }
   };
 
-  
 
   return (
     <Grid container spacing={1}>
@@ -752,41 +771,99 @@ const NodeParameterTable = () => {
                       onChange={(e) => handleRetentionParameterChange(param, unit, e.target.value)}
                       fullWidth
                       style={{ marginRight: '10px' }}
+                      inputProps={{
+                        min: 0,
+                        max: unit === 'days' ? 31 : unit === 'hours' ? 24 : 60,
+                      }}
                     />
                   ))}
                 </div>
               </div>
             ))}
-            <Button onClick={handleRetentionParameterSubmit} color="primary">
-              Submit
-            </Button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                onClick={handleReset}
+                color="primary"
+                variant="contained"
+                style={{ marginRight: '10px' }}
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={handleRetentionParameterSubmit}
+                color="primary"
+                variant="contained"
+                disabled={!valuesChanged} // Disable if values have not changed
+              >
+                Submit
+              </Button>
+            </div>
           </form>
         </Paper>
       </Grid>
+
 
       <Grid item xs={4}>
         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
           <Typography variant="h6">Time Delay Parameters</Typography>
           <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', marginRight: '20px' }}>
             <TextField
               label="Minutes"
               type="number"
               value={timeDelayParameters.minutes}
-              onChange={(e) => setTimeDelayParameters(prev => ({ ...prev, minutes: parseInt(e.target.value) || 0 }))}
-              fullWidth
-              style={{ marginRight: '20px' }}
+              style={{ marginRight: '5px' }}
+              onChange={(e) => {
+                let newValue = parseInt(e.target.value) || 0;
+                // Set upper limit to 60
+                newValue = Math.min(newValue, 60);
+                newValue = Math.max(newValue, 0); // Set lower limit to 0
+
+                setTimeDelayParameters((prev) => ({
+                  ...prev,
+                  minutes: newValue,
+                }));
+                setIsFormValid(true);
+              }}
+              inputProps={{
+                step: 1,
+                min: 0,
+                max: 60,
+              }}
             />
             <TextField
               label="Seconds"
               type="number"
               value={timeDelayParameters.seconds}
-              onChange={(e) => setTimeDelayParameters(prev => ({ ...prev, seconds: parseInt(e.target.value) || 0 }))}
-              fullWidth
+              onChange={(e) => {
+                let newValue = parseInt(e.target.value) || 0;
+                // Set upper limit to 60
+                newValue = Math.min(newValue, 60);
+                newValue = Math.max(newValue, 0); // Set lower limit to 0
+
+                setTimeDelayParameters((prev) => ({
+                  ...prev,
+                  seconds: newValue,
+                }));
+                setIsFormValid(true);
+              }}
+              inputProps={{
+                step: 1,
+                min: 0,
+                max: 60,
+              }}
             />
+            </div>
+            <Button
+              onClick={handleTimeDelayParameterSubmit}
+              color="primary"
+              variant="contained"
+              style={{ marginBottom: '15px' }}
+              disabled={!isFormValid} // Disable the button when the form is not valid
+            >
+              Submit
+            </Button>
           </div>
-          <Button onClick={handleTimeDelayParameterSubmit} color="primary">
-            Submit
-          </Button>
         </Paper>
       </Grid>
 
