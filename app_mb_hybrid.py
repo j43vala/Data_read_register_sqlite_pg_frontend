@@ -106,7 +106,10 @@ def main():
                         setattr(record, parameter_name, data)
 
                         if spb_device.data.get_value(parameter_name) != data:
-                            spb_device.data.set_value(parameter_name, data)
+                   
+                            spb_device.data.set_value(parameter_name, data,int(datetime.datetime.now().timestamp() * 1000))
+                            print('spb_device.data.: ', spb_device.data)
+                            
 
                         print(f"Updated '{parameter_name}' with value: {data}")
                     else:
