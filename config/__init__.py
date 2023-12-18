@@ -67,7 +67,7 @@ def load_config_from_db():
         # Add parameters for each device
         for parameter in device.parameters:
             parameter_data = {
-                'function_code': parameter.function_code,
+                # 'function_code': parameter.function_code,
                 'address': parameter.address,
                 'parameter_name': parameter.parameter_name,
                 'data_type': parameter.data_type,
