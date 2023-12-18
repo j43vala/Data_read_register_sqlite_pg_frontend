@@ -230,12 +230,15 @@ class CreateParameter(Resource):
                 if field not in parameter_data:
                     return make_response(jsonify({"status": status, 'message': f'Required field "{field}" not found in the parameter data'}), 400)
 
+            # Check if 'threshold' is provided in parameter_data, otherwise set it to the default value 0.0
+            threshold_value = parameter_data.get('threshold', 0.0)
+            
             new_parameter = Parameter(
                 function_code=parameter_data['function_code'].strip(),
                 address=parameter_data['address'].strip(),
                 parameter_name=parameter_data['parameter_name'].strip(),
                 data_type=parameter_data['data_type'].strip(),
-                threshold=parameter_data['threshold'].strip(),
+                threshold=threshold_value,
                 active=parameter_data['active'],
                 device_id=device.id  # Set the device_id for the new parameter
             )
