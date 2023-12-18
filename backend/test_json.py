@@ -40,9 +40,11 @@ for device in devices:
     # Add parameters for each device
     for parameter in device.parameters:
         parameter_data = {
+            'function_code': parameter.function_code,
             'address': parameter.address,
             'parameter_name': parameter.parameter_name,
-            'data_type': parameter.data_type
+            'data_type': parameter.data_type,
+            'threshold': parameter.threshold
         }
         device_data['parameters'].append(parameter_data)
 

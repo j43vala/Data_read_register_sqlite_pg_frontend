@@ -97,16 +97,19 @@ def main():
 
                 # retrive data from modbus and update records
                 for parameter in device_dict["parameters"]:
+                    # function_code1 = parameter.get("function_code")
                     parameter_name = parameter.get("parameter_name")
                     reg_no = parameter.get("address")
                     reg_data_type = parameter.get("data_type")
+                    th1 = parameter.get("threshold")
+                    
 
                     if parameter_name is not None:
                         data = retrieve_modbus_data(client, slave_id, reg_no, reg_data_type)
                         setattr(record, parameter_name, data)
                         
                         # fatch threshold
-                        threshold_value = 0
+                        threshold_value = th1
                         
                         old_data = spb_device.data.get_value(parameter_name)
                         if old_data  - threshold_value > data  or data > old_data + threshold_value:
