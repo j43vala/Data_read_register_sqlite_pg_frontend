@@ -36,6 +36,7 @@ def load_config_from_json():
 
 def load_config_from_db():
     # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI
+    global config
     engine = create_engine(f"sqlite:///{db_path}", echo=False)
 
     # Create a session
@@ -105,7 +106,7 @@ def load_config_from_db():
 # config = load_config_from_json()
 
 # print("config before update",json.dumps(config, indent=2))
-config = load_config_from_db()
+config_from_db = load_config_from_db()
 
 
 # config["devices"] = db_devices["devices"]

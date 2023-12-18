@@ -97,25 +97,29 @@ def main():
 
                 # retrive data from modbus and update records
                 for parameter in device_dict["parameters"]:
+                    function_code = parameter.get("function_code")
                     parameter_name = parameter.get("parameter_name")
                     reg_no = parameter.get("address")
                     reg_data_type = parameter.get("data_type")
-
-                    if parameter_name is not None:
-                        data = retrieve_modbus_data(client, slave_id, reg_no, reg_data_type)
-                        setattr(record, parameter_name, data)
+                    threshold = parameter.get("threshold")
+                    if parameter_name :
+                        data = retrieve_modbus_data( client, slave_id, reg_no, reg_data_type)
                         
-                        # fatch threshold
-                        threshold_value = 0
-                        
-                        old_data = spb_device.data.get_value(parameter_name)
-                        if old_data  - threshold_value > data  or data > old_data + threshold_value:
+                        if data:
+                            setattr(record, parameter_name, data)
+                            
+                            # fatch threshold
+                            threshold_value = threshold
+                            # print('\n\n\n threshold_value: ', threshold_value)
+                            
+                            old_data = spb_device.data.get_value(parameter_name)
+                            if old_data  - threshold_value > data  or data > old_data + threshold_value:
+                                    
+                                    spb_device.data.set_value(parameter_name, data,int(datetime.datetime.now().timestamp() * 1000))
+                                    print('spb_device.data.: ', spb_device.data)
 
-                                spb_device.data.set_value(parameter_name, data,int(datetime.datetime.now().timestamp() * 1000))
-                                print('spb_device.data.: ', spb_device.data)
-
-                   
-                        print(f"Updated '{parameter_name}' with value: {data}")
+                    
+                            print(f"Updated '{parameter_name}' with value: {data}")
                     else:
                         print(f"Attribute name is missing in the specification for parameter {parameter}")
 

@@ -23,9 +23,11 @@ class parameter(Base):
     __tablename__ = "parameter"
     id = Column(Integer, primary_key=True, nullable=False)
     active = Column(Boolean, default=True)
+    function_code = Column(String, nullable=False)
     address = Column(Integer, nullable=False)
     parameter_name = Column(String)
     data_type = Column(String)
+    threshold =Column(Float)
     device_id = Column(Integer, ForeignKey('device.id'))
 
 class Attribute(Base):
