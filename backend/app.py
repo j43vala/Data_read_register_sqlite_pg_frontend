@@ -66,6 +66,13 @@ from resources.node_parameter_resource import create_default_node_parameters
 app = Flask(__name__)
 
 CORS(app)
+
+# Set the default route to the UI function
+@app.route("/")
+def index():
+    return render_template('index.html')
+
+
 api.init_app(app, cors_allowed_origins='*')
 
 
@@ -87,10 +94,6 @@ with app.app_context():
     db.create_all()
     create_default_node_parameters()
 
-# Set the default route to the UI function
-@app.route("/ui")
-def index():
-    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
