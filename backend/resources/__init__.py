@@ -14,9 +14,11 @@ api = Api(
     title='RESTX APIs for development',
     version='2.0',
     description='API list and requests for integration purpose',
+    doc='/test/'
     # authorizations=authorizations,
     # security='Bearer'
 )
+
 
 
 # from .client_resources import ns as client_ns

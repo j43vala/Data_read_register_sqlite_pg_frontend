@@ -28,8 +28,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit';
 import { makeStyles } from '@material-ui/core/styles';
 
-
-
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
@@ -64,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const baseUrl = process.env.REACT_APP_BASEURL;
+// const baseUrl = process.env.REACT_APP_BASEURL;
 
 const DeviceParameterTable = () => {
   const classes = useStyles();
@@ -78,6 +76,7 @@ const DeviceParameterTable = () => {
   const [updatedAddress, setUpdatedAddress] = useState('');
   const [updatedParameterName, setUpdatedParameterName] = useState('');
   const [updatedDataType, setUpdatedDataType] = useState('');
+  const [updatedThreshold, setUpdatedThreshold] = useState('');
   const [updatedName, setUpdatedName] = useState('');
   const [updatedValue, setUpdatedValue] = useState('');
   const [deviceName, setDeviceName] = useState('');
@@ -103,7 +102,7 @@ const DeviceParameterTable = () => {
   const [updatedDeviceName, setUpdatedDeviceName] = useState('');
   const [updatedSlaveId, setUpdatedSlaveId] = useState('');
   const [isDeleteDeviceConfirmationOpen, setIsDeleteDeviceConfirmationOpen] = useState(false);
-  const [parameterFields, setParameterFields] = useState([{ function_code: '', address: '', ParameterName: '', data_type: '' }]);
+  const [parameterFields, setParameterFields] = useState([{ function_code: '', address: '', ParameterName: '', data_type: '', threshold: '' }]);
   const [attributeFields, setAttributeFields] = useState([{ name: '', value: ''}]);
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [openUpdateAttributeDialog, setOpenUpdateAttributeDialog] = useState(false);
@@ -127,12 +126,11 @@ const DeviceParameterTable = () => {
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const response = await fetch(`${baseUrl}/devices/`);
+        const response = await fetch(`/devices/`);
         const data = await response.json();
 
         if (Array.isArray(data.devices)) {
           setDevices(data.devices);
-          // setDeviceSuccessMessage('Devices fetch Successfully.!');
         } else {
           setErrorMessage(`No Devices Available.!`);
         }
@@ -148,7 +146,7 @@ const DeviceParameterTable = () => {
     try {
       console.log('Fetching device details for deviceId:', deviceId);
   
-      const response = await fetch(`${baseUrl}/devices/${encodeURIComponent(deviceId)}`);
+      const response = await fetch(`/devices/${encodeURIComponent(deviceId)}`);
       const data = await response.json();
   
       setOpen(true);
@@ -167,8 +165,7 @@ const DeviceParameterTable = () => {
         setParameters([]);
         setErrorMessage('Error fetching Parameters and Attributes or no Parameters and Attributes connected to the selected device');
       }
-  
-      // Set selectedDeviceName and selectedSlaveId based on the selected device
+
       setSelectedDevice(deviceId);
       if (data.device) {
         setSelectedDeviceName(data.device.name);
@@ -186,23 +183,23 @@ const DeviceParameterTable = () => {
     handleDeviceChange(deviceId);
   }; 
   
-
   const handleUpdateClick = (parameter) => {
     setSelectedParameter(parameter);
     setUpdatedFunctionCode(parameter.function_code);
     setUpdatedAddress(parameter.address);
     setUpdatedParameterName(parameter.parameter_name);
     setUpdatedDataType(parameter.data_type);
+    setUpdatedThreshold(parameter.threshold);
     setOpenUpdateDialog(true);
   };
   
-
   const handleUpdateDialogClose = () => {
     setOpenUpdateDialog(false);
     setUpdatedFunctionCode('');
     setUpdatedAddress('');
     setUpdatedParameterName('');
     setUpdatedDataType('');
+    setUpdatedThreshold('');
   };
 
   const handleUpdateSubmit = async () => {
@@ -223,10 +220,11 @@ const DeviceParameterTable = () => {
       address: updatedAddress,
       parameter_name: updatedParameterName,
       data_type: updatedDataType,
+      threshold: updatedThreshold
     };
   
     try {
-      const response = await fetch(`${baseUrl}/parameter/devices/${selectedDevice}/parameter/${selectedParameter.id}`, {
+      const response = await fetch(`/parameter/devices/${selectedDevice}/parameter/${selectedParameter.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -250,13 +248,12 @@ const DeviceParameterTable = () => {
     }
   };
   
-
   const handleDeleteSubmit = async (parameter) => {
     setIsDeleteConfirmationOpen(false);
 
     try {
       if (selectedDevice && parameter && parameter.id) {
-        const response = await fetch(`${baseUrl}/parameter/devices/${selectedDevice}/parameter/${parameter.id}`, {
+        const response = await fetch(`/parameter/devices/${selectedDevice}/parameter/${parameter.id}`, {
           method: 'DELETE',
         });
 
@@ -268,7 +265,7 @@ const DeviceParameterTable = () => {
         setErrorMessage('');
 
         // Update the device list
-        const deviceResponse = await fetch(`${baseUrl}/devices/${selectedDevice}`);
+        const deviceResponse = await fetch(`/devices/${selectedDevice}`);
         const deviceData = await deviceResponse.json();
 
         if (deviceData.device && Array.isArray(deviceData.device.parameters)) {
@@ -278,7 +275,7 @@ const DeviceParameterTable = () => {
         }
 
         // Fetch devices to update the list
-        const devicesResponse = await fetch(`${baseUrl}/devices/`);
+        const devicesResponse = await fetch(`/devices/`);
         const devicesData = await devicesResponse.json();
 
         if (Array.isArray(devicesData.devices)) {
@@ -307,7 +304,7 @@ const DeviceParameterTable = () => {
       const newDevice = { name: deviceName, slave_id: slaveId };
 
       try {
-        const response = await fetch(`${baseUrl}/devices/`, {
+        const response = await fetch(`/devices/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -324,7 +321,7 @@ const DeviceParameterTable = () => {
         setIsAddDeviceFormOpen(false);
 
         // Fetch the updated list of devices
-        const devicesResponse = await fetch(`${baseUrl}/devices/`);
+        const devicesResponse = await fetch(`/devices/`);
         const devicesData = await devicesResponse.json();
 
         if (Array.isArray(devicesData.devices)) {
@@ -351,7 +348,7 @@ const DeviceParameterTable = () => {
     try {
       const updatedDevice = { name: updatedDeviceName, slave_id: updatedSlaveId };
   
-      await fetch(`${baseUrl}/devices/${selectedDevice.id}`, {
+      await fetch(`/devices/${selectedDevice.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -360,7 +357,7 @@ const DeviceParameterTable = () => {
       });
   
       // Fetch the updated list of devices
-      const devicesResponse = await fetch(`${baseUrl}/devices/`);
+      const devicesResponse = await fetch(`/devices/`);
       const devicesData = await devicesResponse.json();
   
       if (Array.isArray(devicesData.devices)) {
@@ -385,12 +382,12 @@ const DeviceParameterTable = () => {
   const handleDeleteDevice = async (deviceId) => {
     try {  
       // Send DELETE request to the server
-      await fetch(`${baseUrl}/devices/${deviceId}`, {
+      await fetch(`/devices/${deviceId}`, {
         method: 'DELETE',
       });
   
       // Fetch the updated list of devices
-      const devicesResponse = await fetch(`${baseUrl}/devices/`);
+      const devicesResponse = await fetch(`/devices/`);
       const devicesData = await devicesResponse.json();
   
       if (Array.isArray(devicesData.devices)) {
@@ -466,7 +463,7 @@ const DeviceParameterTable = () => {
   
   const handleAddParameterFormClose = () => {
     setIsAddParameterFormOpen(false);
-    setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '' }]); // Reset fields
+    setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '', threshold: '' }]); // Reset fields
     clearParameterForm();
   };
 
@@ -481,12 +478,12 @@ const DeviceParameterTable = () => {
   }; 
 
   const clearParameterForm = () => {
-    setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '' }]);
+    setParameterFields([{ function_code: '', address: '', ParameterName: '', data_type: '', threshold: '' }]);
   };
   
   const handleAddParameterButtonClick = () => {
     console.log('Add Parameter button clicked');
-    setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '' }]);
+    setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '', threshold: '' }]);
     setIsAddParameterFormOpen(true);
   };
 
@@ -497,53 +494,19 @@ const DeviceParameterTable = () => {
     setUpdatedAddress('');
     setUpdatedParameterName('');
     setUpdatedDataType('');
+    setUpdatedThreshold('');
   };
   
+  const handleNumericFieldChange = (index, fieldName, value) => {
+    // Check if the value is numeric (allowing decimals) or an empty string
+    if (/^\d*\.?\d*$/.test(value) || value === '') {
+      // Update the field if it's numeric or an empty string
+      handleFieldChange(index, fieldName, value);
+    }
+    // You can optionally show an error message or handle the invalid input in another way
+  };
+ 
   
-  // const ParameterDevice = () => {
-  //   if (!selectedDevice) {
-  //     setErrorMessage('Please select a device!');
-  //     return;
-  //   }
-  
-  //   if (!address || !ParameterName || !data_type_type) {
-  //     setErrorMessage('Please fill in all the required fields for the new Parameter!');
-  //     return;
-  //   }
-  
-  //   const newParameter = {
-  //     address,
-  //     parameter_name: ParameterName,
-  //     data_type_type,
-  //     device_id: selectedDevice,
-  //   };
-  
-  //   fetch(`http://localhost:5000/Parameter/devices/${selectedDevice}/Parameter`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify(newParameter),
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error('Network response was not ok');
-  //       }
-  //       return response.json();
-  //     })
-  //     .then(() => {
-  //       setParameterSuccessMessage('New Parameter created successfully!');
-  //       clearParameterForm();
-  //       setIsAddParameterFormOpen(false);
-  
-  //       handleDeviceChange({ target: { value: selectedDevice } });
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error creating a new Parameter:', error);
-  //       setErrorMessage('Error creating a new Parameter. Please try again.');
-  //     });
-  // };
-
   const parameterDevice = () => {
     if (!selectedDevice) {
       setErrorMessage('Please select a device!');
@@ -553,13 +516,13 @@ const DeviceParameterTable = () => {
   
     // Validate the fields for each row
     const invalidFields = parameterFields.some(
-      (field) => !field.function_code || !field.address || !field.ParameterName || !field.data_type
+      (field) => !field.function_code || !field.address || !field.ParameterName || !field.data_type || !field.threshold
     );
   
     if (invalidFields) {
       setErrorMessage('Please fill in all the required fields for each parameter!');
       setIsAddParameterFormOpen(false);
-      clearParameterForm();
+      // clearParameterForm();
       return;
     }
   
@@ -570,8 +533,8 @@ const DeviceParameterTable = () => {
   
     if (invalidAddressFields) {
       setErrorMessage('Please Enter Only Integer Values in the Address Field!');
-      clearParameterForm();
-      setIsAddParameterFormOpen(false);
+      // clearParameterForm();
+      // setIsAddParameterFormOpen(false);
       return;
     }
   
@@ -582,10 +545,11 @@ const DeviceParameterTable = () => {
         address: field.address,
         parameter_name: field.ParameterName,
         data_type: field.data_type,
+        threshold:field.threshold
       })),
     };
   
-    fetch(`${baseUrl}/parameter/devices/${selectedDevice}/parameter`, {
+    fetch(`/parameter/devices/${selectedDevice}/parameter`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -625,7 +589,6 @@ const DeviceParameterTable = () => {
       });
   };
   
-
   const handleFieldChange = (index, field, value) => {
     const updatedFields = [...parameterFields];
     updatedFields[index][field] = value;
@@ -634,7 +597,7 @@ const DeviceParameterTable = () => {
 
   // eslint-disable-next-line
   const addEmptyRow = () => {
-    setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '' }]);
+    setParameterFields([...parameterFields, { function_code: '', address: '', ParameterName: '', data_type: '', threshold: '' }]);
   };
 
   const removeRow = (index) => {
@@ -687,7 +650,7 @@ const DeviceParameterTable = () => {
       })),
     };
   
-    fetch(`${baseUrl}/attribute/devices/${selectedDevice}/attribute`, {
+    fetch(`/attribute/devices/${selectedDevice}/attribute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -756,7 +719,7 @@ const DeviceParameterTable = () => {
     };
   
     try {
-      const response = await fetch(`${baseUrl}/attribute/devices/${selectedDevice}/attribute/${selectedAttribute.id}`, {
+      const response = await fetch(`/attribute/devices/${selectedDevice}/attribute/${selectedAttribute.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -787,7 +750,7 @@ const DeviceParameterTable = () => {
 
     try {
       if (selectedDevice && attribute && attribute.id) {
-        const response = await fetch(`${baseUrl}/attribute/devices/${selectedDevice}/attribute/${attribute.id}`, {
+        const response = await fetch(`/attribute/devices/${selectedDevice}/attribute/${attribute.id}`, {
           method: 'DELETE',
         });
 
@@ -799,7 +762,7 @@ const DeviceParameterTable = () => {
         setErrorMessage('');
 
         // Update the device list
-        const deviceResponse = await fetch(`${baseUrl}/devices/${selectedDevice}`);
+        const deviceResponse = await fetch(`/devices/${selectedDevice}`);
         const deviceData = await deviceResponse.json();
 
         if (deviceData.device && Array.isArray(deviceData.device.attributes)) {
@@ -809,7 +772,7 @@ const DeviceParameterTable = () => {
         }
 
         // Fetch devices to update the list
-        const devicesResponse = await fetch(`${baseUrl}/devices/`);
+        const devicesResponse = await fetch(`/devices/`);
         const devicesData = await devicesResponse.json();
 
         if (Array.isArray(devicesData.devices)) {
@@ -876,9 +839,6 @@ const DeviceParameterTable = () => {
         <Grid item xs={10}>
           {deviceSuccessMessage && (
             <SuccessMessage message={deviceSuccessMessage} onClose={() => setDeviceSuccessMessage('')}/>
-          )}
-          {errorMessage && (
-            <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
           )}
         </Grid>
         <Grid item xs={2} container justifyContent="flex-end">
@@ -984,6 +944,7 @@ const DeviceParameterTable = () => {
                   <TableCell>Address</TableCell>
                   <TableCell>Parameter Name</TableCell>
                   <TableCell>Data Type</TableCell>
+                  <TableCell>Threshold</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -994,6 +955,7 @@ const DeviceParameterTable = () => {
                     <TableCell>{parameter.address}</TableCell>
                     <TableCell>{parameter.parameter_name}</TableCell>
                     <TableCell>{parameter.data_type}</TableCell>
+                    <TableCell>{parameter.threshold}</TableCell>
                     <TableCell>
                       <IconButton
                         onClick={() => handleUpdateClick(parameter)}
@@ -1120,6 +1082,15 @@ const DeviceParameterTable = () => {
                   <MenuItem value="Boolean">Boolean</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Threshold"
+                value={updatedThreshold}
+                style={{ marginTop: '10px' }}
+                onChange={(e) => setUpdatedThreshold(e.target.value)}
+                fullWidth
+              />
             </Grid>
           </Grid>
         </DialogContent>
@@ -1255,18 +1226,20 @@ const DeviceParameterTable = () => {
         </DialogActions>
       </Dialog>
 
-  
-      <Dialog open={isAddParameterFormOpen} onClose={handleAddParameterFormClose}>
+      <Dialog open={isAddParameterFormOpen} onClose={handleAddParameterFormClose} fullWidth>
         <DialogTitle>Add Parameter</DialogTitle>
+        {errorMessage && (
+          <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')} />
+        )}
         <DialogContent>
           {parameterFields.map((field, index) => (
-            <Grid container spacing={2} key={index} alignItems="center">
-              <Grid item xs={2}>
+            <Grid container spacing={1} key={index} alignItems="center">
+              <Grid item xs={3}>
                 <FormControl fullWidth>
-                  <InputLabel style={{ minWidth: '120px' , marginTop: '5px' }}>Function Code</InputLabel>
+                  <InputLabel style={{ marginTop: '5px' }}>Function Code</InputLabel>
                   <Select
                     value={field.function_code || ''}
-                    style={{ marginTop: '10px', minWidth: '150px' }}
+                    style={{ marginTop: '8px' }}
                     onChange={(e) => handleFieldChange(index, 'function_code', e.target.value)}
                   >
                     <MenuItem value="Coil Status">Coil Status</MenuItem>
@@ -1276,28 +1249,28 @@ const DeviceParameterTable = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={2}>
                 <TextField
                   label="Address"
                   value={field.address}
-                  style={{ marginLeft: '70px' , marginTop: '10px' }}
-                  onChange={(e) => handleFieldChange(index, 'address', e.target.value)}
+                  style={{ marginTop: '5px' }}
+                  onChange={(e) => handleNumericFieldChange(index, 'address', e.target.value)}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={2}>
                 <TextField
                   label="Parameter Name"
                   value={field.ParameterName}
-                  style={{ marginTop: '10px' }}
+                  style={{ marginTop: '5px' }}
                   onChange={(e) => handleFieldChange(index, 'ParameterName', e.target.value)}
                 />
               </Grid>
               <Grid item xs={2}>
                 <FormControl fullWidth>
-                  <InputLabel style={{ minWidth: '80px', marginTop: '5px' }}>Data Type</InputLabel>
+                  <InputLabel style={{ marginTop: '5px' }}>Data Type</InputLabel>
                   <Select
                     value={field.data_type}
-                    style={{ marginTop: '10px', minWidth: '100px' }}
+                    style={{ marginTop: '8px' }}
                     onChange={(e) => handleFieldChange(index, 'data_type', e.target.value)}
                   >
                     <MenuItem value="Integer">Integer</MenuItem>
@@ -1307,6 +1280,14 @@ const DeviceParameterTable = () => {
                   </Select>
                 </FormControl>
               </Grid>
+              <Grid item xs={2}>
+                <TextField
+                  label="Threshold"
+                  value={field.threshold}
+                  style={{ marginTop: '5px' }}
+                  onChange={(e) => handleNumericFieldChange(index, 'threshold', e.target.value)}
+                />
+              </Grid>
               <Grid item xs={1}>
                 {index !== 0 && (
                   <IconButton onClick={() => removeRow(index)}>
@@ -1314,15 +1295,15 @@ const DeviceParameterTable = () => {
                   </IconButton>
                 )}
               </Grid>
-              <Grid item xs={2}>
-                {index === parameterFields.length - 1 && (
-                  <IconButton onClick={handleAddParameterButtonClick}>
-                    <AddIcon style={{ color: 'green' }} />
-                  </IconButton>
-                )}
-              </Grid>
             </Grid>
           ))}
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} align="right">
+              <IconButton onClick={handleAddParameterButtonClick}>
+                <AddIcon style={{ color: 'green' }} />
+              </IconButton>
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleAddParameterFormClose} variant="outlined" color="secondary">
@@ -1334,7 +1315,6 @@ const DeviceParameterTable = () => {
         </DialogActions>
       </Dialog>
 
-      
       <Dialog open={isAddAttributeFormOpen} onClose={handleAddAttributeFormClose}>
         <DialogTitle>
           Add Attribute

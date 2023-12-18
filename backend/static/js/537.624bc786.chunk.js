@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkstarter_bt5=self.webpackChunkstarter_bt5||[]).push([[537],{2537:(e,s,t)=>{t.r(s),t.d(s,{default:()=>a});t(2791);var r=t(2399),c=t(184);const a=()=>(0,c.jsxs)("div",{children:[(0,c.jsx)("h1",{children:"GetDevice"}),(0,c.jsx)(r.Z,{})]})}}]);
+//# sourceMappingURL=537.624bc786.chunk.js.map

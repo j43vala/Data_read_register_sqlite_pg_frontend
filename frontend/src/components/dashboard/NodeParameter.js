@@ -16,27 +16,17 @@ import {
   DialogTitle
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-// import { Replay as ReplayIcon, Stop as StopIcon } from '@mui/icons-material';  
+import { Add as AddIcon, Remove as RemoveIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
-
-const baseUrl = process.env.REACT_APP_BASEURL;
+// const baseUrl = process.env.REACT_APP_BASEURL;
 
 const NodeParameterTable = () => {
   const [data, setData] = useState(null);
   const [updateSpbParameterFormOpen, setUpdateSpbParameterFormOpen] = useState(false);
   const [updateNodeAttributeFormOpen, setUpdateNodeAttributeFormOpen] = useState(false);
-  const [updatedAttributes, setUpdatedAttributes] = useState([]); // Add this line
+  const [updatedAttributes, setUpdatedAttributes] = useState([]);
   const [updateMqttFormOpen, setUpdateMqttFormOpen] = useState(false);
-  // eslint-disable-next-line
-  const [newAttributeName, setNewAttributeName] = useState('');
-  // eslint-disable-next-line
-  const [newAttributeValue, setNewAttributeValue] = useState('');
   const [addNodeAttributeFormOpen, setAddNodeAttributeFormOpen] = useState(false);
-  const [attributeRows, setAttributeRows] = useState([{ name: '', value: '' }]);
   const [formDataList, setFormDataList] = useState([]);
   const [selectedModbus, setSelectedModbus] = useState({
     port: '',
@@ -60,23 +50,8 @@ const NodeParameterTable = () => {
   const [MqttSuccessMessage, setMqttSuccessMessage] = useState('');
   const [ServiceStartSuccessMessage, setServiceStartSuccessMessage] = useState('');
   const [ServiceStopSuccessMessage, setServiceStopSuccessMessage] = useState('');
-  // const [RetentionParameterSuccessMessage, setRetentionParameterSuccessMessage] = useState('');
-  // const [TimeDelaySuccessMessage, setTimeDelaySuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  // const [retentionParameters, setRetentionParameters] = useState({
-  //   checkFrequency: { days: '', hours: '', minutes: '', seconds: '' },
-  //   successRetention: { days: '', hours: '', minutes: '', seconds: '' },
-  //   failureRetention: { days: '', hours: '', minutes: '', seconds: '' },
-  // });
-  // const [valuesChanged, setValuesChanged] = useState(false);
-  // const [timeDelayParameters, setTimeDelayParameters] = useState({
-  //   minutes: '',
-  //   seconds: '',
-  // });
-  // const [isFormValid, setIsFormValid] = useState(false);
-  
-  
 
   const clearMessagesAfterDelay = () => {
     setTimeout(() => {
@@ -86,8 +61,6 @@ const NodeParameterTable = () => {
       setMqttSuccessMessage('');
       setServiceStartSuccessMessage('');
       setServiceStopSuccessMessage('');
-      // setRetentionParameterSuccessMessage('');
-      // setTimeDelaySuccessMessage('');
       setErrorMessage('');
       setSuccessMessage('');
     }, 5000);
@@ -100,38 +73,23 @@ const NodeParameterTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${baseUrl}/node-parameter/`);
+        const response = await fetch(`/node-parameter/`);
         const responseData = await response.json();
         setData(responseData);
-  
-        // Initialize selectedModbus state with modbus values
+
         if (responseData.node_parameters) {
           const modbusValues = responseData.node_parameters.find(param => param.name === 'modbus')?.value;
-          
           if (modbusValues) {
             setSelectedModbus(modbusValues);
           }
-  
-          // // Initialize retention parameters
-          // const retentionValues = responseData.node_parameters.find(param => param.name === 'retention_parameter')?.value;
-          // if (retentionValues) {
-          //   setRetentionParameters(retentionValues);
-          // }
-
-          // const timeDelayValues = responseData.node_parameters.find(param => param.name === 'time_delay')?.value;
-          // if (timeDelayValues) {
-          //   setTimeDelayParameters(timeDelayValues);
-          // }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
-  
 
   if (!data) {
     return <p>Loading...</p>;
@@ -140,47 +98,36 @@ const NodeParameterTable = () => {
   const spbParameter = data.node_parameters.find(param => param.name === 'spb_parameter')?.value;
   const nodeAttributes = data.node_parameters.find(param => param.name === 'node_attributes')?.value;
   const mqtt = data.node_parameters.find(param => param.name === 'mqtt')?.value;
-  
 
-  const baudrateList = data.node_parameters.find(param => param.name === 'modbus')?.value.baudrate_options;
-  const wordLengthList = data.node_parameters.find(param => param.name === 'modbus')?.value.wordlength_options;
-  const parityList = data.node_parameters.find(param => param.name === 'modbus')?.value.parity_options;
-  const stopbitsList = data.node_parameters.find(param => param.name === 'modbus')?.value.stopbits_options;
-  const portList = data.node_parameters.find(param => param.name === 'modbus')?.value.port_options;
-  const methodList = data.node_parameters.find(param => param.name === 'modbus')?.value.method_options;
+  const uniqueBaudrateList = [...new Set(data.node_parameters.find(param => param.name === 'modbus')?.value.baudrate_options)];
+  const uniqueWordLengthList = [...new Set(data.node_parameters.find(param => param.name === 'modbus')?.value.wordlength_options)];
+  const uniqueParityList = [...new Set(data.node_parameters.find(param => param.name === 'modbus')?.value.parity_options)];
+  const uniqueStopbitsList = [...new Set(data.node_parameters.find(param => param.name === 'modbus')?.value.stopbits_options)];
+  const uniquePortList = [...new Set(data.node_parameters.find(param => param.name === 'modbus')?.value.port_options)];
+  const uniqueMethodList = [...new Set(data.node_parameters.find(param => param.name === 'modbus')?.value.method_options)];
 
-  const uniqueBaudrateList = [...new Set(baudrateList)];
-  const uniqueWordLengthList = [...new Set(wordLengthList)];
-  const uniqueParityList = [...new Set(parityList)];
-  const uniqueStopbitsList = [...new Set(stopbitsList)];
-  const uniquePortList = [...new Set(portList)];
-  const uniqueMethodList = [...new Set(methodList)];
-
-  const handleUpdateSpbParameterFormOpen = () =>  {
+  const handleUpdateSpbParameterFormOpen = () => {
     setUpdatedEdgeNodeId(spbParameter?.edge_node_id || '');
     setUpdatedGroupId(spbParameter?.group_id || '');
     setUpdateSpbParameterFormOpen(true);
-  } 
+  };
 
   const handleAddNodeAttributeFormOpen = () => {
-    // Reset the input values when opening the form
-    setFormDataList([{ name: '', value: '' }]); // Set initial row
+    setFormDataList([{ name: '', value: '' }]);
     setAddNodeAttributeFormOpen(true);
   };
 
   const handleUpdateNodeAttributeFormOpen = () => {
-    // Initialize updatedAttributes with existing attributes
     const initialUpdatedAttributes = nodeAttributes?.map(attr => ({ name: attr.name, value: attr.value })) || [];
     setUpdatedAttributes(initialUpdatedAttributes);
     setUpdateNodeAttributeFormOpen(true);
   };
-  
 
-  const handleUpdateMqttFormOpen = () =>  {
+  const handleUpdateMqttFormOpen = () => {
     setUpdatedBrokerHost(mqtt?.broker_host || '');
     setUpdatedBrokerPort(mqtt?.broker_port || '');
     setUpdateMqttFormOpen(true);
-  } 
+  };
 
   const handleUpdateFormClose = () => {
     setUpdateSpbParameterFormOpen(false);
@@ -198,7 +145,7 @@ const NodeParameterTable = () => {
     };
 
     try {
-      const response = await fetch(`${baseUrl}/node-parameter/3`, {
+      const response = await fetch(`/node-parameter/3`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -226,28 +173,14 @@ const NodeParameterTable = () => {
     handleUpdateFormClose();
   };
 
-  // Add this function to handle the change in form data
   const handleFormDataChange = (index, key, value) => {
     const updatedFormDataList = [...formDataList];
     updatedFormDataList[index][key] = value;
     setFormDataList(updatedFormDataList);
   };
 
-  // eslint-disable-next-line
-  const handleAddRow = () => {
-    setAttributeRows([...attributeRows, { name: '', value: '' }]);
-  };
-
-  // Add this function to handle the "Add" button click
   const handleAddFormData = () => {
     setFormDataList([...formDataList, { name: '', value: '' }]);
-  };
-
-  // eslint-disable-next-line
-  const handleAttributeChange = (index, key, value) => {
-    const updatedRows = [...attributeRows];
-    updatedRows[index][key] = value;
-    setAttributeRows(updatedRows);
   };
 
   const handleRemoveFormData = (indexToRemove) => {
@@ -256,13 +189,7 @@ const NodeParameterTable = () => {
     });
   };
 
-  // eslint-disable-next-line
-  const getUpdatedValue = (attributeName) => {
-    // Assuming you have a state variable for updated attributes, e.g., updatedAttributes
-    const updatedAttribute = updatedAttributes.find(attr => attr.name === attributeName);
-    return updatedAttribute ? updatedAttribute.value : "";
-  };
-  
+
   const handleUpdateInputChange = (index, updatedAttribute) => {
     setUpdatedAttributes(prevAttributes => {
       const updatedAttributesCopy = [...prevAttributes];
@@ -276,12 +203,11 @@ const NodeParameterTable = () => {
     updatedAttributesCopy.splice(index, 1);
     setUpdatedAttributes(updatedAttributesCopy);
   };
-  
 
   const handleAddNodeAttributeSubmit = async () => {
     try {
       const newAttributes = formDataList.map(formData => ({ name: formData.name, value: formData.value }));
-      const response = await fetch(`${baseUrl}/node-parameter/`, {
+      const response = await fetch(`/node-parameter/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,9 +239,7 @@ const NodeParameterTable = () => {
     handleUpdateFormClose();
   };
 
-
   const handleUpdateNodeAttributeSubmit = async () => {
-    // Update local state with the new values
     setData((prevData) => {
       const updatedNodeParameters = prevData.node_parameters.map((param) => {
         if (param.name === 'node_attributes') {
@@ -326,26 +250,26 @@ const NodeParameterTable = () => {
         }
         return param;
       });
-  
+
       return {
         ...prevData,
         node_parameters: updatedNodeParameters,
       };
     });
-  
+
     const updatedData = {
       node_attributes: updatedAttributes.map(attr => ({ name: attr.name, value: attr.value })),
     };
-  
+
     try {
-      const response = await fetch(`${baseUrl}/node-parameter/4`, {
+      const response = await fetch(`/node-parameter/4`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedData),
       });
-  
+
       if (response.ok) {
         setNodeAttributeSuccessMessage('Node Attribute updated successfully.');
       } else {
@@ -354,11 +278,10 @@ const NodeParameterTable = () => {
     } catch (error) {
       setErrorMessage(`Error updating Node Attribute:  ${error}`);
     }
-  
+
     handleUpdateFormClose();
   };
-  
-  
+
   const handleUpdateMqttSubmit = async () => {
     const updatedData = {
       mqtt: {
@@ -368,7 +291,7 @@ const NodeParameterTable = () => {
     };
 
     try {
-      const response = await fetch(`${baseUrl}/node-parameter/2`, {
+      const response = await fetch(`/node-parameter/2`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -398,7 +321,7 @@ const NodeParameterTable = () => {
 
   const handleModbusChange = async (paramName, value) => {
     try {
-      const response = await fetch(`${baseUrl}/node-parameter/1`, {
+      const response = await fetch(`/node-parameter/1`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -422,14 +345,10 @@ const NodeParameterTable = () => {
     }
   };
 
-  
   const handleRestart = () => {
-    // Add logic for restarting here
     setIsRestarting(true);
-  
-    // Perform your restart actions, then set isRestarting to false
-    // For example, you can make a fetch request to a restart endpoint
-    fetch(`${baseUrl}/service/restart-services`, {
+
+    fetch(`/service/restart-services`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -438,7 +357,6 @@ const NodeParameterTable = () => {
       .then((response) => {
         if (response.ok) {
           setServiceStartSuccessMessage('Service is restarting.');
-          // Add any additional logic if needed
         } else {
           setErrorMessage(`Failed to restart service: ${response.statusText}`);
         }
@@ -451,12 +369,10 @@ const NodeParameterTable = () => {
       });
   };
 
-
   const handleStop = () => {
-    // Add logic for stopping here
     setIsStopping(true);
-  
-    fetch(`${baseUrl}/service/stop-services`, {
+
+    fetch(`/service/stop-services`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -465,7 +381,6 @@ const NodeParameterTable = () => {
       .then((response) => {
         if (response.ok) {
           setServiceStopSuccessMessage('Service is stopped.');
-          // Add any additional logic if needed
         } else {
           setErrorMessage(`Failed to stop service: ${response.statusText}`);
         }
@@ -490,102 +405,6 @@ const NodeParameterTable = () => {
       {message}
     </Alert>
   );
-  
-  // const handleRetentionParameterChange = (param, unit, value) => {
-  //   // Parse the input value as an integer
-  //   const integerValue = parseInt(value, 10);
-  
-  //   // Check if the parsed value is a valid integer
-  //   if (!isNaN(integerValue)) {
-  //     setRetentionParameters((prevParameters) => ({
-  //       ...prevParameters,
-  //       [param]: { ...prevParameters[param], [unit]: integerValue },
-  //     }));
-  //   }
-  //   // Set valuesChanged to true when any value changes
-  //   setValuesChanged(true);
-  // };
-  
-  
-  // const handleRetentionParameterSubmit = async () => {
-  //   try {
-  //     const response = await fetch(`${baseUrl}/node-parameter/5`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         retention_parameter: retentionParameters,
-  //       }),
-  //     });
-  //     // After successful submission, reset valuesChanged to false
-  //     setValuesChanged(false);
-
-  //     if (response.ok) {
-  //       setRetentionParameterSuccessMessage('Retention Parameters updated successfully.');
-  //     } else {
-  //       setErrorMessage(`Failed to update Retention Parameters: ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     setErrorMessage(`Error updating Retention Parameters: ${error}`);
-  //   }
-  // };
-
-  // const handleReset = () => {
-  //   // Replace the initialValues with your actual initial values
-  //   const initialValues = {
-  //     check_frequency: {
-  //       days: 0,
-  //       hours: 0,
-  //       minutes: 0,
-  //       seconds: 0,
-  //     },
-  //     success_retention: {
-  //       days: 0,
-  //       hours: 0,
-  //       minutes: 0,
-  //       seconds: 0,
-  //     },
-  //     failure_retention: {
-  //       days: 0,
-  //       hours: 0,
-  //       minutes: 0,
-  //       seconds: 0,
-  //     },
-  //   };
-  
-  //   setRetentionParameters(initialValues);
-  //   setValuesChanged(false);
-  // };
-  
-
-  // const handleTimeDelayParameterSubmit = async () => {
-  //   try {
-  //     const response = await fetch(`${baseUrl}/node-parameter/6`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         time_delay: timeDelayParameters,
-  //       }),
-  //     });
-  //     // Assuming the submission is successful, disable the submit button
-  //     setIsFormValid(false);
-
-  //     if (response.ok) {
-  //       // Display success message or handle as needed
-  //       setTimeDelaySuccessMessage('Time Delay updated successfully.');
-  //     } else {
-  //       // Display error message or handle as needed
-  //       setErrorMessage(`Failed to update Time Delay: ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     // Display error message or handle as needed
-  //     setErrorMessage(`Error updating Time Delay: ${error}`);
-  //   }
-  // };
-
 
   return (
     <Grid container spacing={1}>
@@ -608,12 +427,6 @@ const NodeParameterTable = () => {
       {ModbusSuccessMessage && (
         <SuccessMessage message={ModbusSuccessMessage} onClose={() => setModbusSuccessMessage('')}/>
       )}
-      {/* {RetentionParameterSuccessMessage && (
-        <SuccessMessage message={RetentionParameterSuccessMessage} onClose={() => setRetentionParameterSuccessMessage('')}/>
-      )}
-      {TimeDelaySuccessMessage && (
-        <SuccessMessage message={TimeDelaySuccessMessage} onClose={() => setTimeDelaySuccessMessage('')}/>
-      )} */}
       {errorMessage && (
         <ErrorMessage message={errorMessage} onClose={() => setErrorMessage('')}/>
       )}
@@ -753,119 +566,6 @@ const NodeParameterTable = () => {
           </div>
         </Paper>
       </Grid>
-
-      {/* <Grid item xs={4}>
-        <Paper style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h6">Retention Parameters</Typography>
-          <form>
-            {['check_frequency', 'success_retention', 'failure_retention'].map((param, index) => (
-              <div key={index} style={{ marginBottom: '20px' }}>
-                <Typography variant="subtitle1">{param.replace('_', ' ')}</Typography>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                  {['days', 'hours', 'minutes', 'seconds'].map((unit, unitIndex) => (
-                    <TextField
-                      key={unitIndex}
-                      label={unit.charAt(0).toUpperCase() + unit.slice(1)}
-                      type="number"
-                      value={retentionParameters[param][unit]}
-                      onChange={(e) => handleRetentionParameterChange(param, unit, e.target.value)}
-                      fullWidth
-                      style={{ marginRight: '10px' }}
-                      inputProps={{
-                        min: 0,
-                        max: unit === 'days' ? 31 : unit === 'hours' ? 24 : 60,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                onClick={handleReset}
-                color="primary"
-                variant="contained"
-                style={{ marginRight: '10px' }}
-              >
-                Reset
-              </Button>
-              <Button
-                onClick={handleRetentionParameterSubmit}
-                color="primary"
-                variant="contained"
-                disabled={!valuesChanged} // Disable if values have not changed
-              >
-                Submit
-              </Button>
-            </div>
-          </form>
-        </Paper>
-      </Grid>
-
-
-      <Grid item xs={4}>
-        <Paper style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h6">Time Delay Parameters</Typography>
-          <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
-            <div style={{ display: 'flex', flexDirection: 'row', marginRight: '20px' }}>
-            <TextField
-              label="Minutes"
-              type="number"
-              value={timeDelayParameters.minutes}
-              style={{ marginRight: '5px' }}
-              onChange={(e) => {
-                let newValue = parseInt(e.target.value) || 0;
-                // Set upper limit to 60
-                newValue = Math.min(newValue, 60);
-                newValue = Math.max(newValue, 0); // Set lower limit to 0
-
-                setTimeDelayParameters((prev) => ({
-                  ...prev,
-                  minutes: newValue,
-                }));
-                setIsFormValid(true);
-              }}
-              inputProps={{
-                step: 1,
-                min: 0,
-                max: 60,
-              }}
-            />
-            <TextField
-              label="Seconds"
-              type="number"
-              value={timeDelayParameters.seconds}
-              onChange={(e) => {
-                let newValue = parseInt(e.target.value) || 0;
-                // Set upper limit to 60
-                newValue = Math.min(newValue, 60);
-                newValue = Math.max(newValue, 0); // Set lower limit to 0
-
-                setTimeDelayParameters((prev) => ({
-                  ...prev,
-                  seconds: newValue,
-                }));
-                setIsFormValid(true);
-              }}
-              inputProps={{
-                step: 1,
-                min: 0,
-                max: 60,
-              }}
-            />
-            </div>
-            <Button
-              onClick={handleTimeDelayParameterSubmit}
-              color="primary"
-              variant="contained"
-              style={{ marginBottom: '15px' }}
-              disabled={!isFormValid} // Disable the button when the form is not valid
-            >
-              Submit
-            </Button>
-          </div>
-        </Paper>
-      </Grid> */}
 
       {/* Update form for SPB Parameter */}
       <Dialog open={updateSpbParameterFormOpen} onClose={handleUpdateFormClose}>

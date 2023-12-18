@@ -7,5 +7,6 @@ class Parameter(db.Model):
     address = db.Column(db.Integer, nullable=False)
     parameter_name = db.Column(db.String)
     data_type = db.Column(db.String)
+    threshold =db.Column(db.Float)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
     

@@ -13,7 +13,8 @@ parameter_create_fields = ns.model('ParameterCreate', {
         'function_code': fields.String(required=True),
         'address': fields.String(required=True),
         'parameter_name': fields.String(required=True),
-        'data_type': fields.String(required=True)
+        'data_type': fields.String(required=True),
+        'threshold': fields.Float(required=True)
     })))
 })
 
@@ -24,6 +25,8 @@ parameter_update_fields = ns.model('ParameterUpdate', {
     'address': fields.String(description='Parameter address', required=True),
     'parameter_name': fields.String(description='Parameter name'),
     'data_type': fields.String(description='Parameter data_type'),
+    'threshold': fields.Float(required=True)
+    
 })
 
 @ns.route('/')
@@ -31,7 +34,7 @@ class ParameterResourceList(Resource):
     def get(self):
         """Retrieve all Parameters."""
         status = 0
-        return_fields = [ "function_code" ,"address", "parameter_name","data_type", "device_id"]
+        return_fields = [ "function_code" ,"address", "parameter_name","data_type","threshold", "device_id"]
         parameters = db.session.query(Parameter).all()
         if not parameters:
             output = {}
@@ -130,7 +133,7 @@ class ParameterResource(Resource):
     def get(self, id):
         """Retrieve a specific parameter."""
         status = 0
-        return_fields = ["function_code", "address", "parameter_name", "data_type"]
+        return_fields = ["function_code", "address", "parameter_name", "data_type", "threshold"]
         parameter = db.session.query(Parameter).filter_by(id=id).first()
         if not parameter:
             return make_response(jsonify({"status": status, 'message': 'No parameter found while executing API Get parameter By ID!'}), 404)
@@ -222,7 +225,7 @@ class CreateParameter(Resource):
         created_parameters = []
 
         for parameter_data in parameters_data:
-            required_fields = ["function_code", "address", "parameter_name", "data_type"]
+            required_fields = ["function_code", "address", "parameter_name", "data_type", "threshold"]
             for field in required_fields:
                 if field not in parameter_data:
                     return make_response(jsonify({"status": status, 'message': f'Required field "{field}" not found in the parameter data'}), 400)
@@ -232,6 +235,7 @@ class CreateParameter(Resource):
                 address=parameter_data['address'].strip(),
                 parameter_name=parameter_data['parameter_name'].strip(),
                 data_type=parameter_data['data_type'].strip(),
+                threshold=parameter_data['threshold'].strip(),
                 active=parameter_data['active'],
                 device_id=device.id  # Set the device_id for the new parameter
             )

@@ -57,7 +57,7 @@
 #     app.run(debug=True)
 
 import os
-from flask import Flask
+from flask import Flask, render_template
 from resources import api
 from flask_cors import CORS
 from db import db
@@ -67,6 +67,7 @@ app = Flask(__name__)
 
 CORS(app)
 api.init_app(app, cors_allowed_origins='*')
+
 
 # Define the SQLite database file path
 script_path = os.path.abspath(__file__)
@@ -85,6 +86,11 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     create_default_node_parameters()
+
+# Set the default route to the UI function
+@app.route("/")
+def index():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

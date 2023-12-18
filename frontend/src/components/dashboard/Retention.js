@@ -8,7 +8,7 @@ import {
   TextField,
 } from '@mui/material';
 
-const baseUrl = process.env.REACT_APP_BASEURL;
+// const baseUrl = process.env.REACT_APP_BASEURL;
 
 const RetentionParameterForm= () => {
     const [data, setData] = useState(null);
@@ -44,7 +44,7 @@ const RetentionParameterForm= () => {
     useEffect(() => {
     const fetchData = async () => {
         try {
-        const response = await fetch(`${baseUrl}/node-parameter/`);
+        const response = await fetch(`/node-parameter/`);
         const responseData = await response.json();
         setData(responseData);
     
@@ -109,7 +109,7 @@ const RetentionParameterForm= () => {
   
   const handleRetentionParameterSubmit = async () => {
     try {
-      const response = await fetch(`${baseUrl}/node-parameter/5`, {
+      const response = await fetch(`/node-parameter/5`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const RetentionParameterForm= () => {
 
   const handleTimeDelayParameterSubmit = async () => {
     try {
-      const response = await fetch(`${baseUrl}/node-parameter/6`, {
+      const response = await fetch(`/node-parameter/6`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
