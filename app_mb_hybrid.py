@@ -116,7 +116,7 @@ def main():
                             if old_data  - threshold_value > data  or data > old_data + threshold_value:
                                     
                                     spb_device.data.set_value(parameter_name, data,int(datetime.datetime.now().timestamp() * 1000))
-                                    print('spb_device.data.: ', spb_device.data)
+                                    # print('spb_device.data.: ', spb_device.data)
 
                     
                             print(f"Updated '{parameter_name}' with value: {data}")
