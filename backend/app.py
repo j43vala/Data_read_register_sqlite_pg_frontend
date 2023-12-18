@@ -88,7 +88,7 @@ with app.app_context():
     create_default_node_parameters()
 
 # Set the default route to the UI function
-@app.route("/")
+@app.route("/ui")
 def index():
     return render_template('index.html')
 
