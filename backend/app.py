@@ -1,3 +1,42 @@
+import os
+from flask import Flask, render_template
+from resources import api
+from flask_cors import CORS
+from db import db
+from resources.node_parameter_resource import create_default_node_parameters
+
+app = Flask(__name__)
+
+CORS(app)
+
+@app.route("/")
+def index():
+    return render_template('index.html')
+
+api.init_app(app, cors_allowed_origins='*')
+
+# Define the SQLite database file path
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+
+sqlite_db_path = os.path.join(dir_path, "local1.db")
+# print("sqlite db path : ", sqlite_db_path)
+
+# Set the SQLite connection URL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + sqlite_db_path
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+# Create the database if it doesn't exist
+with app.app_context():
+    db.create_all()
+    create_default_node_parameters()
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
+    
+    
 # from flask import Flask
 # from resources import api
 # from flask_cors import CORS
@@ -56,44 +95,3 @@
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
-import os
-from flask import Flask, render_template
-from resources import api
-from flask_cors import CORS
-from db import db
-from resources.node_parameter_resource import create_default_node_parameters
-
-app = Flask(__name__)
-
-CORS(app)
-
-# Set the default route to the UI function
-@app.route("/")
-def index():
-    return render_template('index.html')
-
-
-api.init_app(app, cors_allowed_origins='*')
-
-
-# Define the SQLite database file path
-script_path = os.path.abspath(__file__)
-dir_path = os.path.dirname(script_path)
-
-sqlite_db_path = os.path.join(dir_path, "local1.db")
-# print("sqlite db path : ", sqlite_db_path)
-
-# Set the SQLite connection URL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + sqlite_db_path
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db.init_app(app)
-
-# Create the database if it doesn't exist
-with app.app_context():
-    db.create_all()
-    create_default_node_parameters()
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
