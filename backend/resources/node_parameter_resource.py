@@ -42,8 +42,8 @@ def create_default_node_parameters():
                 "broker_port": 1883,
                 "qos":00,
                 "qos_options": [0,1,2],
-                "client_id": "",
-                "client_password": "",
+                "user": "",
+                "password": "",
             }
         },
         {
