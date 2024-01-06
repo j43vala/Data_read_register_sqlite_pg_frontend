@@ -19,10 +19,12 @@ mqtt-spb-wrapper==1.0.19
 paho-mqtt==1.6.1
 protobuf==3.20.1
 psycopg2==2.9.9
+psycopg2-binary==2.9.9
 pymodbus==3.5.4
 pyrsistent==0.20.0
 pyserial==3.5
 pytz==2023.3.post1
+PyYAML==6.0.1
 SQLAlchemy==2.0.23
 transforms==0.2.1
 typing_extensions==4.8.0

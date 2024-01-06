@@ -43,7 +43,6 @@ def main():
 
                                 reg_no = parameter.get("address")
                                 reg_data_type = parameter.get("data_type")
-                                
 
                                 if parameter_name is not None:
                                     data = read_modbus_data(client, slave_id, reg_no, reg_data_type)

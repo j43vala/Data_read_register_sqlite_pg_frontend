@@ -1,13 +1,3 @@
-#
-#    --- Simple Sparkplub B listener pplication example ---
-#
-#   The application will create an spB application EoN node to receive all group messages and
-#   display them in the console.
-#
-#   Notes:
-#       - To set MQTT broker parameters, use config.yml file
-#       - To set spB group and eon ids, use config.yml file.
-#
 import os
 import time
 from mqtt_spb_wrapper import *

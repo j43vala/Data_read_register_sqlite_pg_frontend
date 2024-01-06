@@ -2,12 +2,12 @@ import time
 from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
 from config.data_conversion import read_integer, read_double, read_float
 from modbus_final import initialize_modbus_client
-
+import copy
 
 device_meta = {}
 node_meta = {}
 
-def init_spb_edge_node(group_id, edge_node_id, node_dict):
+def init_spb_edge_node(group_id, edge_node_id, config):
     
     _DEBUG = True  # Enable debug messages
 
@@ -32,16 +32,26 @@ def init_spb_edge_node(group_id, edge_node_id, node_dict):
 
     # Set the node Attributes, Data and Commands that will be sent on the DBIRTH message --------------------------
 
-    attributes = node_dict["node_attributes"]
+    attributes = config["node_attributes"]
     for attribute in attributes:
         node.attribures.set_value(attribute["name"],attribute["value"])
+    
+    temp = copy.deepcopy(config)
+    for key in temp:
+        print(key)
+        print(temp[key])
+
+    for device in temp["devices"]:
+        del device["model"]
+    
+    node.attribures.set_value(name = "settings" ,value = str(temp))
 
 
     # Commands
     node.commands.set_value("rebirth", False)
 
     
-    node_dict["spb_node"] = node
+    config["spb_node"] = node
 
     
     
@@ -98,13 +108,13 @@ def init_spb_device(group_name,edge_node_name, device_dict):
 
 
 
-def connect_spb_device(device_dict, broker , port):
+def connect_spb_device(device_dict, broker , port, user, password):
    
     
     print("Trying to connect to broker...")
 
-    device = device_dict["spb_device"]
-    _connected = device.connect(broker, port)
+    device : MqttSpbEntityDevice = device_dict["spb_device"]
+    _connected = device.connect(broker, port, user, password)
 
     if _connected:
         # Send birth message
@@ -116,13 +126,13 @@ def connect_spb_device(device_dict, broker , port):
     return _connected
 
 
-def connect_spb_node(node_dict, broker , port):
+def connect_spb_node(node_dict, broker , port, user, password):
    
     
     print("Trying to connect to broker...")
 
     node = node_dict["spb_node"]
-    _connected = node.connect(broker, port)
+    _connected = node.connect(broker, port, user, password)
 
     if _connected:
         # Send birth message
