@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 [Unit]
 Description=modbus publish via spb
 After=network.target
@@ -9,4 +10,17 @@ WorkingDirectory= /home/wzero/Data_read_register_sqlite_pg_frontend/backend
 ExecStart=/home/wzero/Data_read_register_sqlite_pg_frontend/ENV/bin/python3 /home/wzero/Data_read_register_sqlite_pg_frontend/backend/app.py
 
 [Install]
+=======
+[Unit]
+Description=modbus publish via spb
+After=network.target
+
+[Service]
+Type=simple
+User=wzero
+WorkingDirectory= /home/wzero/Data_read_register_sqlite_pg_frontend/backend
+ExecStart=/home/wzero/Data_read_register_sqlite_pg_frontend/ENV/bin/python3 /home/wzero/Data_read_register_sqlite_pg_frontend/backend/app.py
+
+[Install]
+>>>>>>> Stashed changes
 WantedBy=multi-user.target

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 [Unit]
 Description=modbus to sqlite and sparkplug b
 After=network.target
@@ -13,4 +14,21 @@ SyslogIdentifier=app_mb_hybrid # without any quote
 Restart=always
 
 [Install]
+=======
+[Unit]
+Description=modbus to sqlite and sparkplug b
+After=network.target
+
+[Service]
+Type=simple
+User=wzero
+WorkingDirectory= /home/wzero/Data_read_register_sqlite_pg_frontend
+ExecStart=/home/wzero/Data_read_register_sqlite_pg_frontend/ENV/bin/python3 /home/wzero/Data_read_register_sqlite_pg_frontend/app_mb_hybrid.py
+StandardOutput=/home/wzero/Data_read_register_sqlite_pg_frontend/service_files/hybrid_out.log
+StandardError=/home/wzero/Data_read_register_sqlite_pg_frontend/service_files/hybrid_error.log
+SyslogIdentifier=app_mb_hybrid # without any quote
+Restart=always
+
+[Install]
+>>>>>>> Stashed changes
 WantedBy=multi-user.target
