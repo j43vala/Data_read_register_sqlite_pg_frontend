@@ -89,6 +89,15 @@ def create_default_node_parameters():
                 "minutes": 00,
                 "seconds": 00
             }
+        },
+        {
+            "name": "publish_time",
+            "value": {
+                "days": 00,
+                "hours": 00,
+                "minutes": 00,
+                "seconds": 00
+            }
         }
     ]
 
