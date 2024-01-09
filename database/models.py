@@ -28,6 +28,7 @@ class parameter(Base):
     parameter_name = Column(String)
     data_type = Column(String)
     threshold =Column(Float)
+    aggregation_type = Column(String)
     device_id = Column(Integer, ForeignKey('device.id'))
 
 class Attribute(Base):

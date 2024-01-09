@@ -71,7 +71,9 @@ def load_config_from_db():
                 'address': parameter.address,
                 'parameter_name': parameter.parameter_name,
                 'data_type': parameter.data_type,
-                'threshold': parameter.threshold
+                'threshold': parameter.threshold,
+                'aggregation_type': parameter.aggregation_type,
+                
             }
             device_data['parameters'].append(parameter_data)
 
@@ -93,6 +95,7 @@ def load_config_from_db():
         "node_attributes": formatted_node_parameters.get("node_attributes", []),
         "retention_parameter": formatted_node_parameters.get("retention_parameter", []),
         "time_delay": formatted_node_parameters.get("time_delay", []),
+        "publish_time": formatted_node_parameters.get("publish_time", []),
         "devices": devices_list
     }
 
