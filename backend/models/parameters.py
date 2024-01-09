@@ -8,5 +8,6 @@ class Parameter(db.Model):
     parameter_name = db.Column(db.String)
     data_type = db.Column(db.String)
     threshold =db.Column(db.Float)
+    aggregation_type = db.Column(db.String)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
     

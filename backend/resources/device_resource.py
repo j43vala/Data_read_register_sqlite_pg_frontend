@@ -38,7 +38,8 @@ class DeviceResourceList(Resource):
                     "address": parameter.address,
                     "parameter_name": parameter.parameter_name,
                     "data_type": parameter.data_type,
-                    "threshold" :parameter.threshold
+                    "threshold" :parameter.threshold,
+                    "aggregation_type" :parameter.aggregation_type
                 }
                 connected_parameters.append(parameter_data)
 
@@ -115,7 +116,8 @@ class DeviceResource(Resource):
                 "address": parameter.address,
                 "parameter_name": parameter.parameter_name,
                 "data_type": parameter.data_type,
-                "threshold" :parameter.threshold                
+                "threshold" :parameter.threshold,
+                "aggregation_type" :parameter.aggregation_type                                
             }
             connected_parameters.append(parameter_data)
 
