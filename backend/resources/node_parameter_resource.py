@@ -50,7 +50,8 @@ def create_default_node_parameters():
             "name": "spb_parameter",
             "value": {
                 "group_id": "wzero",
-                "edge_node_id": "rpi1"
+                "edge_node_id": "rpi1",
+                "hostname": ""
             }
         },
         {
