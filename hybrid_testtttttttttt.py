@@ -1,5 +1,6 @@
 import time
 import datetime
+import subprocess
 from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
@@ -27,11 +28,8 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
 
 
 
-#dynamic get from json 
-set_qos = config["mqtt"]["qos"]
-
 # publish data to sparkplug b
-def publish_to_sparkplug_b(spb_device, qos = set_qos):
+def publish_to_sparkplug_b(spb_device):
    
     try:
         success = spb_device.publish_data()
@@ -41,12 +39,44 @@ def publish_to_sparkplug_b(spb_device, qos = set_qos):
         print(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
+# update hostname 
+def update_hostname_config_file(hostname):
+    
+    hosts_file_path = "/etc/hosts"                      #linux config file 
+    hostname_file_path = "/etc/hostname"
+
+    # update hosts file 
+    with open(hosts_file_path, 'r') as f:
+        lines = f.readlines()
+    with open(hosts_file_path, 'w') as f:
+        updated = False
+    for line in lines:
+        if '127.0.1.1' in line:
+            f.write(f'127.0.1.1\t{hostname}\n')
+            updated = True
+        else:
+            f.write(line)
+
+    if not updated:
+        with open(hosts_file_path, 'a')as f:
+            f.write(f'127.0.1.1\t{hostname}\n')
+
+
+    #update hostname file
+    with open(hostname_file_path, 'w') as f:
+        f.write(hostname)
+
+
+
+
 # perform data retantion in SQlite database
 def perform_data_retention(session, model, retention_period):
     records_to_delete = session.query(model).filter(model.timestamp < retention_period).all()
     for record in records_to_delete:
         session.delete(record)
     session.commit()
+
+
 
 # main function
 def main():
@@ -84,7 +114,8 @@ def main():
         port = config.get("mqtt").get("broker_port")
         user = config.get("mqtt").get("user")        
         password = config.get("mqtt").get("password")
-        
+        hostname = config.get("spb_parameter").get("hostname")
+        print('hostname: ', hostname)
 
         success = None
         init_spb_edge_node(group_id = group_name, edge_node_id = edge_node_id, config = config)
@@ -105,6 +136,7 @@ def main():
             for device_dict in devices:
                 if not device_dict.get("publish_time"):
                     device_dict["publish_time"] = datetime.datetime.now()
+                    
                 model = device_dict["model"]
                 record = model()
                 slave_id = device_dict.get("slave_id")
@@ -119,13 +151,14 @@ def main():
                     if not parameter.get("value"):
                         parameter["value"] = []
                         
+                        
                     print('\n\n\n\ndevice_dict:............ ', device_dict)
                     function_code = parameter.get("function_code")
                     parameter_name = parameter.get("parameter_name")
                     reg_no = parameter.get("address")
                     reg_data_type = parameter.get("data_type")
                     threshold = parameter.get("threshold")
-                    aggregation_type = parameter.get("aggregation_type")
+                    # aggregation_type = parameter.get("aggregation_type")
 
                         
                     if parameter_name :
@@ -139,13 +172,15 @@ def main():
                     if data:
                         setattr(record, parameter_name, data)
                         
-                        # TODO add min day 
+                        # publish delat time 
                         publish_delay = datetime.timedelta(
+                            
                         days=config["publish_time"]["days"],
                         hours=config["publish_time"]["hours"],
                         minutes=config["publish_time"]["minutes"],
                         seconds=config["publish_time"]["seconds"]
                         )
+                       
                         # check publish time delay
                         if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
                         
@@ -173,6 +208,8 @@ def main():
 
                 # publish data to spb
                 success = publish_to_sparkplug_b(spb_device)
+                if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
+                    device_dict["publish_time"] = datetime.datetime.now()
 
                 #  set the retantion based on success or failure
                 retention_period = (
@@ -210,3 +247,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+ 
