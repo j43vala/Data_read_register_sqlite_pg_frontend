@@ -39,36 +39,6 @@ def publish_to_sparkplug_b(spb_device):
         print(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
-# update hostname 
-def update_hostname_config_file(hostname):
-    
-    hosts_file_path = "/etc/hosts"                      #linux config file 
-    hostname_file_path = "/etc/hostname"
-
-    # update hosts file 
-    with open(hosts_file_path, 'r') as f:
-        lines = f.readlines()
-    with open(hosts_file_path, 'w') as f:
-        updated = False
-    for line in lines:
-        if '127.0.1.1' in line:
-            f.write(f'127.0.1.1\t{hostname}\n')
-            updated = True
-        else:
-            f.write(line)
-
-    if not updated:
-        with open(hosts_file_path, 'a')as f:
-            f.write(f'127.0.1.1\t{hostname}\n')
-
-
-    #update hostname file
-    with open(hostname_file_path, 'w') as f:
-        f.write(hostname)
-
-
-
-
 # perform data retantion in SQlite database
 def perform_data_retention(session, model, retention_period):
     records_to_delete = session.query(model).filter(model.timestamp < retention_period).all()
