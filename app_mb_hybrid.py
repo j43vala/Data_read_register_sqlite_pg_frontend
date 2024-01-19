@@ -131,13 +131,13 @@ def main():
                         
                     if parameter_name :
                         data = retrieve_modbus_data( client, slave_id, reg_no, reg_data_type)
-                        parameter["value"].append(data)
                         print(f'\n\n\n\n {parameter_name} value: ', parameter["value"])
                     else:
                         data = None
 
                
                     if data:
+                        parameter["value"].append(data)
                         setattr(record, parameter_name, data)
                         
                         # publish delat time 
@@ -157,6 +157,8 @@ def main():
                             # print('\n\n\n threshold_value: ', threshold_value)
                             
                             old_data = spb_device.data.get_value(parameter_name)
+
+                            # parameter["value"].append(None)
                             val = aggregator.aggregate_data(type = parameter["aggregation_type"],data = parameter["value"])
                             print("\n\n\n------------------------------------ aggregated value : ",val)
                             if old_data  - threshold_value > val  or val > old_data + threshold_value:
@@ -178,6 +180,8 @@ def main():
                 success = publish_to_sparkplug_b(spb_device)
                 if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
                     device_dict["publish_time"] = datetime.datetime.now()
+                    for parameter in device_dict["parameters"]:
+                        parameter["value"] = []
 
                 #  set the retantion based on success or failure
                 retention_period = (
