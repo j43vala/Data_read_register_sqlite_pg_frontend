@@ -7,6 +7,7 @@ from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
 from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node
 import socket
+# import os 
 from config.aggrigation import Aggregate
 
 aggregator = Aggregate()
@@ -26,8 +27,6 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         print(f"An error occurred reading Modbus data: {e}")
         return None
 
-
-
 # publish data to sparkplug b
 def publish_to_sparkplug_b(spb_device):
    
@@ -45,8 +44,6 @@ def perform_data_retention(session, model, retention_period):
     for record in records_to_delete:
         session.delete(record)
     session.commit()
-
-
 
 # main function
 def main():
@@ -71,7 +68,8 @@ def main():
         client = initialize_modbus_client()
         client.connect()
 
-        hostname = socket.gethostname()
+        # hostname = os.uname()[1]                    # for linux
+        hostname = socket.gethostname()             # for win and linux
 
         # create dynamic model for sqlite
         create_dynamic_models(devices, hostname)
@@ -97,7 +95,7 @@ def main():
             init_spb_device(group_name, edge_node_id, device_dict)
             connect_spb_device(device_dict, broker , port, user, password)
 
-        value=[]
+        # value=[]
 
         # main loop
         while True:

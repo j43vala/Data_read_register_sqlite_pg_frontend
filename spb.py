@@ -3,6 +3,7 @@ from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
 from config.data_conversion import read_integer, read_double, read_float
 from modbus_final import initialize_modbus_client
 import copy
+import json
 
 device_meta = {}
 node_meta = {}
@@ -44,7 +45,7 @@ def init_spb_edge_node(group_id, edge_node_id, config):
     for device in temp["devices"]:
         del device["model"]
     
-    node.attribures.set_value(name = "settings" ,value = str(temp))
+    node.attribures.set_value(name = "settings" ,value = json.dumps(temp))
 
 
     # Commands
