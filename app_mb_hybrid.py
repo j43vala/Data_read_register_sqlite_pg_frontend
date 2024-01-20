@@ -1,6 +1,8 @@
 import time
 import datetime
 import subprocess
+import logging
+from logging.handlers import TimedRotatingFileHandler , MemoryHandler
 from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
@@ -10,13 +12,41 @@ import socket
 # import os 
 from config.aggrigation import Aggregate
 
+def unique_message_filter():
+    previous_message = None
+
+    def filter(record):
+        nonlocal previous_message
+        current_message = record.getMessage()
+        if current_message != previous_message:
+            previous_message = current_message
+            return True
+        return False
+    
+    return filter
+
+log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler = TimedRotatingFileHandler('hybrid.log', when='midnight', interval=1, backupCount=5, encoding='utf-8')
+file_handler.setFormatter(log_formatter)
+
+
+memory_handler = MemoryHandler(capacity=1000, target=file_handler)
+
+
+logging.basicConfig(level=logging.DEBUG, handlers=[memory_handler])
+
 aggregator = Aggregate()
 
 # connect to mqtt broker if the sparkplugb device is not connected 
 def connect_to_broker(device_dict, broker, port, user, password):
-    if not device_dict["spb_device_connected"]:
-        print("Connecting to broker from while loop...")
-        connect_spb_device(device_dict, broker, port, user, password)
+    try:
+        if not device_dict["spb_device_connected"]:
+            logging.info("Connecting to broker from while loop...")
+            # print("Connecting to broker from while loop...")
+            connect_spb_device(device_dict, broker, port, user, password)
+    except Exception as e:
+        logging.error(f"Error connecting to the broker: {e}")
+
 
 # retrive data from modbus 
 def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
@@ -24,7 +54,8 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
         return data
     except Exception as e:
-        print(f"An error occurred reading Modbus data: {e}")
+        # print(f"An error occurred reading Modbus data: {e}")
+        logging.error(f"An error occurred reading Modbus data: {e}")
         return None
 
 # publish data to sparkplug b
@@ -32,18 +63,26 @@ def publish_to_sparkplug_b(spb_device):
    
     try:
         success = spb_device.publish_data()
-        print(f"Publish success: {success}")
+        logging.info(f"Publish success: {success}")
+
+        # print(f"Publish success: {success}")
         return success
     except Exception as e:
-        print(f"Failed to publish data to Sparkplug B: {e}")
+        # print(f"Failed to publish data to Sparkplug B: {e}")
+        logging.error(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
 # perform data retantion in SQlite database
 def perform_data_retention(session, model, retention_period):
-    records_to_delete = session.query(model).filter(model.timestamp < retention_period).all()
-    for record in records_to_delete:
-        session.delete(record)
-    session.commit()
+    try:
+        records_to_delete = session.query(model).filter(model.timestamp < retention_period).all()
+        for record in records_to_delete:
+            session.delete(record)
+        session.commit()
+    except Exception as e:
+        logging.error(f"An error occurred during data retention: {e}")
+
+
 
 # main function
 def main():
@@ -99,123 +138,131 @@ def main():
 
         # main loop
         while True:
-            time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
+            try:
+                time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
 
-            for device_dict in devices:
-                if not device_dict.get("publish_time"):
-                    device_dict["publish_time"] = datetime.datetime.now()
-                    
-                model = device_dict["model"]
-                record = model()
-                slave_id = device_dict.get("slave_id")
-                spb_device = device_dict["spb_device"]
-
-                # connecte to mqtt broker 
-                connect_to_broker(device_dict, broker, port, user, password)
-
-
-                # retrive data from modbus and update records
-                for parameter in device_dict["parameters"]:
-                    if not parameter.get("value"):
-                        parameter["value"] = []
+                for device_dict in devices:
+                    if not device_dict.get("publish_time"):
+                        device_dict["publish_time"] = datetime.datetime.now()
                         
-                        
-                    print('\n\n\n\ndevice_dict:............ ', device_dict)
-                    function_code = parameter.get("function_code")
-                    parameter_name = parameter.get("parameter_name")
-                    reg_no = parameter.get("address")
-                    reg_data_type = parameter.get("data_type")
-                    threshold = parameter.get("threshold")
-                    # aggregation_type = parameter.get("aggregation_type")
+                    model = device_dict["model"]
+                    record = model()
+                    slave_id = device_dict.get("slave_id")
+                    spb_device = device_dict["spb_device"]
 
-                        
-                    if parameter_name :
-                        data = retrieve_modbus_data( client, slave_id, reg_no, reg_data_type)
-                        print(f'\n\n\n\n {parameter_name} value: ', parameter["value"])
-                    else:
-                        data = None
+                    # connecte to mqtt broker 
+                    connect_to_broker(device_dict, broker, port, user, password)
 
-               
-                    if data:
-                        parameter["value"].append(data)
-                        setattr(record, parameter_name, data)
-                        
-                        # publish delat time 
-                        publish_delay = datetime.timedelta(
+
+                    # retrive data from modbus and update records
+                    for parameter in device_dict["parameters"]:
+                        if not parameter.get("value"):
+                            parameter["value"] = []
                             
-                        days=config["publish_time"]["days"],
-                        hours=config["publish_time"]["hours"],
-                        minutes=config["publish_time"]["minutes"],
-                        seconds=config["publish_time"]["seconds"]
-                        )
-                       
-                        # check publish time delay
-                        if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
-                        
-                            # fatch threshold
-                            threshold_value = threshold
-                            # print('\n\n\n threshold_value: ', threshold_value)
                             
-                            old_data = spb_device.data.get_value(parameter_name)
+                        # print('\n\n\n\ndevice_dict:............ ', device_dict)
+                        function_code = parameter.get("function_code")
+                        parameter_name = parameter.get("parameter_name")
+                        reg_no = parameter.get("address")
+                        reg_data_type = parameter.get("data_type")
+                        threshold = parameter.get("threshold") 
+                        # aggregation_type = parameter.get("aggregation_type")
 
-                            # parameter["value"].append(None)
-                            val = aggregator.aggregate_data(type = parameter["aggregation_type"],data = parameter["value"])
-                            print("\n\n\n------------------------------------ aggregated value : ",val)
-                            if old_data  - threshold_value > val  or val > old_data + threshold_value:
-                                    
-                                    spb_device.data.set_value(parameter_name, data,int(datetime.datetime.now().timestamp() * 1000))
-                                    parameter["value"] = []
-                                    # print('spb_device.data.: ', spb_device.data)
+                            
+                        if parameter_name :
+                            data = retrieve_modbus_data( client, slave_id, reg_no, reg_data_type)
+                            print(f'\n\n\n\n {parameter_name} value: ', parameter["value"])
+                        else:
+                            data = None
 
                 
-                        # print(f"Updated '{parameter_name}' with value: {data}")
-                else:
-                    print(f"Attribute name is missing in the specification for parameter {parameter}")
+                        if data:
+                            parameter["value"].append(data)
+                            setattr(record, parameter_name, data)
+                            
+                            # publish delat time 
+                            publish_delay = datetime.timedelta(
+                                
+                            days=config["publish_time"]["days"],
+                            hours=config["publish_time"]["hours"],
+                            minutes=config["publish_time"]["minutes"],
+                            seconds=config["publish_time"]["seconds"]
+                            )
+                        
+                            # check publish time delay
+                            if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
+                            
+                                # fatch threshold
+                                threshold_value = threshold
+                                # print('\n\n\n threshold_value: ', threshold_value)
+                                
+                                old_data = spb_device.data.get_value(parameter_name)
 
-                #  add and commit to the record to the sqlite database
-                session.add(record)
-                session.commit()
+                                # parameter["value"].append(None)
+                                val = aggregator.aggregate_data(type = parameter["aggregation_type"],data = parameter["value"])
+                                print("\n\n\n------------------------------------ aggregated value : ",val)
+                                if old_data  - threshold_value > val  or val > old_data + threshold_value:
+                                        
+                                        spb_device.data.set_value(parameter_name, data,int(datetime.datetime.now().timestamp() * 1000))
+                                        parameter["value"] = []
+                                        # print('spb_device.data.: ', spb_device.data)
 
-                # publish data to spb
-                success = publish_to_sparkplug_b(spb_device)
-                if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
-                    device_dict["publish_time"] = datetime.datetime.now()
-                    for parameter in device_dict["parameters"]:
-                        parameter["value"] = []
+                    
+                            # print(f"Updated '{parameter_name}' with value: {data}")
+                    else:
+                        print(f"Attribute name is missing in the specification for parameter {parameter}")
 
-                #  set the retantion based on success or failure
-                retention_period = (
-                    datetime.datetime.utcnow() - datetime.timedelta(
-                        days=config["retention_parameter"]["success_retention"]["days"],
-                        hours=config["retention_parameter"]["success_retention"]["hours"],
-                        minutes=config["retention_parameter"]["success_retention"]["minutes"],
-                        seconds=config["retention_parameter"]["success_retention"]["seconds"]
-                    )
-                )
+                    #  add and commit to the record to the sqlite database
+                    session.add(record)
+                    session.commit()
 
-                if success and datetime.datetime.now() - last_check_time >= check_frequency:
-                    last_check_time = datetime.datetime.now()
-                    perform_data_retention(session, model, retention_period)
-                    print(f"Records retained for device: '{device_dict['device_name']}'")
+                    # publish data to spb
+                    success = publish_to_sparkplug_b(spb_device)
+                    if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
+                        device_dict["publish_time"] = datetime.datetime.now()
+                        for parameter in device_dict["parameters"]:
+                            parameter["value"] = []
 
-                elif not success:
-                    retention_period_failure = (
+                    #  set the retantion based on success or failure
+                    retention_period = (
                         datetime.datetime.utcnow() - datetime.timedelta(
-                            days=config["retention_parameter"]["failure_retention"]["days"],
-                            hours=config["retention_parameter"]["failure_retention"]["hours"],
-                            minutes=config["retention_parameter"]["failure_retention"]["minutes"],
-                            seconds=config["retention_parameter"]["failure_retention"]["seconds"]
+                            days=config["retention_parameter"]["success_retention"]["days"],
+                            hours=config["retention_parameter"]["success_retention"]["hours"],
+                            minutes=config["retention_parameter"]["success_retention"]["minutes"],
+                            seconds=config["retention_parameter"]["success_retention"]["seconds"]
                         )
                     )
 
-                    if datetime.datetime.now() - last_check_time >= check_frequency:
+                    if success and datetime.datetime.now() - last_check_time >= check_frequency:
                         last_check_time = datetime.datetime.now()
-                        perform_data_retention(session, model, retention_period_failure)
-                        print(f"Records retained for device (failure case): '{device_dict['device_name']}'")
+                        perform_data_retention(session, model, retention_period)
+                        print(f"Records retained for device: '{device_dict['device_name']}'")
+
+                    elif not success:
+                        retention_period_failure = (
+                            datetime.datetime.utcnow() - datetime.timedelta(
+                                days=config["retention_parameter"]["failure_retention"]["days"],
+                                hours=config["retention_parameter"]["failure_retention"]["hours"],
+                                minutes=config["retention_parameter"]["failure_retention"]["minutes"],
+                                seconds=config["retention_parameter"]["failure_retention"]["seconds"]
+                            )
+                        )
+
+                        if datetime.datetime.now() - last_check_time >= check_frequency:
+                            last_check_time = datetime.datetime.now()
+                            perform_data_retention(session, model, retention_period_failure)
+                            print(f"Records retained for device (failure case): '{device_dict['device_name']}'")
+            except Exception as main_exception:
+                logging.error(f"An error occurred in the main loop: {main_exception}")
 
     except KeyboardInterrupt:
         client.close()
-        print("Exiting the loop...........")
+        # print("Exiting the loop...........")
+        logging.info("Exiting the loop due to KeyboardInterrupt.")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
+    finally:
+        logging.shutdown()
 
 if __name__ == "__main__":
     main()
