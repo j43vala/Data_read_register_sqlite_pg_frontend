@@ -1,41 +1,39 @@
 import time
 import datetime
 import subprocess
+import schedule
 import logging
-from logging.handlers import TimedRotatingFileHandler , MemoryHandler
+from logging.handlers import  TimedRotatingFileHandler ,MemoryHandler
 from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
 from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node
 import socket
-# import os 
+import os 
 from config.aggrigation import Aggregate
 
-def unique_message_filter():
-    previous_message = None
+log_file_path = "hybrid.log"
+logging.basicConfig(filename=log_file_path, level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-    def filter(record):
-        nonlocal previous_message
-        current_message = record.getMessage()
-        if current_message != previous_message:
-            previous_message = current_message
-            return True
-        return False
-    
-    return filter
-
-log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler = TimedRotatingFileHandler('hybrid.log', when='midnight', interval=1, backupCount=5, encoding='utf-8')
-file_handler.setFormatter(log_formatter)
-
-
-memory_handler = MemoryHandler(capacity=1000, target=file_handler)
-
-
-logging.basicConfig(level=logging.DEBUG, handlers=[memory_handler])
-
-aggregator = Aggregate()
+# log file clean up function
+def clean_up_old_logs(log_file_path, weeks_to_keep=2):
+    try:
+        logging.info("Running clean_up_old_logs function.")
+        cutoff_time = datetime.datetime.now() - datetime.timedelta(weeks=weeks_to_keep)
+        
+        if os.path.isfile(log_file_path) and log_file_path.endswith("hybrid.log"):
+            with open(log_file_path, 'r') as f:
+                lines = f.readlines()
+            
+            filtered_lines = [line for line in lines if datetime.datetime.strptime(line.split(" - ")[0], "%Y-%m-%d %H:%M:%S,%f") >= cutoff_time]
+            
+            with open(log_file_path, 'w') as f:
+                f.writelines(filtered_lines)
+                
+            logging.info(f"Removed old log entries in {log_file_path} older than {weeks_to_keep} weeks.")
+    except Exception as e:
+        logging.error(f"Error cleaning up old log files: {e}")
 
 # connect to mqtt broker if the sparkplugb device is not connected 
 def connect_to_broker(device_dict, broker, port, user, password):
@@ -139,6 +137,8 @@ def main():
         # main loop
         while True:
             try:
+                schedule.run_pending()
+
                 time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
 
                 for device_dict in devices:
@@ -152,6 +152,9 @@ def main():
 
                     # connecte to mqtt broker 
                     connect_to_broker(device_dict, broker, port, user, password)
+                    
+                    # Call the function with weeks_to_keep set to 2
+                    clean_up_old_logs(log_file_path, weeks_to_keep=2)
 
 
                     # retrive data from modbus and update records
@@ -199,7 +202,7 @@ def main():
                                 old_data = spb_device.data.get_value(parameter_name)
 
                                 # parameter["value"].append(None)
-                                val = aggregator.aggregate_data(type = parameter["aggregation_type"],data = parameter["value"])
+                                val = Aggregate.aggregate_data(type = parameter["aggregation_type"],data = parameter["value"])
                                 print("\n\n\n------------------------------------ aggregated value : ",val)
                                 if old_data  - threshold_value > val  or val > old_data + threshold_value:
                                         
