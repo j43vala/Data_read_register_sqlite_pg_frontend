@@ -91,7 +91,7 @@ class DeviceResourceList(Resource):
         db.session.commit()
 
         status = 1
-        return make_response(jsonify({"status": status, 'message': 'New Device created'}), 201)
+        return make_response(jsonify({"status": status, 'message': 'New Device created', "device_id": new_device.id }), 201)
 
 @ns.route('/<id>')
 class DeviceResource(Resource):
