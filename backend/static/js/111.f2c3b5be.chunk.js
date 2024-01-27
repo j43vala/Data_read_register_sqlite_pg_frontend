@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkstarter_bt5=self.webpackChunkstarter_bt5||[]).push([[111],{2111:(e,r,s)=>{s.r(r),s.d(r,{default:()=>a});s(2791);var t=s(184);const a=()=>(0,t.jsx)("div",{children:(0,t.jsx)("h1",{children:"SparkPlug_B"})})}}]);
-//# sourceMappingURL=111.f2c3b5be.chunk.js.map
