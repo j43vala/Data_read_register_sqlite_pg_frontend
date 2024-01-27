@@ -2,7 +2,7 @@ from flask_restx import Resource, Namespace, fields
 from flask import jsonify, make_response, request
 import subprocess
 import platform
-
+import shlex
 
 ns = Namespace('Services', description='Services related operations')
 
@@ -75,6 +75,22 @@ class Wifi(Resource):
 
         except subprocess.CalledProcessError as e:
             print(f"Error executing command: {e}")
+        
+# ---------------------------------------------------------------------------------------------------------------------------------
+        # os_name = platform.system()
+        # if os_name == "Linux":
+        #     list_networks_command = "sudo iwlist wlan0 scan | grep ESSID | cut -d '\"' -f 2"
+        # else:
+        #     return []
+        # try:
+        #     output = subprocess.check_output(list_networks_command, shell=True, text=True)
+        #     ssids = output.splitlines()
+        #     # return ssids
+        # except subprocess.CalledProcessError as e:
+        #     print(f"Error executing command: {e}")
+            
+        # status = 1
+        # return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
     
 
 # CONFIG_FILE_PATH = "/etc/wpa_supplicant/wpa_supplicant.conf"
@@ -86,39 +102,35 @@ def is_valid_password(password):
 
 @ns.route("/connect_network")
 class ConnectWifi(Resource):
+    @ns.doc("connect_network")
+    @ns.expect(ns.model("WiFiCredentials", {
+        "ssid": fields.String(required=True, description="WiFi SSID"),
+        "password": fields.String(required=True, description="WiFi Password"),
+    }))
     def post(self):
         """Set Wifi And Password."""
-
+        
         try:
             # Get data from the request
-            ssid = request.form.get("ssid")
-            print('ssid: ', ssid)
-            password = request.form.get("password")
-            print('password: ', password)
+            data = request.get_json()
+            ssid = data.get("ssid")
+            password = data.get("password")
 
-            # Validate the password
-            if not is_valid_password(password):
-                return "Invalid password. Connection failed."
+            # Sanitize SSID and password to handle special characters
+            sanitized_ssid = shlex.quote(ssid)
+            sanitized_password = shlex.quote(password)
 
-            # Specify the path to the wpa_supplicant.conf file
-            config_file_path = "/etc/wpa_supplicant/wpa_supplicant.conf"
+            # Form the command to add a new WiFi connection
+            command = f"sudo nmcli dev wifi connect {sanitized_ssid} password {sanitized_password}"
 
-            # Update the wpa_supplicant.conf file
-            with open(config_file_path, "a") as config_file:
-                config_file.write(f'network={{\n    ssid="{ssid}"\n    psk="{password}"\n}}\n')
+            # Execute the command using subprocess
+            subprocess.run(command, shell=True, check=True)
 
-            # Restart wpa_supplicant to apply changes
-            restart_command = ["sudo", "systemctl", "restart", "wpa_supplicant"]
-            subprocess.run(restart_command, check=True)
+            return f"Successfully connected to WiFi network: {ssid}"
 
-            return "Connection successful!"
+        except subprocess.CalledProcessError as e:
+            return f"Error: Failed to connect to WiFi network {ssid}. {e}"
 
-        except Exception as e:
-            # Log the exception for debugging purposes
-            print(f"Connection failed: {e}")
-
-            # Return an error message to the client
-            return "Connection failed. Please check the server logs for more details."
         
                 
         
