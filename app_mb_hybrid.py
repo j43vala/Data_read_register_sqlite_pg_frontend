@@ -312,6 +312,7 @@ def main():
         # print("Exiting the loop...........")
         info_logger.info("Exiting the loop due to KeyboardInterrupt.")
     except Exception as e:
+        time.sleep(10)
         error_logger.exception(f"An unexpected error occurred: {e}")
     finally:
         logging.shutdown()
