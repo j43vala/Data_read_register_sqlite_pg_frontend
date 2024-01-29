@@ -4,7 +4,7 @@ class Aggregate():
     def aggregate_data(self,type:str,data:list):
         '''
 
-        type > min, max, avg, median, rms, mode 
+        type > min, max, avg, median, rms, mode, current_val
 
         '''
         if not data:
@@ -22,7 +22,8 @@ class Aggregate():
             return self.calculate_root_mean_square(data)
         elif type=="mode":
             return self.calculate_mode(data)
-       
+        elif type=="current_val":
+            return self.calculate_current_val(data)
         else:                # if type is unknown ....
             print(type, "unknown type")
             return None 
@@ -66,10 +67,25 @@ class Aggregate():
                 return (sum(x ** 2 for x in data) / len(data)) ** 0.5
             except ZeroDivisionError:
                 return None
+            
+    def calculate_current_val(self, data: list):
+        try:
+            if data:
+                return data[-1]
+            else:
+                return None
+        except (IndexError, TypeError):
+            return None
+
+
+
+
+
+
 
 if __name__ == "__main__":
     # Example usage:
-    data = [1, 1, 9 , 10 ,2, 3, 4, 5, 6, 7, 8]
+    data = [1, 1, 9 , 10 ,2, 3, 4, 5, 6, 7, 8.325e-7]
     
     a = Aggregate()
     minimum_value = a.aggregate_data("min",data)
@@ -78,7 +94,7 @@ if __name__ == "__main__":
     median_value = a.aggregate_data("median",data)
     mode_value = a.aggregate_data("mode",data)
     rms_value = a.aggregate_data("rms",data)
-
+    current_val = a.aggregate_data("current_val",data)
 
     # minimum_value = calculate_minimum(data)
     # maximum_value = calculate_maximum(data)
@@ -93,3 +109,4 @@ if __name__ == "__main__":
     print("Median:", median_value)
     print("Mode:", mode_value)
     print("Root Mean Square:", rms_value)
+    print("current val:", current_val)
