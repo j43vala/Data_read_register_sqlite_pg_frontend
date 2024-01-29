@@ -4,14 +4,19 @@ import subprocess
 import schedule
 import logging
 from logging.handlers import  TimedRotatingFileHandler 
+from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
+
+
+
 from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
-from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node
+from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp
 import socket
 import os 
 from config.aggrigation import Aggregate
+
 
 aggregator = Aggregate()
 
@@ -73,10 +78,10 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         return None
 
 # publish data to sparkplug b
-def publish_to_sparkplug_b(spb_device):
-   
+def publish_to_sparkplug_b(spb_entity):
+ 
     try:
-        success = spb_device.publish_data()
+        success = spb_entity.publish_data()
         logging.info(f"Publish success: {success}")
 
         # print(f"Publish success: {success}")
@@ -149,12 +154,25 @@ def main():
             connect_spb_device(device_dict, broker , port, user, password)
 
         # value=[]
+        # for key in config:
+        #     print(key , ":",config[key], type(config[key]))
+            
 
         # main loop
         while True:
             try:
                 schedule.run_pending()
 
+                if not config.get("publish_time"):
+                    config["publish_time"] = datetime.datetime.now()
+                
+                if config["publish_time"] + publish_delay < datetime.datetime.now():
+                    config["publish_time"] = datetime.datetime.now()
+                    spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
+                    spb_node.data.set_value("temperature", get_node_temp())
+                    publish_to_sparkplug_b(spb_device)
+                    
+                    
                 time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
 
                 for device_dict in devices:
@@ -164,7 +182,7 @@ def main():
                     model = device_dict["model"]
                     record = model()
                     slave_id = device_dict.get("slave_id")
-                    spb_device = device_dict["spb_device"]
+                    spb_device :  MqttSpbEntityDevice = device_dict["spb_device"]
 
                     # connecte to mqtt broker 
                     connect_to_broker(device_dict, broker, port, user, password)

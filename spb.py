@@ -8,6 +8,13 @@ import json
 device_meta = {}
 node_meta = {}
 
+def get_node_temp():
+    with open('/sys/class/thermal/thermal_zone0/temp', 'r') as file:
+        temperature_str = file.read().strip()
+        temperature = float(temperature_str) / 1000.0  # Convert millidegree Celsius to degree Celsius
+        return temperature
+    
+
 def init_spb_edge_node(group_id, edge_node_id, config):
     
     _DEBUG = True  # Enable debug messages
@@ -36,12 +43,13 @@ def init_spb_edge_node(group_id, edge_node_id, config):
     attributes = config["node_attributes"]
     for attribute in attributes:
         node.attribures.set_value(attribute["name"],attribute["value"])
+    temperature = get_node_temp()
+    
+    node.data.set_value("temperature", temperature)
+    
     
     temp = copy.deepcopy(config)
-    for key in temp:
-        print(key)
-        print(temp[key])
-
+    
     for device in temp["devices"]:
         del device["model"]
     
