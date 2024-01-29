@@ -37,44 +37,44 @@ class Wifi(Resource):
         """Retrieve all Wifi SSID In List."""
         status = 0
         # Get the name of the operating system.
-        os_name = platform.system()
+        # os_name = platform.system()
 
-        # Check if the OS is Windows.
-        if os_name == "Windows":
-            # Command to list Wi-Fi networks on Windows using netsh.
-            list_networks_command = 'netsh wlan show networks mode=Bssid'
-        # Check if the OS is Linux.
-        elif os_name == "Linux":
-            # Command to list Wi-Fi networks on Linux using nmcli.
-            list_networks_command = "nmcli --fields SSID device wifi list"
-        # Handle unsupported operating systems.
-        else:
-            # Print a message indicating that the OS is unsupported (Not Linux or Windows).
-            print("Unsupported OS")
-            return
+        # # Check if the OS is Windows.
+        # if os_name == "Windows":
+        #     # Command to list Wi-Fi networks on Windows using netsh.
+        #     list_networks_command = 'netsh wlan show networks mode=Bssid'
+        # # Check if the OS is Linux.
+        # elif os_name == "Linux":
+        #     # Command to list Wi-Fi networks on Linux using nmcli.
+        #     list_networks_command = "nmcli --fields SSID device wifi list"
+        # # Handle unsupported operating systems.
+        # else:
+        #     # Print a message indicating that the OS is unsupported (Not Linux or Windows).
+        #     print("Unsupported OS")
+        #     return
 
-        try:
-            # Execute the command and capture the result.
-            output = subprocess.check_output(list_networks_command, shell=True, text=True)
+        # try:
+        #     # Execute the command and capture the result.
+        #     output = subprocess.check_output(list_networks_command, shell=True, text=True)
 
-            # Parse the output and extract SSIDs.
-            ssids = []
-            lines = output.splitlines()
-            header = lines[0].split()
-            for line in lines[1:]:
-                values = line.split()
-                if "SSID" in header:
-                    ssid_index = header.index("SSID")
-                    ssid = values[ssid_index]
-                    ssids.append(ssid)
-                    # Return the list of network names.
-            status = 1
-            return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
-            # print('ssids: ', ssids)
+        #     # Parse the output and extract SSIDs.
+        #     ssids = []
+        #     lines = output.splitlines()
+        #     header = lines[0].split()
+        #     for line in lines[1:]:
+        #         values = line.split()
+        #         if "SSID" in header:
+        #             ssid_index = header.index("SSID")
+        #             ssid = values[ssid_index]
+        #             ssids.append(ssid)
+        #             # Return the list of network names.
+        #     status = 1
+        #     return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
+        #     # print('ssids: ', ssids)
 
 
-        except subprocess.CalledProcessError as e:
-            print(f"Error executing command: {e}")
+        # except subprocess.CalledProcessError as e:
+        #     print(f"Error executing command: {e}")
         
 # ---------------------------------------------------------------------------------------------------------------------------------
         # os_name = platform.system()
@@ -91,16 +91,53 @@ class Wifi(Resource):
             
         # status = 1
         # return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
+        
+# -----------------------------------------------------------------------------------------------------------------------------------
+        os_name = platform.system()
+
+        if os_name == "Windows":
+            list_networks_command = 'netsh wlan show networks mode=Bssid'
+        elif os_name == "Linux":
+            if platform.machine().startswith('arm') or 'raspberry' in platform.machine().lower():
+                # Raspberry Pi/Linux specific command
+                list_networks_command = "sudo iwlist wlan0 scan | grep ESSID | cut -d '\"' -f 2"
+            else:
+                # Generic Linux command
+                list_networks_command = "nmcli --fields SSID device wifi list"
+        else:
+            # Unsupported OS
+            print("Unsupported OS")
+            return make_response(jsonify({"status": 0, 'error': 'Unsupported OS'}), 400)
+
+        try:
+            output = subprocess.check_output(list_networks_command, shell=True, text=True)
+
+            ssids = []
+            lines = output.splitlines()
+
+            if os_name == "Windows":
+                # Parse the output for Windows
+                header = lines[0].split()
+                for line in lines[1:]:
+                    values = line.split()
+                    if "SSID" in header:
+                        ssid_index = header.index("SSID")
+                        ssid = values[ssid_index].strip()  # Strip leading/trailing whitespaces
+                        ssids.append(ssid)
+            elif os_name == "Linux":
+                # Parse the output for Linux
+                ssids = [ssid.strip() for ssid in lines if ssid.strip() != "SSID"]  # Exclude "SSID" from the list
+
+            status = 1
+            return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error executing command: {e}")
+            return make_response(jsonify({"status": 0, 'error': f"Error executing command: {e}"}), 500)
     
 
-# CONFIG_FILE_PATH = "/etc/wpa_supplicant/wpa_supplicant.conf"
 
-def is_valid_password(password):
-        # Add your password validation logic here
-        # For example, check if the password meets certain criteria (length, complexity, etc.)
-        return len(password) >= 8  # Placeholder validation, adjust as needed
-
-@ns.route("/connect_network")
+@ns.route("/connect-network")
 class ConnectWifi(Resource):
     @ns.doc("connect_network")
     @ns.expect(ns.model("WiFiCredentials", {
@@ -110,28 +147,19 @@ class ConnectWifi(Resource):
     def post(self):
         """Set Wifi And Password."""
         
+         
+
+
+@ns.route("/get-connected-network")
+class ConnectedWifi(Resource):
+    def get(self):
+        """Find Which Wifi network I Connected."""
         try:
-            # Get data from the request
-            data = request.get_json()
-            ssid = data.get("ssid")
-            password = data.get("password")
-
-            # Sanitize SSID and password to handle special characters
-            sanitized_ssid = shlex.quote(ssid)
-            sanitized_password = shlex.quote(password)
-
-            # Form the command to add a new WiFi connection
-            command = f"sudo nmcli dev wifi connect {sanitized_ssid} password {sanitized_password}"
-
-            # Execute the command using subprocess
-            subprocess.run(command, shell=True, check=True)
-
-            return f"Successfully connected to WiFi network: {ssid}"
-
+            result = subprocess.check_output(['iwgetid', '-r'], text=True)
+            return result.strip()
         except subprocess.CalledProcessError as e:
-            return f"Error: Failed to connect to WiFi network {ssid}. {e}"
-
-        
+            print(f"Error: {e}")
+            return None
                 
         
 # import subprocess
