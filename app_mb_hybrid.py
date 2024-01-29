@@ -22,48 +22,47 @@ aggregator = Aggregate()
 current_directory = os.getcwd()
 
 # Specify the log file name
-log_file_name = 'hybrid.log'
+error_log_file_name = 'error.log'
+info_log_file_name = 'info.log'
 
 # Create the full path to the log file
-log_file_path = os.path.join(current_directory, log_file_name)
+error_log_file_path = os.path.join(current_directory, error_log_file_name)
+info_log_file_path = os.path.join(current_directory, info_log_file_name)
 
-# Check if the log file exists, and create it if not
-if not os.path.isfile(log_file_path):
-    with open(log_file_path, 'w'):
+if not os.path.isfile(error_log_file_path):
+    with open(error_log_file_path, 'w'):
         pass  # Creates an empty file
 
-# Use the dynamic path when initializing the TimedRotatingFileHandler
-handler = TimedRotatingFileHandler(
-    filename=log_file_path,
+# Check if the log file exists, and create it if not
+if not os.path.isfile(info_log_file_path):
+    with open(info_log_file_path, 'w'):
+        pass  # Creates an empty file
+
+
+# Create a logger for information logs
+info_logger = logging.getLogger('info_logger')
+info_handler = TimedRotatingFileHandler(
+    filename=info_log_file_path,
     when='D',
     interval=1,
     backupCount=5,
     encoding='utf-8',
     delay=False
 )
-
-
-
-# create formatter and add to handler
-formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-# add the handler to the root logger
-logging.getLogger().addHandler(handler)
-
-# set the logging level
-logging.getLogger().setLevel(logging.INFO)
-
-# Create a logger for information logs
-info_logger = logging.getLogger('info_logger')
-info_handler = logging.FileHandler('info.log')
 info_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 info_handler.setFormatter(info_formatter)
 info_logger.addHandler(info_handler)
 
 # Create a logger for error logs
 error_logger = logging.getLogger('error_logger')
-error_handler = logging.FileHandler('error.log')
+error_handler = TimedRotatingFileHandler(
+    filename=error_log_file_path,
+    when='D',
+    interval=1,
+    backupCount=5,
+    encoding='utf-8',
+    delay=False
+)
 error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 error_handler.setFormatter(error_formatter)
 error_logger.addHandler(error_handler)
