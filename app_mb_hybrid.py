@@ -1,12 +1,10 @@
 import time
 import datetime
 import subprocess
-import schedule
+# import schedule
 import logging
 from logging.handlers import  TimedRotatingFileHandler 
 from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
-
-
 
 from config import config
 from config.db import get_sqlite_session
@@ -56,15 +54,31 @@ logging.getLogger().addHandler(handler)
 # set the logging level
 logging.getLogger().setLevel(logging.INFO)
 
+# Create a logger for information logs
+info_logger = logging.getLogger('info_logger')
+info_handler = logging.FileHandler('info.log')
+info_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+info_handler.setFormatter(info_formatter)
+info_logger.addHandler(info_handler)
+
+# Create a logger for error logs
+error_logger = logging.getLogger('error_logger')
+error_handler = logging.FileHandler('error.log')
+error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(error_formatter)
+error_logger.addHandler(error_handler)
+
+
+
 # connect to mqtt broker if the sparkplugb device is not connected 
 def connect_to_broker(device_dict, broker, port, user, password):
     try:
         if not device_dict["spb_device_connected"]:
-            logging.info("Connecting to broker from while loop...")
+            info_logger.info("Connecting to broker from while loop...")
             # print("Connecting to broker from while loop...")
             connect_spb_device(device_dict, broker, port, user, password)
     except Exception as e:
-        logging.error(f"Error connecting to the broker: {e}")
+        error_logger.exception(f"Error connecting to the broker: {e}")
 
 
 # retrive data from modbus 
@@ -74,7 +88,7 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         return data
     except Exception as e:
         # print(f"An error occurred reading Modbus data: {e}")
-        logging.error(f"An error occurred reading Modbus data: {e}")
+        logging.exception(f"An error occurred reading Modbus data: {e}")
         return None
 
 # publish data to sparkplug b
@@ -82,13 +96,13 @@ def publish_to_sparkplug_b(spb_entity):
  
     try:
         success = spb_entity.publish_data()
-        logging.info(f"Publish success: {success}")
+        info_logger.info(f"Publish success: {success}")
 
         # print(f"Publish success: {success}")
         return success
     except Exception as e:
         # print(f"Failed to publish data to Sparkplug B: {e}")
-        logging.error(f"Failed to publish data to Sparkplug B: {e}")
+        error_logger.exception(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
 # perform data retantion in SQlite database
@@ -99,7 +113,7 @@ def perform_data_retention(session, model, retention_period):
             session.delete(record)
         session.commit()
     except Exception as e:
-        logging.error(f"An error occurred during data retention: {e}")
+        error_logger.exception(f"An error occurred during data retention: {e}")
 
 
 
@@ -108,6 +122,7 @@ def main():
 
     # configuration setup
     last_check_time = datetime.datetime.now()
+
     check_frequency = datetime.timedelta(
         days=config["retention_parameter"]["check_frequency"]["days"],
         hours=config["retention_parameter"]["check_frequency"]["hours"],
@@ -161,23 +176,31 @@ def main():
         # main loop
         while True:
             try:
-                schedule.run_pending()
+                # schedule.run_pending()
+               # publish delat time 
 
-                if not config.get("publish_time"):
-                    config["publish_time"] = datetime.datetime.now()
-                
-                if config["publish_time"] + publish_delay < datetime.datetime.now():
-                    config["publish_time"] = datetime.datetime.now()
-                    spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
-                    spb_node.data.set_value("temperature", get_node_temp())
-                    publish_to_sparkplug_b(spb_device)
+                publish_delay = datetime.timedelta(
+                    
+                days=config["publish_time"]["days"],
+                hours=config["publish_time"]["hours"],
+                minutes=config["publish_time"]["minutes"],
+                seconds=config["publish_time"]["seconds"]
+                )
+                if not config.get("last_publish_time"):
+                    config["last_publish_time"] = datetime.datetime.now()
+                else:
+                    if config["last_publish_time"] + publish_delay < datetime.datetime.now():
+                        config["last_publish_time"] = datetime.datetime.now()
+                        spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
+                        spb_node.data.set_value("temperature", get_node_temp())
+                        publish_to_sparkplug_b(spb_device)
                     
                     
                 time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
 
                 for device_dict in devices:
-                    if not device_dict.get("publish_time"):
-                        device_dict["publish_time"] = datetime.datetime.now()
+                    if not device_dict.get("last_publish_time"):
+                        device_dict["last_publish_time"] = datetime.datetime.now()
                         
                     model = device_dict["model"]
                     record = model()
@@ -217,17 +240,9 @@ def main():
                             parameter["value"].append(data)
                             setattr(record, parameter_name, data)
                             
-                            # publish delat time 
-                            publish_delay = datetime.timedelta(
-                                
-                            days=config["publish_time"]["days"],
-                            hours=config["publish_time"]["hours"],
-                            minutes=config["publish_time"]["minutes"],
-                            seconds=config["publish_time"]["seconds"]
-                            )
                         
                             # check publish time delay
-                            if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
+                            if device_dict["last_publish_time"] + publish_delay < datetime.datetime.now():
                             
                                 # fatch threshold
                                 threshold_value = threshold
@@ -256,8 +271,8 @@ def main():
 
                     # publish data to spb
                     success = publish_to_sparkplug_b(spb_device)
-                    if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
-                        device_dict["publish_time"] = datetime.datetime.now()
+                    if device_dict["last_publish_time"] + publish_delay < datetime.datetime.now():
+                        device_dict["last_publish_time"] = datetime.datetime.now()
                         for parameter in device_dict["parameters"]:
                             parameter["value"] = []
 
@@ -291,14 +306,14 @@ def main():
                             perform_data_retention(session, model, retention_period_failure)
                             print(f"Records retained for device (failure case): '{device_dict['device_name']}'")
             except Exception as main_exception:
-                logging.error(f"An error occurred in the main loop: {main_exception}")
+                error_logger.exception(f"An error occurred in the main loop: {main_exception}")
 
     except KeyboardInterrupt:
         client.close()
         # print("Exiting the loop...........")
-        logging.info("Exiting the loop due to KeyboardInterrupt.")
+        info_logger.info("Exiting the loop due to KeyboardInterrupt.")
     except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
+        error_logger.exception(f"An unexpected error occurred: {e}")
     finally:
         logging.shutdown()
 
@@ -453,7 +468,7 @@ if __name__ == "__main__":
 
 #                 for device_dict in devices:
 #                     if not device_dict.get("publish_time"):
-#                         device_dict["publish_time"] = datetime.datetime.now()
+#                         device_dict["last_publish_time"] = datetime.datetime.now()
                         
 #                     model = device_dict["model"]
 #                     record = model()
@@ -503,7 +518,7 @@ if __name__ == "__main__":
 #                             )
                         
 #                             # check publish time delay
-#                             if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
+#                             if device_dict["last_publish_time"] + publish_delay < datetime.datetime.now():
                             
 #                                 # fatch threshold
 #                                 threshold_value = threshold
@@ -531,8 +546,8 @@ if __name__ == "__main__":
 
 #                     # publish data to spb
 #                     success = publish_to_sparkplug_b(spb_device)
-#                     if device_dict["publish_time"] + publish_delay < datetime.datetime.now():
-#                         device_dict["publish_time"] = datetime.datetime.now()
+#                     if device_dict["last_publish_time"] + publish_delay < datetime.datetime.now():
+#                         device_dict["last_publish_time"] = datetime.datetime.now()
 #                         for parameter in device_dict["parameters"]:
 #                             parameter["value"] = []
 

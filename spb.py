@@ -8,12 +8,16 @@ import json
 device_meta = {}
 node_meta = {}
 
+
 def get_node_temp():
-    with open('/sys/class/thermal/thermal_zone0/temp', 'r') as file:
-        temperature_str = file.read().strip()
-        temperature = float(temperature_str) / 1000.0  # Convert millidegree Celsius to degree Celsius
-        return temperature
-    
+    try:
+        with open('/sys/class/thermal/thermal_zone0/temp', 'r') as file:
+            temperature_str = file.read().strip()
+            temperature = float(temperature_str) / 1000.0  # Convert millidegree Celsius to degree Celsius
+            return temperature
+    except  Exception as e:
+        print("Error occurred while reading the rpi temperature : ", str(e))
+        return 0
 
 def init_spb_edge_node(group_id, edge_node_id, config):
     
