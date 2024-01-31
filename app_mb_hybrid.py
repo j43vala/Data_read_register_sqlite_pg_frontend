@@ -11,10 +11,10 @@ from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
 from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp
+from infotst import handle_info_command ,handle_error_command
 import socket
 import os 
 from config.aggrigation import Aggregate
-
 
 aggregator = Aggregate()
 
@@ -66,6 +66,17 @@ error_handler = TimedRotatingFileHandler(
 error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 error_handler.setFormatter(error_formatter)
 error_logger.addHandler(error_handler)
+
+# def callback_command(payload):
+#     command = payload.get("name")
+#     if command == "rebirth":
+#         print("Node Attribute received CMD: %s" % (payload))
+#     elif command == "info":
+#         handle_info_command()  
+#     elif command == "error":
+#         handle_error_command()  
+#     else:
+#         print("Unknown command received: %s" % command)
 
 
 
@@ -192,7 +203,7 @@ def main():
                         config["last_publish_time"] = datetime.datetime.now()
                         spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
                         spb_node.data.set_value("temperature", get_node_temp())
-                        publish_to_sparkplug_b(spb_device)
+                        publish_to_sparkplug_b(spb_node)
                     
                     
                 time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
