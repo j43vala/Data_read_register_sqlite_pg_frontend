@@ -35,12 +35,14 @@ class ParameterResourceList(Resource):
     def get(self):
         """Retrieve all Parameters."""
         status = 0
-        return_fields = [ "function_code" ,"address", "parameter_name","data_type","threshold","aggregation_type", "device_id"]
+        return_fields = ["active", "function_code", "address", "parameter_name", "data_type", "threshold", "aggregation_type", "device_id"]
         parameters = db.session.query(Parameter).all()
+        
         if not parameters:
-            output = {}
-            output["status"] = 0
-            output["message"] = "No Parameters found"
+            output = {
+                "status": 0,
+                "message": "No Parameters found"
+            }
             return make_response(jsonify(output), 404)
 
         output = []
@@ -134,7 +136,7 @@ class ParameterResource(Resource):
     def get(self, id):
         """Retrieve a specific parameter."""
         status = 0
-        return_fields = ["function_code", "address", "parameter_name", "data_type", "threshold", "aggregation_type"]
+        return_fields = ["function_code", "address", "parameter_name", "data_type", "threshold", "aggregation_type","active"]
         parameter = db.session.query(Parameter).filter_by(id=id).first()
         if not parameter:
             return make_response(jsonify({"status": status, 'message': 'No parameter found while executing API Get parameter By ID!'}), 404)

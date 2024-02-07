@@ -1,11 +1,17 @@
-from flask_restx import Resource, Namespace, fields
+import json
+from flask_restx import Resource, Namespace, fields, reqparse
 from flask import jsonify, make_response, request
 import subprocess
 import platform
 import shlex
+from db import db
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Device, NodeParameter, Attribute, Parameter
+ 
 
 ns = Namespace('Services', description='Services related operations')
-
 
 @ns.route('/restart-services')
 class RestartService(Resource):
@@ -160,7 +166,238 @@ class ConnectedWifi(Resource):
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
             return None
+
+# Define the SQLite database file path
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+main_path = os.path.dirname(dir_path)
+db_path = os.path.join(main_path, "local1.db")
+
+def load_config_from_db():
+    # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI
+    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+
+    # Create a session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # Query devices and associated parameters from the database
+    devices = session.query(Device).all()
+
+    # Convert devices to a list of dictionaries
+    devices_list = []
+    for device in devices:
+        device_data = {
+            'device_name': device.name,
+            'slave_id': device.slave_id,
+            'attributes': [],
+            'parameters': []
+        }
+
+        # Add attributes for each device
+        for attribute in device.attributes:
+            attribute_data = {
+                'name': attribute.name,
+                'value': attribute.value
+            }
+            device_data['attributes'].append(attribute_data)
+
+        # Add parameters for each device
+        for parameter in device.parameters:
+            parameter_data = {
+                'function_code': parameter.function_code,
+                'address': parameter.address,
+                'parameter_name': parameter.parameter_name,
+                'data_type': parameter.data_type,
+                'threshold': parameter.threshold,
+                'aggregation_type': parameter.aggregation_type,
                 
+            }
+            device_data['parameters'].append(parameter_data)
+
+        devices_list.append(device_data)
+
+    # Query node parameters for all devices
+    node_parameters = session.query(NodeParameter).all()
+
+    # Convert node parameters to the desired format
+    formatted_node_parameters = {}
+    for node_parameter in node_parameters:
+        formatted_node_parameters[node_parameter.name] = node_parameter.value
+        
+    
+    # Exclude specific options from the 'modbus' section
+    excluded_modbus_options = ['parity_options', 'port_options', 'wordlength_options', 'baudrate_options', 'method_options', 'stopbits_options']
+
+    # Filter out excluded options
+    filtered_modbus_options = {
+            key: value for key, value in formatted_node_parameters.get("modbus", {}).items() 
+            if key not in excluded_modbus_options and value is not None
+        }
+    
+    # Exclude specific options from the 'modbus' section
+    excluded_mqtt_options = ['qos_options']
+
+    # Filter out excluded options
+    filtered_mqtt_options = {
+            key: value for key, value in formatted_node_parameters.get("mqtt", {}).items() 
+            if key not in excluded_mqtt_options and value is not None
+        }
+    # Create a dictionary with the devices list, node parameters, and additional structure
+    config = {
+        "modbus": filtered_modbus_options,
+        "mqtt": filtered_mqtt_options,
+        "spb_parameter": formatted_node_parameters.get("spb_parameter", {}),
+        "node_attributes": formatted_node_parameters.get("node_attributes", []),
+        "retention_parameter": formatted_node_parameters.get("retention_parameter", []),
+        "time_delay": formatted_node_parameters.get("time_delay", []),
+        "publish_time": formatted_node_parameters.get("publish_time", []),
+        "devices": devices_list
+    }
+
+    return config
+
+@ns.route("/get-json")
+class ConfigResource(Resource):
+    def get(self):
+        status = 0
+        config_data = load_config_from_db()
+        status = 1
+        return make_response(jsonify({"status": status, 'config_data': config_data}), 200)
+
+# Define the parser for file upload
+file_upload_parser = reqparse.RequestParser()
+file_upload_parser.add_argument('file', location='files', type='file', required=True)
+
+
+@ns.route("/upload-json")
+class FileUploadResources(Resource):
+    @ns.expect(file_upload_parser)
+    def post(self):
+        # Get the uploaded file from the request
+        uploaded_file = request.files['file']
+
+        # Save the file to a temporary location
+        temp_file_path = os.path.join(os.getcwd(), 'temp_file.json')
+        uploaded_file.save(temp_file_path)
+
+        # Read the content of the JSON file
+        with open(temp_file_path, 'r') as file:
+            json_content = file.read()
+
+        # Clean up the temporary file
+        os.remove(temp_file_path)
+
+        try:
+            # Attempt to parse the JSON content
+            parsed_json = json.loads(json_content)
+            for device_data in parsed_json.get('devices', []):
+                device_name = device_data.get('device_name')
+                device_slave_id = device_data.get('slave_id')
+
+                # Check if the device with the given name exists in the database
+                device = db.session.query(Device).filter(Device.name == device_name).first()
+
+                if not device:
+                    # If the device doesn't exist, create a new one
+                    new_device = Device(name=device_name, slave_id=device_slave_id)
+                    db.session.add(new_device)
+                    db.session.flush()  # Flush to get the device ID
+
+                else:
+                    # Device already exists, update its slave_id if provided
+                    if device_slave_id is not None:
+                        device.slave_id = device_slave_id
+
+                    new_device = device
+
+                # Update or create attributes
+                for attribute_data in device_data.get('attributes', []):
+                    attribute_name = attribute_data.get('name')
+                    attribute_value = attribute_data.get('value')
+
+                    # Update the attribute value in the database
+                    attribute = db.session.query(Attribute).filter(
+                        Attribute.device_id == new_device.id,
+                        Attribute.name == attribute_name
+                    ).first()
+
+                    if attribute:
+                        attribute.value = attribute_value
+                    else:
+                        # If the attribute doesn't exist, create a new one
+                        new_attribute = Attribute(device_id=new_device.id, name=attribute_name, value=attribute_value)
+                        db.session.add(new_attribute)
+
+                # Update or create parameters
+                for parameter_data in device_data.get('parameters', []):
+                    parameter_name = parameter_data.get('parameter_name')
+                    parameter_address = parameter_data.get('address')
+                    parameter_aggregation_type = parameter_data.get('aggregation_type')
+                    parameter_data_type = parameter_data.get('data_type')
+                    parameter_function_code = parameter_data.get('function_code')
+                    parameter_threshold = parameter_data.get('threshold')
+
+                    # Update the parameter in the database
+                    parameter = db.session.query(Parameter).filter(
+                        Parameter.device_id == new_device.id,
+                        Parameter.parameter_name == parameter_name
+                    ).first()
+
+                    if parameter:
+                        # Parameter exists, update its values
+                        parameter.address = parameter_address
+                        parameter.aggregation_type = parameter_aggregation_type
+                        parameter.data_type = parameter_data_type
+                        parameter.function_code = parameter_function_code
+                        parameter.threshold = parameter_threshold
+                    else:
+                        # Parameter doesn't exist, create a new one
+                        new_parameter = Parameter(
+                            device_id=new_device.id,
+                            parameter_name=parameter_name,
+                            address=parameter_address,
+                            aggregation_type=parameter_aggregation_type,
+                            data_type=parameter_data_type,
+                            function_code=parameter_function_code,
+                            threshold=parameter_threshold
+                        )
+                        db.session.add(new_parameter)
+
+                db.session.commit()
+
+            # Update or create predefined node parameters
+            predefined_node_parameters = [
+                'modbus', 'mqtt', 'spb_parameter', 'node_attributes', 'retention_parameter', 'time_delay', 'publish_time'
+            ]
+            for node_parameter_name in predefined_node_parameters:
+                node_parameter_value = parsed_json.get(node_parameter_name, None)
+
+                if node_parameter_value is not None:
+                    # Update the node parameter in the database
+                    node_parameter = db.session.query(NodeParameter).filter(
+                        NodeParameter.name == node_parameter_name
+                    ).first()
+
+                    if node_parameter:
+                        # Node parameter exists, update its value
+                        node_parameter.value = node_parameter_value
+                    else:
+                        # Node parameter doesn't exist, create a new one
+                        new_node_parameter = NodeParameter(
+                            name=node_parameter_name,
+                            value=node_parameter_value
+                        )
+                        db.session.add(new_node_parameter)
+
+            db.session.commit()
+
+        except json.JSONDecodeError as e:
+            # Handle JSON decoding error
+            return make_response(jsonify({"status": 0, "error": f"Invalid JSON format: {str(e)}"}), 400)
+
+        return make_response(jsonify({"status": 1, "json_content": parsed_json}), 200)
+
         
 # import subprocess
 # import platform
