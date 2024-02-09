@@ -28,11 +28,11 @@ def create_default_node_parameters():
                 "stopbits": 1,
                 "wordlength": 8,
                 "port_options": get_serial_ports(),
-                # "method_options": ["rtu", "ascii"],
-                # "parity_options": ['ODD', 'EVEN', 'NONE'],
-                # "baudrate_options": [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000],
-                # "stopbits_options": [1, 2],
-                # "wordlength_options": [7, 8]
+                "method_options": ["rtu", "ascii"],
+                "parity_options": ['ODD', 'EVEN', 'NONE'],
+                "baudrate_options": [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000],
+                "stopbits_options": [1, 2],
+                "wordlength_options": [7, 8]
             },
         },
         {

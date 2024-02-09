@@ -152,9 +152,27 @@ class ConnectWifi(Resource):
     }))
     def post(self):
         """Set Wifi And Password."""
-        
-         
+        try:
+            # Get data from the request
+            data = request.get_json()
+            ssid = data.get("ssid")
+            password = data.get("password")
 
+            # Sanitize SSID and password to handle special characters
+            sanitized_ssid = shlex.quote(ssid)
+            sanitized_password = shlex.quote(password)
+
+
+            # Form the command to add a new WiFi connection
+            command = f"sudo nmcli dev wifi connect {sanitized_ssid} password {sanitized_password}"
+
+            # Execute the command using subprocess
+            subprocess.run(command, shell=True, check=True)
+
+            return f"Successfully connected to WiFi network: {ssid}"
+         
+        except subprocess.CalledProcessError as e:
+            return f"Error: Failed to connect to WiFi network {ssid}. {e}"
 
 @ns.route("/get-connected-network")
 class ConnectedWifi(Resource):
@@ -373,23 +391,41 @@ class FileUploadResources(Resource):
             for node_parameter_name in predefined_node_parameters:
                 node_parameter_value = parsed_json.get(node_parameter_name, None)
 
-                if node_parameter_value is not None:
-                    # Update the node parameter in the database
-                    node_parameter = db.session.query(NodeParameter).filter(
+                if node_parameter_name == 'modbus':
+                    existing_node_parameter = db.session.query(NodeParameter).filter(
                         NodeParameter.name == node_parameter_name
                     ).first()
 
-                    if node_parameter:
-                        # Node parameter exists, update its value
-                        node_parameter.value = node_parameter_value
+                    if existing_node_parameter:
+                        # 'modbus' parameter exists, update its value
+                        existing_node_parameter.value = {**existing_node_parameter.value, **node_parameter_value}
                     else:
-                        # Node parameter doesn't exist, create a new one
+                        # 'modbus' parameter doesn't exist, create a new one
                         new_node_parameter = NodeParameter(
                             name=node_parameter_name,
                             value=node_parameter_value
                         )
                         db.session.add(new_node_parameter)
 
+                else:
+                    # General handling for other parameters
+                    if node_parameter_value is not None:
+                        # Update the node parameter in the database
+                        node_parameter = db.session.query(NodeParameter).filter(
+                            NodeParameter.name == node_parameter_name
+                        ).first()
+
+                        if node_parameter:
+                            # Node parameter exists, update its value
+                            node_parameter.value = node_parameter_value
+                        else:
+                            # Node parameter doesn't exist, create a new one
+                            new_node_parameter = NodeParameter(
+                                name=node_parameter_name,
+                                value=node_parameter_value
+                            )
+                            db.session.add(new_node_parameter)
+                        
             db.session.commit()
 
         except json.JSONDecodeError as e:
