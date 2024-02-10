@@ -1,12 +1,10 @@
 import time
 from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
 from config.data_conversion import read_integer, read_double, read_float
+from err_inf import handle_error_command, handle_info_command
 from modbus_final import initialize_modbus_client
 import copy
 import json
-
-device_meta = {}
-node_meta = {}
 
 
 def get_node_temp():
@@ -25,11 +23,21 @@ def init_spb_edge_node(group_id, edge_node_id, config):
 
     print("--- Sparkplug B example - End of Node Attribute - Simple")
 
-
+    # def callback_command(payload):
+    #     print("Node Attribute received CMD: %s" % (payload))
     def callback_command(payload):
-        print("Node Attribute received CMD: %s" % (payload))
-
-
+        command = payload.get("name")
+        if command == "rebirth":
+            print("Node Attribute received CMD: %s" % (payload))
+        elif command == "info":
+            info_str = handle_info_command(info_keyword_to_search = "INFO", num_occurrences=10)
+            print("\n\n\n\n\n",info_str)
+        elif command == "error":
+            error_str = handle_error_command(error_keyword_to_search="ERROR", num_occurrences=5)
+            print("\n\n\n\n\n",error_str)
+        else:
+            print("Unknown command received: %s" % command)
+        print("\n\n payload", payload)
     def callback_message(topic, payload):
         print("Node Attribute Received MESSAGE: %s - %s" % (topic, payload))
     
@@ -62,6 +70,8 @@ def init_spb_edge_node(group_id, edge_node_id, config):
 
     # Commands
     node.commands.set_value("rebirth", False)
+    node.commands.set_value("INFO", False)
+    node.commands.set_value("ERROR", False)
 
     
     config["spb_node"] = node
@@ -85,7 +95,21 @@ def init_spb_device(group_name,edge_node_name, device_dict):
 
     def callback_command(payload):
         print("DEVICE received CMD: %s" % (payload))
-
+        metrics = payload.get("metrics")
+        command = metrics[0].get("name")
+        print('\n\n\n\ncommand: ', command)
+        if command == "rebirth":
+            print("Node Attribute received CMD: %s" % (payload))
+        elif command == "INFO":
+            info_str = handle_info_command(info_keyword_to_search = "INFO", num_occurrences=10)
+            print("\n\n\n\n\n-------------------info STR :: \n",info_str)
+        elif command == "ERROR":
+            error_keyword_to_search = "ERROR"
+            error_result = handle_error_command(error_keyword_to_search)
+            print("\n\n\n\n\n -------------------ERROR STR :: \n",error_result)
+        else:
+            print("Unknown command received: %s" % command)
+        print("\n\n payload", payload)
 
     def callback_message(topic, payload):
         print("Received MESSAGE: %s - %s" % (topic, payload))
@@ -113,6 +137,8 @@ def init_spb_device(group_name,edge_node_name, device_dict):
 
     # Commands
     device.commands.set_value("rebirth", False)
+    device.commands.set_value("INFO", False)
+    device.commands.set_value("ERROR", False)
 
     device_dict["spb_device"] = device
 
@@ -155,3 +181,5 @@ def connect_spb_node(node_dict, broker , port, user, password):
 
     node_dict["spb_node_connected"] = _connected
     return _connected
+
+

@@ -11,7 +11,7 @@ from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
 from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp
-from infotst import handle_info_command ,handle_error_command
+from err_inf import handle_info_command ,handle_error_command
 import socket
 import os 
 from config.aggrigation import Aggregate
@@ -22,22 +22,22 @@ aggregator = Aggregate()
 current_directory = os.getcwd()
 
 # Specify the log file name
-error_log_file_name = 'error.log'
 info_log_file_name = 'info.log'
+error_log_file_name = 'error.log'
 
 # Create the full path to the log file
-error_log_file_path = os.path.join(current_directory, error_log_file_name)
 info_log_file_path = os.path.join(current_directory, info_log_file_name)
+error_log_file_path = os.path.join(current_directory, error_log_file_name)
 
-if not os.path.isfile(error_log_file_path):
-    with open(error_log_file_path, 'w'):
-        pass  # Creates an empty file
 
 # Check if the log file exists, and create it if not
 if not os.path.isfile(info_log_file_path):
     with open(info_log_file_path, 'w'):
         pass  # Creates an empty file
 
+if not os.path.isfile(error_log_file_path):
+    with open(error_log_file_path, 'w'):
+        pass  # Creates an empty file
 
 # Create a logger for information logs
 info_logger = logging.getLogger('info_logger')
@@ -52,6 +52,7 @@ info_handler = TimedRotatingFileHandler(
 info_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 info_handler.setFormatter(info_formatter)
 info_logger.addHandler(info_handler)
+
 
 # Create a logger for error logs
 error_logger = logging.getLogger('error_logger')
