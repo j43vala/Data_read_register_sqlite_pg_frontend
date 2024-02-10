@@ -139,18 +139,55 @@ class DeviceResource(Resource):
         return make_response(jsonify({"status": status, "device": device_data}), 200)
 
 
+    # @ns.expect(device_fields)
+    # def put(self, id):
+    #     """Update a specific device."""
+    #     status = 0
+    #     data = request.get_json()
+    #     device = db.session.query(Device).filter_by(id=id).first()
+    #     if not device:
+    #         return make_response(jsonify({"status": status, 'message': 'No device found while executing Update Device API!'}), 404)
 
+    #     json_fields = data.keys()
+    #     all_columns = [field.key for field in Device.__table__.columns]
+
+    #     for parameter_name in all_columns:
+    #         if parameter_name in json_fields:
+    #             setattr(device, parameter_name, data[parameter_name])
+
+    #     db.session.commit()
+    #     db.session.close()
+
+    #     status = 1
+    #     return make_response(jsonify({"status": status, "message": "Device has been updated."}), 200)
+    
     @ns.expect(device_fields)
     def put(self, id):
         """Update a specific device."""
         status = 0
         data = request.get_json()
         device = db.session.query(Device).filter_by(id=id).first()
+
         if not device:
             return make_response(jsonify({"status": status, 'message': 'No device found while executing Update Device API!'}), 404)
 
         json_fields = data.keys()
         all_columns = [field.key for field in Device.__table__.columns]
+
+        # Check if 'name' and 'slave_id' are in the request data
+        if 'name' in json_fields and 'slave_id' in json_fields:
+            # Find the attribute connected to the device based on 'Device Name' and 'Slave ID'
+            connected_attributes = db.session.query(Attribute).filter_by(device_id=device.id).filter(
+                (Attribute.name == 'Device Name' and Attribute.value == data['name']) |
+                (Attribute.name == 'Slave ID' and Attribute.value == data['slave_id'])
+            ).all()
+
+            # Update the values of the connected attributes
+            for connected_attribute in connected_attributes:
+                if connected_attribute.name == 'Device Name':
+                    connected_attribute.value = data['name']
+                elif connected_attribute.name == 'Slave ID':
+                    connected_attribute.value = data['slave_id']
 
         for parameter_name in all_columns:
             if parameter_name in json_fields:
