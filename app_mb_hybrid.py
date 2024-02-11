@@ -10,8 +10,8 @@ from config import config
 from config.db import get_sqlite_session
 from modbus_final import read_modbus_data, initialize_modbus_client
 from sqlite_final import create_dynamic_models
-from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp
-from err_inf import handle_info_command ,handle_error_command
+from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp,get_ram_usage
+# from err_inf import handle_info_command ,handle_error_command
 import socket
 import os 
 from config.aggrigation import Aggregate
@@ -204,6 +204,7 @@ def main():
                         config["last_publish_time"] = datetime.datetime.now()
                         spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
                         spb_node.data.set_value("temperature", get_node_temp())
+                        spb_node.data.set_value("RAM_usage", get_ram_usage())
                         publish_to_sparkplug_b(spb_node)
                     
                     
