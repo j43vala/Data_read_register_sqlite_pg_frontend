@@ -75,6 +75,7 @@ def init_spb_edge_node(group_id, edge_node_id, config):
     ram = get_ram_usage()
     
     node.data.set_value("temperature", temperature)
+    node.data_set_value("RAM_usage", {"used": used_ram, "total": total_ram})
     
     
     temp = copy.deepcopy(config)
@@ -83,7 +84,6 @@ def init_spb_edge_node(group_id, edge_node_id, config):
         del device["model"]
     
     node.attribures.set_value(name = "settings" ,value = json.dumps(temp))
-    node.data_set_value("RAM_usage", {"used": used_ram, "total": total_ram})
 
     # Commands
     node.commands.set_value("rebirth", False)
