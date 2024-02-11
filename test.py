@@ -1,110 +1,78 @@
-# from flask import Flask, request, make_response, jsonify
-# from flask_restx import Resource, Api, reqparse
-# import os
+# from sqlalchemy import create_engine, Column, Integer, Float, DateTime
+# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.orm import sessionmaker
+# from datetime import datetime, timedelta
+# import random
 
-# app = Flask(__name__)
-# api = Api(app)
+# Base = declarative_base()
 
-# log_parser = reqparse.RequestParser()
-# log_parser.add_argument('log_type', type=str, help='Type of log (e.g., "info" or "error")', required=True)
-# log_parser.add_argument('num_occurrences', type=int, default=0, help='Number of occurrences to retrieve')
+# class WZero3PLC(Base):
+#     __tablename__ = 'wzero_3_plc'
 
+#     id = Column(Integer, primary_key=True)
+#     kwh = Column(Float)
+#     kvah = Column(Float)
+#     kvarh = Column(Float)
+#     avg_vln = Column(Float)
+#     avg_vll = Column(Float)
+#     avg_current = Column(Float)
+#     avg_pf = Column(Float)
+#     frequency = Column(Float)
+#     total_kw = Column(Float)
+#     total_kva = Column(Float)
+#     total_kvar = Column(Float)
+#     timestamp = Column(DateTime)
 
-# @api.route('/logs')
-# class LogsResource(Resource):
-#     @api.expect(log_parser)
-#     def get(self):
-#         args = log_parser.parse_args()
+# class WZero3PLC2(Base):
+#     __tablename__ = 'wzero_3_plc_2'
 
-#         log_type = args['log_type'].lower()  # convert to lowercase for case-insensitivity
-#         if log_type not in ['info', 'error']:
-#             return {'message': 'Invalid log type. Use "info" or "error".'}, 400
+#     id = Column(Integer, primary_key=True)
+#     kwh = Column(Float)
+#     kvah = Column(Float)
+#     kvarh = Column(Float)
+#     avg_vln = Column(Float)
+#     avg_vll = Column(Float)
+#     avg_current = Column(Float)
+#     avg_pf = Column(Float)
+#     frequency = Column(Float)
+#     total_kw = Column(Float)
+#     total_kva = Column(Float)
+#     total_kvar = Column(Float)
+#     timestamp = Column(DateTime)
 
-#         logs = handle_log_command(f'{log_type}.log', args['num_occurrences'])
+# # Database connection
+# database_path = '/home/wzero/Public/Data_read_register_sqlite_pg_frontend/config/local.db'
+# engine = create_engine(f'sqlite:///{database_path}')
+# Base.metadata.create_all(engine)
 
-#         response_data = {
-#             f'{log_type}_logs': logs,
-#         }
+# # Generate and insert random data
+# Session = sessionmaker(bind=engine)
+# session = Session()
 
-#         return make_response(jsonify(response_data), 200)
+# for _ in range(1000):
+#     timestamp = datetime.now() - timedelta(days=random.randint(1, 30))
+#     data = {
+#         'kwh': random.uniform(0, 100),
+#         'kvah': random.uniform(0, 100),
+#         'kvarh': random.uniform(0, 100),
+#         'avg_vln': random.uniform(200, 240),
+#         'avg_vll': random.uniform(380, 420),
+#         'avg_current': random.uniform(0, 10),
+#         'avg_pf': random.uniform(0.8, 1),
+#         'frequency': random.uniform(48, 52),
+#         'total_kw': random.uniform(0, 100),
+#         'total_kva': random.uniform(0, 100),
+#         'total_kvar': random.uniform(0, 100),
+#         'timestamp': timestamp
+#     }
 
-# def handle_log_command(log_file_name, num_occurrences):
-#     log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), log_file_name)
-#     try:
-#         with open(log_file_path, 'r') as f:
-#             lines = f.readlines()
+#     # Insert into wzero_3_plc
+#     wzero_3_plc_data = WZero3PLC(**data)
+#     session.add(wzero_3_plc_data)
 
-#             # Return the last N lines from the log file
-#             if num_occurrences > 0:
-#                 lines = lines[-num_occurrences:]
+#     # Insert into wzero_3_plc_2
+#     wzero_3_plc_2_data = WZero3PLC2(**data)
+#     session.add(wzero_3_plc_2_data)
 
-#             return lines
-#     except Exception as e:
-#         return f"Error handling {log_file_name} command: {e}"
-
-# if __name__ == "__main__":
-#     app.run(port=5001, debug=True)
-
-
-from flask import Flask, request, make_response, jsonify
-from flask_restx import Resource, Api, reqparse
-import os
-import re
-from datetime import datetime
-
-app = Flask(__name__)
-api = Api(app)
-
-log_parser = reqparse.RequestParser()
-log_parser.add_argument('log_type', type=str, help='Type of log (e.g., "info" or "error")', required=True)
-log_parser.add_argument('num_occurrences', type=int, default=0, help='Number of occurrences to retrieve')
-
-
-@api.route('/logs')
-class LogsResource(Resource):
-    @api.expect(log_parser)
-    def get(self):
-        args = log_parser.parse_args()
-
-        log_type = args['log_type'].lower()
-        if log_type not in ['info', 'error']:
-            return {'message': 'Invalid log type. Use "info" or "error".'}, 400
-
-        logs = handle_log_command(f'{log_type}.log', args['num_occurrences'])
-
-        return make_response(jsonify(logs), 200)
-
-def handle_log_command(log_file_name, num_occurrences):
-    log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), log_file_name)
-    try:
-        with open(log_file_path, 'r') as f:
-            lines = f.readlines()
-
-            logs_with_timestamp = []
-            current_log = ""
-            for line in lines:
-                if re.match(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - (INFO|ERROR) -', line):
-                    if current_log:
-                        logs_with_timestamp.append(current_log)
-                    current_log = line
-                else:
-                    current_log += line
-
-            # Append the last log entry
-            if current_log:
-                logs_with_timestamp.append(current_log)
-
-            # Sort logs based on timestamp
-            logs_with_timestamp.sort(key=lambda x: datetime.strptime(re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}', x).group(), "%Y-%m-%d %H:%M:%S,%f"))
-
-            # Return the last N logs
-            if num_occurrences > 0:
-                logs_with_timestamp = logs_with_timestamp[-num_occurrences:]
-
-            return logs_with_timestamp
-    except Exception as e:
-        return f"Error handling {log_file_name} command: {e}"
-
-if __name__ == "__main__":
-    app.run(port=5001, debug=True)
-
+# # Commit the changes
+# session.commit()
