@@ -5,7 +5,23 @@ from err_inf import handle_error_command, handle_info_command
 from modbus_final import initialize_modbus_client
 import copy
 import json
+import psutil
 
+def get_ram_usage():
+    try:
+        # Get system memory usage statistics
+        mem = psutil.virtual_memory()
+        # Total physical memory available in bytes
+        total_memory = mem.total
+        # Total memory used in bytes
+        used_memory = mem.used
+        return total_memory, used_memory
+    except Exception as e:
+        print("Error occurred while reading RAM usage: ", str(e))
+        return 0, 0
+# Example usage
+total_ram, used_ram = get_ram_usage()
+print(f"RAM: {used_ram / (1024 ** 3):.2f} GB / {total_ram / (1024 ** 3):.2f} GB")
 
 def get_node_temp():
     try:
@@ -56,6 +72,7 @@ def init_spb_edge_node(group_id, edge_node_id, config):
     for attribute in attributes:
         node.attribures.set_value(attribute["name"],attribute["value"])
     temperature = get_node_temp()
+    ram = get_ram_usage()
     
     node.data.set_value("temperature", temperature)
     
@@ -66,7 +83,7 @@ def init_spb_edge_node(group_id, edge_node_id, config):
         del device["model"]
     
     node.attribures.set_value(name = "settings" ,value = json.dumps(temp))
-
+    node.data_set_value("RAM_usage", {"used": used_ram, "total": total_ram})
 
     # Commands
     node.commands.set_value("rebirth", False)
@@ -79,9 +96,6 @@ def init_spb_edge_node(group_id, edge_node_id, config):
     
     
     return node
-
-
-
 
 
 
