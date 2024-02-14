@@ -5,7 +5,7 @@ import logging
 from logging.handlers import  TimedRotatingFileHandler 
 import socket
 import os 
- 
+
 # Get the current working directory
 current_directory = os.getcwd()
 
@@ -74,19 +74,6 @@ except ImportError as e:
     # Log the import error
     error_logger.error(f"Error importing library: {e}")
     raise
-
-# def callback_command(payload):
-#     command = payload.get("name")
-#     if command == "rebirth":
-#         print("Node Attribute received CMD: %s" % (payload))
-#     elif command == "info":
-#         handle_info_command()  
-#     elif command == "error":
-#         handle_error_command()  
-#     else:
-#         print("Unknown command received: %s" % command)
-
-
 
 # connect to mqtt broker if the sparkplugb device is not connected 
 def connect_to_broker(device_dict, broker, port, user, password):
