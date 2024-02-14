@@ -83,63 +83,63 @@ class Wifi(Resource):
         #     print(f"Error executing command: {e}")
         
 # ---------------------------------------------------------------------------------------------------------------------------------
-        # os_name = platform.system()
-        # if os_name == "Linux":
-        #     list_networks_command = "sudo iwlist wlan0 scan | grep ESSID | cut -d '\"' -f 2"
-        # else:
-        #     return []
-        # try:
-        #     output = subprocess.check_output(list_networks_command, shell=True, text=True)
-        #     ssids = output.splitlines()
-        #     # return ssids
-        # except subprocess.CalledProcessError as e:
-        #     print(f"Error executing command: {e}")
-            
-        # status = 1
-        # return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
-        
-# -----------------------------------------------------------------------------------------------------------------------------------
         os_name = platform.system()
-
-        if os_name == "Windows":
-            list_networks_command = 'netsh wlan show networks mode=Bssid'
-        elif os_name == "Linux":
-            if platform.machine().startswith('arm') or 'raspberry' in platform.machine().lower():
-                # Raspberry Pi/Linux specific command
-                list_networks_command = "sudo iwlist wlan0 scan | grep ESSID | cut -d '\"' -f 2"
-            else:
-                # Generic Linux command
-                list_networks_command = "nmcli --fields SSID device wifi list"
+        if os_name == "Linux":
+            list_networks_command = "sudo iwlist wlan0 scan | grep ESSID | cut -d '\"' -f 2"
         else:
-            # Unsupported OS
-            print("Unsupported OS")
-            return make_response(jsonify({"status": 0, 'error': 'Unsupported OS'}), 400)
-
+            return []
         try:
             output = subprocess.check_output(list_networks_command, shell=True, text=True)
-
-            ssids = []
-            lines = output.splitlines()
-
-            if os_name == "Windows":
-                # Parse the output for Windows
-                header = lines[0].split()
-                for line in lines[1:]:
-                    values = line.split()
-                    if "SSID" in header:
-                        ssid_index = header.index("SSID")
-                        ssid = values[ssid_index].strip()  # Strip leading/trailing whitespaces
-                        ssids.append(ssid)
-            elif os_name == "Linux":
-                # Parse the output for Linux
-                ssids = [ssid.strip() for ssid in lines if ssid.strip() != "SSID"]  # Exclude "SSID" from the list
-
-            status = 1
-            return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
-
+            ssids = output.splitlines()
+            # return ssids
         except subprocess.CalledProcessError as e:
             print(f"Error executing command: {e}")
-            return make_response(jsonify({"status": 0, 'error': f"Error executing command: {e}"}), 500)
+            
+        status = 1
+        return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
+        
+# -----------------------------------------------------------------------------------------------------------------------------------
+        # os_name = platform.system()
+
+        # if os_name == "Windows":
+        #     list_networks_command = 'netsh wlan show networks mode=Bssid'
+        # elif os_name == "Linux":
+        #     if platform.machine().startswith('arm') or 'raspberry' in platform.machine().lower():
+        #         # Raspberry Pi/Linux specific command
+        #         list_networks_command = "sudo iwlist wlan0 scan | grep ESSID | cut -d '\"' -f 2"
+        #     else:
+        #         # Generic Linux command
+        #         list_networks_command = "nmcli --fields SSID device wifi list"
+        # else:
+        #     # Unsupported OS
+        #     print("Unsupported OS")
+        #     return make_response(jsonify({"status": 0, 'error': 'Unsupported OS'}), 400)
+
+        # try:
+        #     output = subprocess.check_output(list_networks_command, shell=True, text=True)
+
+        #     ssids = []
+        #     lines = output.splitlines()
+
+        #     if os_name == "Windows":
+        #         # Parse the output for Windows
+        #         header = lines[0].split()
+        #         for line in lines[1:]:
+        #             values = line.split()
+        #             if "SSID" in header:
+        #                 ssid_index = header.index("SSID")
+        #                 ssid = values[ssid_index].strip()  # Strip leading/trailing whitespaces
+        #                 ssids.append(ssid)
+        #     elif os_name == "Linux":
+        #         # Parse the output for Linux
+        #         ssids = [ssid.strip() for ssid in lines if ssid.strip() != "SSID"]  # Exclude "SSID" from the list
+
+        #     status = 1
+        #     return make_response(jsonify({"status": status, 'ssids': ssids}), 200)
+
+        # except subprocess.CalledProcessError as e:
+        #     print(f"Error executing command: {e}")
+        #     return make_response(jsonify({"status": 0, 'error': f"Error executing command: {e}"}), 500)
     
 
 
