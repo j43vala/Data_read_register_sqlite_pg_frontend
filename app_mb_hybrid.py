@@ -1,23 +1,11 @@
 import time
 import datetime
 import subprocess
-# import schedule
 import logging
 from logging.handlers import  TimedRotatingFileHandler 
-from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
-
-from config import config
-from config.db import get_sqlite_session
-from modbus_final import read_modbus_data, initialize_modbus_client
-from sqlite_final import create_dynamic_models
-from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp,get_ram_usage
-# from err_inf import handle_info_command ,handle_error_command
 import socket
 import os 
-from config.aggrigation import Aggregate
-
-aggregator = Aggregate()
-
+ 
 # Get the current working directory
 current_directory = os.getcwd()
 
@@ -26,21 +14,22 @@ info_log_file_name = 'info.log'
 error_log_file_name = 'error.log'
 
 # Create the full path to the log file
-info_log_file_path = os.path.join(current_directory, info_log_file_name)
 error_log_file_path = os.path.join(current_directory, error_log_file_name)
+info_log_file_path = os.path.join(current_directory, info_log_file_name)
 
+if not os.path.isfile(error_log_file_path):
+    with open(error_log_file_path, 'w'):
+        pass  # Creates an empty file
 
 # Check if the log file exists, and create it if not
 if not os.path.isfile(info_log_file_path):
     with open(info_log_file_path, 'w'):
         pass  # Creates an empty file
 
-if not os.path.isfile(error_log_file_path):
-    with open(error_log_file_path, 'w'):
-        pass  # Creates an empty file
 
 # Create a logger for information logs
 info_logger = logging.getLogger('info_logger')
+# info_logger.setLevel(logging.INFO)
 info_handler = TimedRotatingFileHandler(
     filename=info_log_file_path,
     when='D',
@@ -56,6 +45,7 @@ info_logger.addHandler(info_handler)
 
 # Create a logger for error logs
 error_logger = logging.getLogger('error_logger')
+error_logger.setLevel(logging.ERROR)
 error_handler = TimedRotatingFileHandler(
     filename=error_log_file_path,
     when='D',
@@ -67,6 +57,23 @@ error_handler = TimedRotatingFileHandler(
 error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 error_handler.setFormatter(error_formatter)
 error_logger.addHandler(error_handler)
+
+try:
+    from config import config
+    from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
+    from config.db import get_sqlite_session
+    from modbus_final import read_modbus_data, initialize_modbus_client
+    from sqlite_final import create_dynamic_models
+    from spb import init_spb_device, connect_spb_device, init_spb_edge_node, connect_spb_node,get_node_temp,get_ram_usage
+    from config.aggrigation import Aggregate
+    # from err_inf import handle_info_command ,handle_error_command
+
+    aggregator = Aggregate()
+
+except ImportError as e:
+    # Log the import error
+    error_logger.error(f"Error importing library: {e}")
+    raise
 
 # def callback_command(payload):
 #     command = payload.get("name")
