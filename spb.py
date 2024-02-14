@@ -38,32 +38,14 @@ def init_spb_edge_node(group_id, edge_node_id, config):
 
     print("--- Sparkplug B example - End of Node Attribute - Simple")
 
-    # def callback_command(payload):
-    #     print("Node Attribute received CMD: %s" % (payload))
-    def callback_command(payload):
-        command = payload.get("name")
-        if command == "rebirth":
-            print("Node Attribute received CMD: %s" % (payload))
-        elif command == "info":
-            info_str = handle_info_command(info_keyword_to_search = "INFO", num_occurrences=10)
-            print("\n\n\n\n\n",info_str)
-        elif command == "error":
-            error_str = handle_error_command(error_keyword_to_search="ERROR", num_occurrences=5)
-            print("\n\n\n\n\n",error_str)
-        else:
-            print("Unknown command received: %s" % command)
-        print("\n\n payload", payload)
-    def callback_message(topic, payload):
-        print("Node Attribute Received MESSAGE: %s - %s" % (topic, payload))
-    
     
     # Create the spB entity object
    
     node = MqttSpbEntityEdgeNode(group_id, edge_node_id)
    
    
-    node.on_message = callback_message  # Received messages
-    node.on_command = callback_command  # Callback for received commands
+    # node.on_message = callback_message  # Received messages
+    # node.on_command = callback_command  # Callback for received commands
 
     # Set the node Attributes, Data and Commands that will be sent on the DBIRTH message --------------------------
 
@@ -112,13 +94,7 @@ def init_spb_device(group_name,edge_node_name, device_dict):
         print('\n\n\n\ncommand: ', command)
         if command == "rebirth":
             print("Node Attribute received CMD: %s" % (payload))
-        elif command == "INFO":
-            info_str = handle_info_command(info_keyword_to_search = "INFO", num_occurrences=10)
-            print("\n\n\n\n\n-------------------info STR :: \n",info_str)
-        elif command == "ERROR":
-            error_keyword_to_search = "ERROR"
-            error_result = handle_error_command(error_keyword_to_search)
-            print("\n\n\n\n\n -------------------ERROR STR :: \n",error_result)
+      
         else:
             print("Unknown command received: %s" % command)
         print("\n\n payload", payload)
