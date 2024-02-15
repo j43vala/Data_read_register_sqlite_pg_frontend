@@ -38,7 +38,7 @@ def create_default_node_parameters():
         {
             "name": "mqtt",
             "value": {
-                "broker_host": "broker.hivemq.com",
+                "broker_host": "172.105.49.231",
                 "broker_port": 1883,
                 "qos":00,
                 "qos_options": [0,1,2],
