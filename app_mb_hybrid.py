@@ -181,11 +181,12 @@ def main():
         # main loop
         while True:
             try:
-                # schedule.run_pending()
-               # publish delat time 
+                spb_node:   MqttSpbEntityEdgeNode = config["spb_node"]
+                spb_node.data.set_value("temprature", get_node_temp())
+                spb_node.data.set_value("RAM_usage", get_ram_usage())
+                publish_to_sparkplug_b(spb_node)
 
-                publish_delay = datetime.timedelta(
-                    
+                publish_delay = datetime.timedelta( 
                 days=config["publish_time"]["days"],
                 hours=config["publish_time"]["hours"],
                 minutes=config["publish_time"]["minutes"],
