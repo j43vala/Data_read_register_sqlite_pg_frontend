@@ -170,8 +170,11 @@ def main():
         # print('\\n\n\n config["spb_node"].attribures.get_value_list(): ', config["spb_node"].attribures.get_dictionary())
         # initialized and connect spb devices
         for device_dict in config["devices"]:
-            init_spb_device(group_name, edge_node_id, device_dict)
-            connect_spb_device(device_dict, broker , port, user, password)
+            try:
+                init_spb_device(group_name, edge_node_id, device_dict)
+                connect_spb_device(device_dict, broker , port, user, password)
+            except Exception as device_creation_error:
+                error_logger.error(f"Failed to create and connect SPB device: {device_creation_error}")
 
         # value=[]
         # for key in config:
