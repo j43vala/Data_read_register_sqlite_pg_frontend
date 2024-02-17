@@ -12,7 +12,7 @@ config = None
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
 main_path = os.path.dirname(dir_path)
-db_path = os.path.join(main_path, "backend", "local1.db")
+db_path = os.path.join(main_path, "backend", "ui.db")
 
 
 def load_config_from_json():
@@ -39,7 +39,7 @@ def load_config_from_db():
     global config
     engine = create_engine(f"sqlite:///{db_path}", echo=False)
 
-    # Create a session
+     # Create a session
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -67,7 +67,7 @@ def load_config_from_db():
         # Add parameters for each device
         for parameter in device.parameters:
             parameter_data = {
-                # 'function_code': parameter.function_code,
+                'function_code': parameter.function_code,
                 'address': parameter.address,
                 'parameter_name': parameter.parameter_name,
                 'data_type': parameter.data_type,
@@ -86,11 +86,29 @@ def load_config_from_db():
     formatted_node_parameters = {}
     for node_parameter in node_parameters:
         formatted_node_parameters[node_parameter.name] = node_parameter.value
+        
+    
+    # Exclude specific options from the 'modbus' section
+    excluded_modbus_options = ['parity_options', 'port_options', 'wordlength_options', 'baudrate_options', 'method_options', 'stopbits_options']
 
+    # Filter out excluded options
+    filtered_modbus_options = {
+            key: value for key, value in formatted_node_parameters.get("modbus", {}).items() 
+            if key not in excluded_modbus_options and value is not None
+        }
+    
+    # Exclude specific options from the 'modbus' section
+    excluded_mqtt_options = ['qos_options']
+
+    # Filter out excluded options
+    filtered_mqtt_options = {
+            key: value for key, value in formatted_node_parameters.get("mqtt", {}).items() 
+            if key not in excluded_mqtt_options and value is not None
+        }
     # Create a dictionary with the devices list, node parameters, and additional structure
     config = {
-        "modbus": formatted_node_parameters.get("modbus", {}),
-        "mqtt": formatted_node_parameters.get("mqtt", {}),
+        "modbus": filtered_modbus_options,
+        "mqtt": filtered_mqtt_options,
         "spb_parameter": formatted_node_parameters.get("spb_parameter", {}),
         "node_attributes": formatted_node_parameters.get("node_attributes", []),
         "retention_parameter": formatted_node_parameters.get("retention_parameter", []),

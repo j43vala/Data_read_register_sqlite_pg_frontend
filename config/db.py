@@ -6,7 +6,7 @@ import os
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
 
-sqlite_db_path = os.path.join(dir_path, "local.db")
+sqlite_db_path = os.path.join(dir_path, "edge_local.db")
 print("sqlite db path : ",sqlite_db_path)
 # Create a custom event listener to check if the database file exists
 @event.listens_for(create_engine(f"sqlite:///{sqlite_db_path}", echo=False), 'connect')

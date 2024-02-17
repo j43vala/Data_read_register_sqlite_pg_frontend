@@ -189,7 +189,7 @@ class ConnectedWifi(Resource):
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
 main_path = os.path.dirname(dir_path)
-db_path = os.path.join(main_path, "local1.db")
+db_path = os.path.join(main_path, "ui.db")
 
 def load_config_from_db():
     # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI

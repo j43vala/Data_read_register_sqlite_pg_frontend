@@ -19,7 +19,7 @@ api.init_app(app, cors_allowed_origins='*')
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
 
-sqlite_db_path = os.path.join(dir_path, "local1.db")
+sqlite_db_path = os.path.join(dir_path, "ui.db")
 # print("sqlite db path : ", sqlite_db_path)
 
 # Set the SQLite connection URL
