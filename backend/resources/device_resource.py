@@ -22,7 +22,7 @@ class DeviceResourceList(Resource):
             output = {}
             output["status"] = 0
             output["message"] = "No Devices found"
-            return make_response(jsonify(output), 404)
+            return make_response(jsonify(output))
 
         device_list = []
         for device in devices:
