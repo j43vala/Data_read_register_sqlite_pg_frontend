@@ -57,6 +57,9 @@ def handle_log_command(log_file_name, num_occurrences):
             if num_occurrences > 0:
                 logs_with_timestamp = logs_with_timestamp[-num_occurrences:]
 
+            if not logs_with_timestamp:
+                return f"No logs found in the requested log file."
+
             return logs_with_timestamp
     except Exception as e:
-        return f"Error handling {log_file_name} command: {e}"
+        return f"Error handling {log_file_name} command: {e}"       
