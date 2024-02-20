@@ -9,28 +9,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Device, NodeParameter, Attribute, Parameter
-import logging 
  
-script_path = os.path.abspath(__file__)
-dir_path = os.path.dirname(script_path)
-main_path = os.path.dirname(dir_path)
-project_path = os.path.dirname(main_path)
-log_file_path = os.path.join(project_path)
-
-# Define loggers
-error_logger = logging.getLogger('error_logger')
-error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler(os.path.join(log_file_path, 'error.log'))
-error_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
-error_handler.setFormatter(error_formatter)
-error_logger.addHandler(error_handler)
-
-info_logger = logging.getLogger('info_logger')
-info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler(os.path.join(log_file_path, 'info.log'))
-info_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
-info_handler.setFormatter(info_formatter)
-info_logger.addHandler(info_handler)
 
 ns = Namespace('Services', description='Services related operations')
 
@@ -41,7 +20,6 @@ class RestartService(Resource):
             # Run 'systemctl daemon-reload' to reload units
             subprocess.run(['sudo', 'systemctl', 'restart', 'app_mb_hybrid.service'], check=True)
             # subprocess.run(['sc', 'restart', 'app_mb_hybrid'], check=True)
-            info_logger.info("service restarted successfully")
             return 'Services restarted successfully'
         except subprocess.CalledProcessError as e:
             return f'Error restarting services: {str(e)}'
@@ -53,7 +31,6 @@ class StopService(Resource):
         try:
             subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
             # subprocess.run(['sc', 'stop', 'app_mb_hybrid'], check=True)
-            error_logger.error("service stopped successfully")
             return 'Services stopped successfully'
         except subprocess.CalledProcessError as e:
             return f'Error stopping services: {str(e)}'
@@ -411,6 +388,7 @@ class FileUploadResources(Resource):
             predefined_node_parameters = [
                 'modbus', 'mqtt', 'spb_parameter', 'node_attributes', 'retention_parameter', 'time_delay', 'publish_time'
             ]
+
             for node_parameter_name in predefined_node_parameters:
                 node_parameter_value = parsed_json.get(node_parameter_name, None)
 
@@ -420,36 +398,99 @@ class FileUploadResources(Resource):
                     ).first()
 
                     if existing_node_parameter:
-                        # 'modbus' parameter exists, update its value
                         existing_node_parameter.value = {**existing_node_parameter.value, **node_parameter_value}
                     else:
-                        # 'modbus' parameter doesn't exist, create a new one
                         new_node_parameter = NodeParameter(
                             name=node_parameter_name,
                             value=node_parameter_value
                         )
                         db.session.add(new_node_parameter)
 
+                elif node_parameter_name == 'retention_parameter':
+                    existing_retention_parameter = db.session.query(NodeParameter).filter(
+                        NodeParameter.name == node_parameter_name
+                    ).first()
+
+                    if existing_retention_parameter:
+                        existing_retention_parameter.value = {**existing_retention_parameter.value, **node_parameter_value}
+
+                        for retention_type in ['check_frequency', 'failure_retention', 'success_retention']:
+                            retention_values = existing_retention_parameter.value.get(retention_type, {})
+
+                            retention_values['hours'] = min(retention_values.get('hours', 0), 24)
+                            retention_values['minutes'] = min(retention_values.get('minutes', 0), 59)
+                            retention_values['seconds'] = min(retention_values.get('seconds', 0), 59)
+
+                            existing_retention_parameter.value[retention_type] = retention_values
+
+                    else:
+                        new_retention_parameter = NodeParameter(
+                            name=node_parameter_name,
+                            value=node_parameter_value
+                        )
+
+                        for retention_type in ['check_frequency', 'failure_retention', 'success_retention']:
+                            retention_values = new_retention_parameter.value.get(retention_type, {})
+
+                            retention_values['hours'] = min(retention_values.get('hours', 0), 24)
+                            retention_values['minutes'] = min(retention_values.get('minutes', 0), 59)
+                            retention_values['seconds'] = min(retention_values.get('seconds', 0), 59)
+
+                            new_retention_parameter.value[retention_type] = retention_values
+
+                        db.session.add(new_retention_parameter)
+
+                elif node_parameter_name in ['time_delay', 'publish_time']:
+                    existing_time_parameter = db.session.query(NodeParameter).filter(
+                        NodeParameter.name == node_parameter_name
+                    ).first()
+
+                    if existing_time_parameter:
+                        existing_time_parameter.value = {**existing_time_parameter.value, **node_parameter_value}
+
+                        if node_parameter_name == 'time_delay':
+                            existing_time_parameter.value['minutes'] = min(existing_time_parameter.value.get('minutes', 0), 59)
+                            existing_time_parameter.value['seconds'] = min(existing_time_parameter.value.get('seconds', 0), 59)
+                        elif node_parameter_name == 'publish_time':
+                            existing_time_parameter.value['days'] = max(existing_time_parameter.value.get('days', 0), 0)
+                            existing_time_parameter.value['hours'] = min(existing_time_parameter.value.get('hours', 0), 23)
+                            existing_time_parameter.value['minutes'] = min(existing_time_parameter.value.get('minutes', 0), 59)
+                            existing_time_parameter.value['seconds'] = min(existing_time_parameter.value.get('seconds', 0), 59)
+
+                    else:
+                        new_time_parameter = NodeParameter(
+                            name=node_parameter_name,
+                            value=node_parameter_value
+                        )
+
+                        if node_parameter_name == 'time_delay':
+                            new_time_parameter.value['minutes'] = min(new_time_parameter.value.get('minutes', 0), 59)
+                            new_time_parameter.value['seconds'] = min(new_time_parameter.value.get('seconds', 0), 59)
+                        elif node_parameter_name == 'publish_time':
+                            new_time_parameter.value['days'] = max(new_time_parameter.value.get('days', 0), 0)
+                            new_time_parameter.value['hours'] = min(new_time_parameter.value.get('hours', 0), 23)
+                            new_time_parameter.value['minutes'] = min(new_time_parameter.value.get('minutes', 0), 59)
+                            new_time_parameter.value['seconds'] = min(new_time_parameter.value.get('seconds', 0), 59)
+
+                        db.session.add(new_time_parameter)
+
                 else:
-                    # General handling for other parameters
                     if node_parameter_value is not None:
-                        # Update the node parameter in the database
                         node_parameter = db.session.query(NodeParameter).filter(
                             NodeParameter.name == node_parameter_name
                         ).first()
 
                         if node_parameter:
-                            # Node parameter exists, update its value
                             node_parameter.value = node_parameter_value
                         else:
-                            # Node parameter doesn't exist, create a new one
                             new_node_parameter = NodeParameter(
                                 name=node_parameter_name,
                                 value=node_parameter_value
                             )
                             db.session.add(new_node_parameter)
-                        
+
             db.session.commit()
+
 
         except json.JSONDecodeError as e:
             # Handle JSON decoding error
