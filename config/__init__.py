@@ -1,5 +1,6 @@
 import json 
 import os
+import logging 
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -14,6 +15,18 @@ dir_path = os.path.dirname(script_path)
 main_path = os.path.dirname(dir_path)
 db_path = os.path.join(main_path, "backend", "ui.db")
 
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+main_path = os.path.dirname(dir_path)
+log_file_path = os.path.join(main_path)
+
+# Define loggers
+error_logger = logging.getLogger('error_logger')
+error_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(os.path.join(log_file_path, 'error.log'))
+error_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
+error_handler.setFormatter(error_formatter)
+error_logger.addHandler(error_handler)
 
 def load_config_from_json():
     # Specify the path to the configuration JSON file
@@ -45,6 +58,7 @@ def load_config_from_db():
 
     # Query devices and associated parameters from the database
     devices = session.query(Device).all()
+    error_logger.error("No Devices found")
 
     # Convert devices to a list of dictionaries
     devices_list = []
