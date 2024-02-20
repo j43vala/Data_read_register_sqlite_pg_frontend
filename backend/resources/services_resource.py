@@ -9,7 +9,28 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Device, NodeParameter, Attribute, Parameter
+import logging 
  
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+main_path = os.path.dirname(dir_path)
+project_path = os.path.dirname(main_path)
+log_file_path = os.path.join(project_path)
+
+# Define loggers
+error_logger = logging.getLogger('error_logger')
+error_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(os.path.join(log_file_path, 'error.log'))
+error_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
+error_handler.setFormatter(error_formatter)
+error_logger.addHandler(error_handler)
+
+info_logger = logging.getLogger('info_logger')
+info_logger.setLevel(logging.INFO)
+info_handler = logging.FileHandler(os.path.join(log_file_path, 'info.log'))
+info_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
+info_handler.setFormatter(info_formatter)
+info_logger.addHandler(info_handler)
 
 ns = Namespace('Services', description='Services related operations')
 
@@ -20,6 +41,7 @@ class RestartService(Resource):
             # Run 'systemctl daemon-reload' to reload units
             subprocess.run(['sudo', 'systemctl', 'restart', 'app_mb_hybrid.service'], check=True)
             # subprocess.run(['sc', 'restart', 'app_mb_hybrid'], check=True)
+            info_logger.info("service restarted successfully")
             return 'Services restarted successfully'
         except subprocess.CalledProcessError as e:
             return f'Error restarting services: {str(e)}'
@@ -31,6 +53,7 @@ class StopService(Resource):
         try:
             subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
             # subprocess.run(['sc', 'stop', 'app_mb_hybrid'], check=True)
+            error_logger.error("service stopped successfully")
             return 'Services stopped successfully'
         except subprocess.CalledProcessError as e:
             return f'Error stopping services: {str(e)}'

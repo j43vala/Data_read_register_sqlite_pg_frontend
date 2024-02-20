@@ -89,17 +89,18 @@ except ImportError as e:
 
 def connect_to_broker(device_dict, broker, port, user, password):
     try:
+        
         if not device_dict["spb_device_connected"]:
-            start_time = time.time()
             info_logger.info("Connecting to broker...")
             connect_spb_device(device_dict, broker, port, user, password)
-            elapsed_time = time.time() - start_time
-            if elapsed_time > 10:
-                info_logger.info("Connection to broker not established within 10 seconds.")
-            else:
+            
+            if device_dict["spb_device_connected"]:
                 info_logger.info("Connection to broker successful.")
+            else:
+                error_logger.error("Connection to broker failed (check your credentials of host and port).")
     except Exception as e:
         error_logger.exception(f"Error connecting to the broker: {e}")
+
 
 # retrive data from modbus 
 def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
@@ -226,7 +227,7 @@ def main():
                             session.add(record)
                             session.commit()
                             publish_to_sparkplug_b(spb_node)
-                            info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B")
+                            info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B. . spb_node: {json.dumps(spb_node.__dict__)}")
                         except Exception as publish_error:
                             # Log any errors that occur during data publishing
                             error_logger.error(f"Error publishing temperature and RAM usage data to Sparkplug B: {publish_error}")
