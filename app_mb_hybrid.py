@@ -6,7 +6,6 @@ from logging.handlers import  TimedRotatingFileHandler
 import socket
 import os 
 
-
 # Get the current working directory
 current_directory = os.getcwd()
 
@@ -42,7 +41,6 @@ info_handler = TimedRotatingFileHandler(
 info_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 info_handler.setFormatter(info_formatter)
 info_logger.addHandler(info_handler)
-
 
 # Create a logger for error logs
 error_logger = logging.getLogger('error_logger')
@@ -136,8 +134,6 @@ def perform_data_retention(session, model, retention_period):
     except Exception as e:
         error_logger.exception(f"An error occurred during data retention: {e}")
 
-
-
 # main function
 def main():
 
@@ -177,7 +173,6 @@ def main():
         password = config.get("mqtt").get("password")
         hostname = config.get("spb_parameter").get("hostname")
         
-
         success = None
         init_spb_edge_node(group_id = group_name, edge_node_id = edge_node_id, config = config)
         connect_spb_node( config,  broker , port, user, password)
@@ -194,8 +189,7 @@ def main():
         # value=[]
         # for key in config:
         #     print(key , ":",config[key], type(config[key]))
-            
-
+                
         # main loop
         while True:
             try:
@@ -226,6 +220,8 @@ def main():
                             record = NData(timestamp=datetime.datetime.utcnow(), temperature=temperature_value, ram_usage=str(ram_usage_value))
                             session.add(record)
                             session.commit()
+                            if not spb_node.is_connected():
+                                spb_node.connect( broker, port, user, password)
                             publish_to_sparkplug_b(spb_node)
                             info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B. . spb_node: {json.dumps(spb_node.__dict__)}")
                         except Exception as publish_error:
@@ -244,7 +240,8 @@ def main():
                     spb_device :  MqttSpbEntityDevice = device_dict["spb_device"]
 
                     # connecte to mqtt broker 
-                    connect_to_broker(device_dict, broker, port, user, password)
+                    if not spb_device.is_connected():
+                        connect_to_broker(device_dict, broker, port, user, password)
                     
                     # Call the function with weeks_to_keep set to 2
                     # clean_up_old_logs(log_file_path, weeks_to_keep=2)
@@ -355,5 +352,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
- 
