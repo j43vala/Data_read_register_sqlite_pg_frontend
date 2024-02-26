@@ -202,8 +202,6 @@ def main():
                 if not config.get("last_publish_time"):
                     config["last_publish_time"] = datetime.datetime.now()
                 else:
-                    print("\n-----last_publish_time", config["last_publish_time"]+ publish_delay)
-                    print("\n/////datetime.datetime.now",datetime.datetime.now(), "\n")
                     if config["last_publish_time"] + publish_delay < datetime.datetime.now():
                         config["last_publish_time"] = datetime.datetime.now()
                         spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
@@ -321,7 +319,7 @@ def main():
                     if success and datetime.datetime.now() - last_check_time >= check_frequency:
                         last_check_time = datetime.datetime.now()
                         perform_data_retention(session, model, retention_period)
-                        print(f"Records retained for device: '{device_dict['device_name']}'")
+                        # print(f"Records retained for device: '{device_dict['device_name']}'")
 
                     elif not success:
                         retention_period_failure = (
@@ -336,7 +334,7 @@ def main():
                         if datetime.datetime.now() - last_check_time >= check_frequency:
                             last_check_time = datetime.datetime.now()
                             perform_data_retention(session, model, retention_period_failure)
-                            print(f"Records retained for device (failure case): '{device_dict['device_name']}'")
+                            # print(f"Records retained for device (failure case): '{device_dict['device_name']}'")
             except Exception as main_exception:
                 error_logger.exception(f"An error occurred in the main loop: {main_exception}")
 

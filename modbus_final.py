@@ -6,6 +6,28 @@ import time
 from pymodbus.client import ModbusSerialClient as ModbusClient
 from config import config
 from config.data_conversion import read_integer, read_double, read_float, read_boolean
+import logging
+import os
+
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+main_path = os.path.dirname(dir_path)
+project_path = os.path.dirname(main_path)
+log_file_path = os.path.join(project_path)
+# Define loggers
+error_logger = logging.getLogger('error_logger')
+error_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(os.path.join(log_file_path, 'error.log'))
+error_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
+error_handler.setFormatter(error_formatter)
+error_logger.addHandler(error_handler)
+
+info_logger = logging.getLogger('info_logger')
+info_logger.setLevel(logging.INFO)
+info_handler = logging.FileHandler(os.path.join(log_file_path, 'info.log'))
+info_formatter = logging.Formatter('%(asctime)s -  %(levelname)s - %(message)s')
+info_handler.setFormatter(info_formatter)
+info_logger.addHandler(info_handler)
 
 def initialize_modbus_client():
     modbus_config = config.get("modbus")
@@ -24,29 +46,29 @@ def initialize_modbus_client():
     return client
 
 def read_modbus_data(client,slave_id, reg_address, reg_data_type):
-    print(client,slave_id, reg_address, reg_data_type)
     try:
         function_code = 3
         data = None  # Initialize data variable
 
         if reg_data_type == "Integer":
             data = read_integer(client, reg_address, slave_id)
-            print('Integer > ', reg_address, ":", data)
+            info_logger.info('Integer > ', reg_address, ":", data)
         elif reg_data_type == "Double":
             data = read_double(client, reg_address, slave_id)
-            print('Double > ', reg_address, ":", data)
+            info_logger.info('Double > ', reg_address, ":", data)
         elif reg_data_type == "Float":
             data = read_float(client, reg_address, slave_id)
-            print('Float > ', reg_address, ":", data)
+            info_logger.info('Float > ', reg_address, ":", data)
         elif reg_data_type == "Boolean":
             data = read_boolean(client, reg_address, slave_id)
-            print('Boolean > ', reg_address, ":", data)
+            info_logger.info('Boolean > ', reg_address, ":", data)
         else:
-            print(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
+            error_logger.error(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
 
         return data
 
     
     except Exception as e:
-        print(f"error reading modbus data : {e}")
+        # print(client,slave_id, reg_address, reg_data_type)
+        error_logger.error(f"error reading modbus data : \n{e}")
         return None
