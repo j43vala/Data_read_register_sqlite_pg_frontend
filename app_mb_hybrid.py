@@ -42,11 +42,11 @@ def connect_to_broker(device_dict, broker, port, user, password):
             connect_spb_device(device_dict, broker, port, user, password)
             
             if device_dict["spb_device_connected"]:
-                info_logger.info("Connection to broker successful.")
+                info_logger.info(f"Connection to broker successful: {e}")
             else:
-                error_logger.error("Connection to broker failed (check your credentials of host and port).")
+                error_logger.error(f"Connection to broker failed (check your credentials of host and port): {e}")
     except Exception as e:
-        error_logger.exception(f"Error connecting to the broker: {e}")
+        error_logger.error(f"Error connecting to the broker: {e}")
 
 # retrive data from modbus 
 def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
@@ -54,8 +54,7 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
         return data
     except Exception as e:
-        # print(f"An error occurred reading Modbus data: {e}")
-        error_logger.exception(f"An error occurred reading Modbus data: {e}")
+        error_logger.error(f"An error occurred reading Modbus data: {e}")
         return None
 
 # publish data to sparkplug b
@@ -65,10 +64,8 @@ def publish_to_sparkplug_b(spb_entity):
         success = spb_entity.publish_data()
         info_logger.info(f"Publish success: {success}")
 
-        # print(f"Publish success: {success}")
         return success
     except Exception as e:
-        # print(f"Failed to publish data to Sparkplug B: {e}")
         error_logger.exception(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
@@ -267,7 +264,6 @@ def main():
                     if success and datetime.datetime.now() - last_check_time >= check_frequency:
                         last_check_time = datetime.datetime.now()
                         perform_data_retention(session, model, retention_period)
-                        # print(f"Records retained for device: '{device_dict['device_name']}'")
 
                     elif not success:
                         retention_period_failure = (
@@ -282,14 +278,13 @@ def main():
                         if datetime.datetime.now() - last_check_time >= check_frequency:
                             last_check_time = datetime.datetime.now()
                             perform_data_retention(session, model, retention_period_failure)
-                            # print(f"Records retained for device (failure case): '{device_dict['device_name']}'")
             except Exception as main_exception:
                 error_logger.exception(f"An error occurred in the main loop: {main_exception}")
 
     except KeyboardInterrupt:
         client.close()
         # print("Exiting the loop...........")
-        info_logger.info("Exiting the loop due to KeyboardInterrupt.")
+        info_logger.info(f"Exiting the loop due to KeyboardInterrupt: {e}")
     except Exception as e:
         time.sleep(10)
         error_logger.exception(f"An unexpected error occurred: {e}")

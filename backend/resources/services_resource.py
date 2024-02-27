@@ -3,7 +3,6 @@ import subprocess
 import platform
 import shlex
 import os
-import logging
 
 from flask_restx import Resource, Namespace, fields, reqparse
 from flask import jsonify, make_response, request
@@ -14,7 +13,6 @@ from models import Device, NodeParameter, Attribute, Parameter
 from logger_services import info_logger, error_logger 
 
 ns = Namespace('Services', description='Services related operations')
-
 
 @ns.route('/restart-services')
 class RestartService(Resource):
@@ -39,8 +37,6 @@ class StopService(Resource):
             return 'Services stopped successfully'
         except subprocess.CalledProcessError as e:
             return f'Error stopping services: {str(e)}'
-        
-        
 
 @ns.route('/get-wifi-lists')
 class Wifi(Resource):
@@ -503,33 +499,4 @@ class FileUploadResources(Resource):
 
         return make_response(jsonify({"status": 1, "json_content": parsed_json}), 200)
 
-        
-# import subprocess
-# import platform
 
-# def list_wifi_networks():
-#     # Get the name of the operating system.
-#     os_name = platform.system()
-
-#     # Check if the OS is Windows.
-#     if os_name == "Windows":
-#         # Command to list Wi-Fi networks on Windows using netsh.
-#         list_networks_command = 'netsh wlan show networks'
-#     # Check if the OS is Linux.
-#     elif os_name == "Linux":
-#         # Command to list Wi-Fi networks on Linux using nmcli.
-#         list_networks_command = "nmcli device wifi list"
-#     # Handle unsupported operating systems.
-#     else:
-#         # Print a message indicating that the OS is unsupported (Not Linux or Windows).
-#         print("Unsupported OS")
-#         return
-
-#     try:
-#         # Execute the command and capture the result.
-#         output = subprocess.check_output(list_networks_command, shell=True, text=True)
-#         # Print the output, all networks in range.
-#         print(output)
-#     except subprocess.CalledProcessError as e:
-#         print(f"Error executing command: {e}")
-        

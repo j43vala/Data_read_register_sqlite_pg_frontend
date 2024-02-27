@@ -21,8 +21,9 @@ def setup_info_logger(log_file_path):
     if not os.path.isfile(log_file_path):
         with open(log_file_path, 'w'):
             pass  # Creates an empty file
-
+        
     info_logger = logging.getLogger('info_logger')
+    info_logger.setLevel(logging.INFO)
     info_handler = TimedRotatingFileHandler(
         filename=log_file_path,
         when='D',
