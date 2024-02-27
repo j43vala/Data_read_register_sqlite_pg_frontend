@@ -1,61 +1,10 @@
 import time
 import datetime
 import subprocess
-import logging
+from logger_services import error_logger, info_logger
 from logging.handlers import  TimedRotatingFileHandler 
 import socket
 import os 
-
-# Get the current working directory
-current_directory = os.getcwd()
-
-# Specify the log file name
-info_log_file_name = 'info.log'
-error_log_file_name = 'error.log'
-
-# Create the full path to the log file
-error_log_file_path = os.path.join(current_directory, error_log_file_name)
-info_log_file_path = os.path.join(current_directory, info_log_file_name)
-
-if not os.path.isfile(error_log_file_path):
-    with open(error_log_file_path, 'w'):
-        pass  # Creates an empty file
-
-# Check if the log file exists, and create it if not
-if not os.path.isfile(info_log_file_path):
-    with open(info_log_file_path, 'w'):
-        pass  # Creates an empty file
-
-
-# Create a logger for information logs
-info_logger = logging.getLogger('info_logger')
-# info_logger.setLevel(logging.INFO)
-info_handler = TimedRotatingFileHandler(
-    filename=info_log_file_path,
-    when='D',
-    interval=1,
-    backupCount=5,
-    encoding='utf-8',
-    delay=False
-)
-info_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-info_handler.setFormatter(info_formatter)
-info_logger.addHandler(info_handler)
-
-# Create a logger for error logs
-error_logger = logging.getLogger('error_logger')
-error_logger.setLevel(logging.ERROR)
-error_handler = TimedRotatingFileHandler(
-    filename=error_log_file_path,
-    when='D',
-    interval=1,
-    backupCount=5,
-    encoding='utf-8',
-    delay=False
-)
-error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-error_handler.setFormatter(error_formatter)
-error_logger.addHandler(error_handler)
 
 try:
     from config import config
@@ -99,7 +48,6 @@ def connect_to_broker(device_dict, broker, port, user, password):
     except Exception as e:
         error_logger.exception(f"Error connecting to the broker: {e}")
 
-
 # retrive data from modbus 
 def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
     try:
@@ -107,7 +55,7 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         return data
     except Exception as e:
         # print(f"An error occurred reading Modbus data: {e}")
-        logging.exception(f"An error occurred reading Modbus data: {e}")
+        error_logger.exception(f"An error occurred reading Modbus data: {e}")
         return None
 
 # publish data to sparkplug b
@@ -346,7 +294,9 @@ def main():
         time.sleep(10)
         error_logger.exception(f"An unexpected error occurred: {e}")
     finally:
-        logging.shutdown()
+        # Shutdown loggers and handlers
+        info_logger.handlers.clear()
+        error_logger.handlers.clear()
 
 if __name__ == "__main__":
     main()

@@ -1,35 +1,12 @@
 import time
 from mqtt_spb_wrapper import MqttSpbEntityDevice , MqttSpbEntityEdgeNode
 from config.data_conversion import read_integer, read_double, read_float
+from logger_services import info_logger, error_logger
 from modbus_final import initialize_modbus_client
 import copy
 import json
 import psutil
-import logging
 import os
-
-# Initialize loggers
-script_path = os.path.abspath(__file__)
-dir_path = os.path.dirname(script_path)
-main_path = os.path.dirname(dir_path)
-project_path = os.path.dirname(main_path)
-log_file_path = os.path.join(project_path)
-
-# Define error logger
-error_logger = logging.getLogger('error_logger')
-error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler(os.path.join(log_file_path, 'error.log'))
-error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-error_handler.setFormatter(error_formatter)
-error_logger.addHandler(error_handler)
-
-# Define info logger
-info_logger = logging.getLogger('info_logger')
-info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler(os.path.join(log_file_path, 'info.log'))
-info_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-info_handler.setFormatter(info_formatter)
-info_logger.addHandler(info_handler)
 
 def get_ram_usage():
     try:
@@ -82,7 +59,6 @@ def init_spb_edge_node(group_id, edge_node_id, config):
         node.commands.set_value("INFO", False)
         node.commands.set_value("ERROR", False)
 
-        
         config["spb_node"] = node
     except Exception as e:
         error_logger.error("Error occurred during initialization of Sparkplug B Edge Node: %s", str(e))
@@ -96,7 +72,7 @@ def init_spb_device(group_name,edge_node_name, device_dict):
     
     _DEBUG = True  # Enable debug messages
 
-    print("--- Sparkplug B example - End of Node Device - Simple")
+    info_logger.info("--- Sparkplug B example - End of Node Device - Simple")
 
 
     def callback_command(payload):
@@ -148,7 +124,7 @@ def init_spb_device(group_name,edge_node_name, device_dict):
 def connect_spb_device(device_dict, broker , port, user, password):
    
     
-    print("Trying to connect to broker...")
+    info_logger.info("Trying to connect to broker...")
 
     device : MqttSpbEntityDevice = device_dict["spb_device"]
     _connected = device.connect(broker, port, user, password)

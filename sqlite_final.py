@@ -2,11 +2,9 @@ import time
 from config.db import sqlite_engine
 from config.data_conversion import read_integer, read_double, read_float
 from database.models import create_dynamic_model , check_and_add_column
-import logging
+import os
+from logger_services import error_logger, info_logger
 
-# Define loggers
-error_logger = logging.getLogger('error_logger')
-info_logger = logging.getLogger('info_logger')
 
 def create_dynamic_models(devices, hostname):
     device = {}
