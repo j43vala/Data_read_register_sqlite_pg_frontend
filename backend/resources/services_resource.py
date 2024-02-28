@@ -3,6 +3,7 @@ import subprocess
 import platform
 import shlex
 import os
+import sys
 
 from flask_restx import Resource, Namespace, fields, reqparse
 from flask import jsonify, make_response, request
@@ -10,7 +11,16 @@ from db import db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Device, NodeParameter, Attribute, Parameter
+
+script_path = os.path.abspath(__file__)
+dir_path = os.path.dirname(script_path)
+main_path = os.path.dirname(dir_path)
+project_path = os.path.dirname(main_path)
+log_file_path = os.path.join(project_path)
+sys.path.append(log_file_path)
+
 from logger_services import info_logger, error_logger 
+
 
 ns = Namespace('Services', description='Services related operations')
 
@@ -26,7 +36,6 @@ class RestartService(Resource):
         except subprocess.CalledProcessError as e:
             return f'Error restarting services: {str(e)}'
         
-        
 @ns.route('/stop-services')
 class StopService(Resource):
     def get(self):
@@ -37,7 +46,6 @@ class StopService(Resource):
             return 'Services stopped successfully'
         except subprocess.CalledProcessError as e:
             return f'Error stopping services: {str(e)}'
-
 @ns.route('/get-wifi-lists')
 class Wifi(Resource):
     def get(self):
