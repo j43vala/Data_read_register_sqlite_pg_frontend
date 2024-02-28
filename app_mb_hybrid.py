@@ -66,7 +66,7 @@ def publish_to_sparkplug_b(spb_entity):
 
         return success
     except Exception as e:
-        error_logger.exception(f"Failed to publish data to Sparkplug B: {e}")
+        error_logger.error(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
 # perform data retantion in SQlite database
@@ -77,7 +77,7 @@ def perform_data_retention(session, model, retention_period):
             session.delete(record)
         session.commit()
     except Exception as e:
-        error_logger.exception(f"An error occurred during data retention: {e}")
+        error_logger.error(f"An error occurred during data retention: {e}")
 
 # main function
 def main():
@@ -166,7 +166,7 @@ def main():
                             if not spb_node.is_connected():
                                 spb_node.connect( broker, port, user, password)
                             publish_to_sparkplug_b(spb_node)
-                            info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B. . spb_node: {json.dumps(spb_node.__dict__)}")
+                            info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B")
                         except Exception as publish_error:
                             # Log any errors that occur during data publishing
                             error_logger.error(f"Error publishing temperature and RAM usage data to Sparkplug B: {publish_error}")
@@ -279,7 +279,7 @@ def main():
                             last_check_time = datetime.datetime.now()
                             perform_data_retention(session, model, retention_period_failure)
             except Exception as main_exception:
-                error_logger.exception(f"An error occurred in the main loop: {main_exception}")
+                error_logger.error(f"An error occurred in the main loop: {main_exception}")
 
     except KeyboardInterrupt:
         client.close()
@@ -287,7 +287,7 @@ def main():
         info_logger.info(f"Exiting the loop due to KeyboardInterrupt: {e}")
     except Exception as e:
         time.sleep(10)
-        error_logger.exception(f"An unexpected error occurred: {e}")
+        error_logger.error(f"An unexpected error occurred: {e}")
     finally:
         # Shutdown loggers and handlers
         info_logger.handlers.clear()

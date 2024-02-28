@@ -63,7 +63,7 @@ def init_spb_edge_node(group_id, edge_node_id, config):
     except Exception as e:
         error_logger.error("Error occurred during initialization of Sparkplug B Edge Node: %s", str(e))
     else:
-        info_logger.info(f"Successfully initialized Sparkplug B Edge Node: {e}")
+        info_logger.info(f"Successfully initialized Sparkplug B Edge Node")
     
     return node
 
