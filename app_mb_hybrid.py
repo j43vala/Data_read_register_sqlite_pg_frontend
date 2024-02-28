@@ -284,7 +284,7 @@ def main():
     except KeyboardInterrupt:
         client.close()
         # print("Exiting the loop...........")
-        info_logger.info(f"Exiting the loop due to KeyboardInterrupt: {e}")
+        info_logger.info("Exiting the loop due to KeyboardInterrupt")
     except Exception as e:
         time.sleep(10)
         error_logger.error(f"An unexpected error occurred: {e}")
