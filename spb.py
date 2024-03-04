@@ -8,20 +8,25 @@ import json
 import psutil
 import os
 
+
 def get_ram_usage():
     try:
+        import psutil
+        
         # Get system memory usage statistics
         mem = psutil.virtual_memory()
         # Total physical memory available in bytes
-        total_memory = float(mem.total)
+        # total_memory = float(mem.total)
         # Total memory used in bytes
         used_memory = float(mem.used)
-        # Format the result string
-        result_string = f"{used_memory / (1024 ** 3):.2f} GB/{total_memory / (1024 ** 3):.2f} GB"
-        return result_string
+        
+        # Calculate the RAM usage in GB and round it to two decimal places
+        result_float = round(used_memory / (1024 ** 3), 1)
+        
+        return result_float
     except Exception as e:
         error_logger.error("Error occurred while reading RAM usage: %s", str(e))
-        return "Error occurred while reading RAM usage."
+        return -1  # Return a default value or handle the error accordingly
 
 def get_node_temp():
     try:
@@ -150,6 +155,7 @@ def connect_spb_node(node_dict, broker , port, user, password):
     if _connected:
         # Send birth message
         node.publish_birth()
+        
     else:
         error_logger.error("Error, could not connect spb node to broker...")
 
