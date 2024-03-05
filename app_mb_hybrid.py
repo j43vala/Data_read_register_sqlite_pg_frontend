@@ -138,21 +138,28 @@ def main():
         # main loop
         while True:
             try:
+                # Ddata publish timer
                 publish_delay = datetime.timedelta( 
                 days=config["publish_time"]["days"],
                 hours=config["publish_time"]["hours"],
                 minutes=config["publish_time"]["minutes"],
                 seconds=config["publish_time"]["seconds"]
                 )
+                # Ndata publish timer
+                node_publish_delay = datetime.timedelta( 
+                # days=config["publish_time"]["days"],
+                # hours=config["publish_time"]["hours"],
+                # minutes=config["publish_time"]["minutes"],
+                seconds=30
+                )
                 if not config.get("last_publish_time"):
                     config["last_publish_time"] = datetime.datetime.now()
                 else:
-                    if config["last_publish_time"] + publish_delay < datetime.datetime.now():
+                    if config["last_publish_time"] + node_publish_delay < datetime.datetime.now():
                         config["last_publish_time"] = datetime.datetime.now()
                         spb_node : MqttSpbEntityEdgeNode= config["spb_node"] 
 
                         try:
-
                             spb_node:   MqttSpbEntityEdgeNode = config["spb_node"]
                             temperature_value = get_node_temp()
                             ram_usage_value = get_ram_usage()
@@ -160,11 +167,12 @@ def main():
                             spb_node.data.set_value("RAM_usage", ram_usage_value)
                             # Insert data into SQLite database using the NData model
 
-                            record = NData(timestamp=datetime.datetime.utcnow(), temperature=temperature_value, ram_usage=str(ram_usage_value))
+                            record = NData(timestamp=datetime.datetime.utcnow(), temperature=temperature_value, ram_usage=ram_usage_value)
                             session.add(record)
                             session.commit()
                             if not spb_node.is_connected():
                                 spb_node.connect( broker, port, user, password)
+                             
                             publish_to_sparkplug_b(spb_node)
                             info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B")
                         except Exception as publish_error:
@@ -295,3 +303,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
