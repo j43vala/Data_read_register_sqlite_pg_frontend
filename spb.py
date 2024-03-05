@@ -8,7 +8,6 @@ import json
 import psutil
 import os
 
-
 def get_ram_usage():
     try:
         import psutil
@@ -38,9 +37,8 @@ def get_node_temp():
         error_logger.error("Error occurred while reading the rpi temperature : ", str(e))
         return 0
 
-def init_spb_edge_node(group_id, edge_node_id, config):
+def init_spb_edge_node(group_id, edge_node_id, config, mac_address):
     node = MqttSpbEntityEdgeNode(group_id, edge_node_id)
-   
    
     try:
         attributes = config["node_attributes"]
@@ -50,7 +48,10 @@ def init_spb_edge_node(group_id, edge_node_id, config):
         ram_usage = get_ram_usage()
         node.data.set_value("temperature", temperature)
         node.data.set_value("RAM_usage", ram_usage)
-        
+
+        node.attribures.set_value("MAC_address", mac_address)
+        print('=======================================node.attribures.set_value("MAC_address", mac_address): ', node.attribures.set_value("MAC_address", mac_address))
+
         
         temp = copy.deepcopy(config)
         
@@ -155,7 +156,7 @@ def connect_spb_node(node_dict, broker , port, user, password):
     if _connected:
         # Send birth message
         node.publish_birth()
-        
+        print("nbirth published")
     else:
         error_logger.error("Error, could not connect spb node to broker...")
 

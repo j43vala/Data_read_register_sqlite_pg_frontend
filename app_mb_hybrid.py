@@ -5,6 +5,7 @@ from logger_services import error_logger, info_logger
 from logging.handlers import  TimedRotatingFileHandler 
 import socket
 import os 
+import uuid
 
 try:
     from config import config
@@ -79,6 +80,10 @@ def perform_data_retention(session, model, retention_period):
     except Exception as e:
         error_logger.error(f"An error occurred during data retention: {e}")
 
+def get_mac_address():
+    mac = uuid.getnode()
+    return  ':'.join(('%012X' % mac)[i:i + 2] for i in range(0, 12, 2))
+
 # main function
 def main():
 
@@ -119,7 +124,7 @@ def main():
         hostname = config.get("spb_parameter").get("hostname")
         
         success = None
-        init_spb_edge_node(group_id = group_name, edge_node_id = edge_node_id, config = config)
+        init_spb_edge_node(group_id = group_name, edge_node_id = edge_node_id, config = config, mac_address = get_mac_address())
         connect_spb_node( config,  broker , port, user, password)
         # config["spb_node"].attribures.get_value_list()
         # print('\\n\n\n config["spb_node"].attribures.get_value_list(): ', config["spb_node"].attribures.get_dictionary())
@@ -152,6 +157,10 @@ def main():
                 # minutes=config["publish_time"]["minutes"],
                 seconds=30
                 )
+
+                mac_address = get_mac_address()
+                print("MAC Address:=========================", mac_address)
+
                 if not config.get("last_publish_time"):
                     config["last_publish_time"] = datetime.datetime.now()
                 else:
