@@ -183,16 +183,21 @@ class ConnectWifi(Resource):
         except subprocess.CalledProcessError as e:
             return f"Error: Failed to connect to WiFi network {ssid}. {e}"
 
-@ns.route("/get-connected-network")
-class ConnectedWifi(Resource):
+@ns.route('/git-pull')
+class GitPullResource(Resource):
     def get(self):
-        """Find Which Wifi network I Connected."""
+        repo_url = "https://github.com/j43vala/Data_read_register_sqlite_pg_frontend.git"
+
         try:
-            result = subprocess.check_output(['iwgetid', '-r'], text=True)
-            return result.strip()
+            # Run git pull command
+            result = subprocess.run(["git", "pull", repo_url], capture_output=True, text=True, check=True)
+
+            # Check the output of the git pull command
+            output = result.stdout
+            return {'message': 'Git pull successful', 'output': output}, 200
         except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
-            return None
+            # If git pull fails, return error message and output
+            return {'message': 'Git pull failed', 'output': e.stderr}, 500
 
 # Define the SQLite database file path
 script_path = os.path.abspath(__file__)
