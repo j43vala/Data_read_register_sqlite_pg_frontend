@@ -5,10 +5,10 @@ After=network.target
 [Service]
 Type=simple
 User=wzero
-WorkingDirectory= /home/wzero/Data_read_register_sqlite_pg_frontend
-ExecStart=/home/wzero/Data_read_register_sqlite_pg_frontend/ENV/bin/python3 /home/wzero/Data_read_register_sqlite_pg_frontend/app_mb_hybrid.py
-StandardOutput=/home/wzero/Data_read_register_sqlite_pg_frontend/service_files/hybrid_out.log
-StandardError=/home/wzero/Data_read_register_sqlite_pg_frontend/service_files/hybrid_error.log
+WorkingDirectory= /home/wzero/wzero-edge-app
+ExecStart=/home/wzero/wzero-edge-app/ENV/bin/python3 /home/wzero/wzero-edge-app/app_mb_hybrid.py
+StandardOutput=/home/wzero/wzero-edge-app/service_files/hybrid_out.log
+StandardError=/home/wzero/wzero-edge-app/service_files/hybrid_error.log
 SyslogIdentifier=app_mb_hybrid # without any quote
 Restart=always
 
