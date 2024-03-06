@@ -2,7 +2,7 @@ import struct
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
-def read_integer(client, reg_address, slave_id):
+def read_integer(client : ModbusClient, reg_address, slave_id):
     result = client.read_holding_registers(reg_address, 2, slave=slave_id)
     if result.isError():
         print(f"Error reading Modbus data: {result}")

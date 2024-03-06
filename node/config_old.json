@@ -1,0 +1,338 @@
+{
+  "modbus": {
+    "baudrate": 9600,
+    "method": "rtu",
+    "parity": "N",
+    "port": "COM5",
+    "stopbits": 1,
+    "wordlength": 8
+  },
+  "mqtt": {
+    "broker_host": "172.105.49.231",
+    "broker_port": 1883,
+    "qos": 0,
+    "user": "",
+    "password": ""
+  },
+  "spb_parameter": {
+    "edge_node_id": "rpi1",
+    "group_id": "wzero1",
+    "hostname": ""
+  },
+  "node_attributes": [
+    { "name": "description", "value": "plc_Simple EoN Device" },
+    { "name": "version", "value": "0.01" }
+  ],
+  "retention_parameter": {
+    "check_frequency": { "days": 0, "hours": 0, "minutes": 1, "seconds": 0 },
+    "failure_retention": { "days": 0, "hours": 0, "minutes": 4, "seconds": 0 },
+    "success_retention": { "days": 0, "hours": 0, "minutes": 3, "seconds": 0 }
+  },
+  "time_delay": { "minutes": 0, "seconds": 1 },
+  "publish_time": { "days": 0, "hours": 0, "minutes": 0, "seconds": 1 },
+  "devices": [
+    {
+      "device_name": "plc1",
+      "slave_id": 1,
+      "attributes": [
+        { "name": "Device Name", "value": "plc" },
+        { "name": "Slave ID", "value": "1" },
+        { "name": "Type", "value": "plc" },
+        { "name": "Company", "value": "wecon" },
+        { "name": "Model Number", "value": "lx2e" }
+      ],
+      "parameters": [
+        {
+          "function_code": "Holding Register",
+          "address": 300,
+          "parameter_name": "kwh",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 2,
+          "parameter_name": "kvah",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 6,
+          "parameter_name": "kvarh",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 10,
+          "parameter_name": "avg_vln",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 12,
+          "parameter_name": "avg_vll",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 44,
+          "parameter_name": "avg_current",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 60,
+          "parameter_name": "avg_pf",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "frequency",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kw",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kva",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kvar",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        }
+      ]
+    },
+    {
+      "device_name": "plc2",
+      "slave_id": 2,
+      "attributes": [
+        { "name": "Device Name", "value": "plc" },
+        { "name": "Slave ID", "value": "1" },
+        { "name": "Type", "value": "plc" },
+        { "name": "Company", "value": "wecon" },
+        { "name": "Model Number", "value": "lx2e" }
+      ],
+      "parameters": [
+        {
+          "function_code": "Holding Register",
+          "address": 300,
+          "parameter_name": "kwh",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 2,
+          "parameter_name": "kvah",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 6,
+          "parameter_name": "kvarh",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 10,
+          "parameter_name": "avg_vln",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 12,
+          "parameter_name": "avg_vll",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 44,
+          "parameter_name": "avg_current",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 60,
+          "parameter_name": "avg_pf",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "frequency",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kw",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kva",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kvar",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        }
+      ]
+    },
+    {
+      "device_name": "plc3",
+      "slave_id": 3,
+      "attributes": [
+        { "name": "Device Name", "value": "plc" },
+        { "name": "Slave ID", "value": "1" },
+        { "name": "Type", "value": "plc" },
+        { "name": "Company", "value": "wecon" },
+        { "name": "Model Number", "value": "lx2e" }
+      ],
+      "parameters": [
+        {
+          "function_code": "Holding Register",
+          "address": 300,
+          "parameter_name": "kwh",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 2,
+          "parameter_name": "kvah",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 6,
+          "parameter_name": "kvarh",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 10,
+          "parameter_name": "avg_vln",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 12,
+          "parameter_name": "avg_vll",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 44,
+          "parameter_name": "avg_current",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": 60,
+          "parameter_name": "avg_pf",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": "current_val"
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "frequency",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kw",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kva",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        },
+        {
+          "function_code": "Holding Register",
+          "address": "",
+          "parameter_name": "total_kvar",
+          "data_type": "Float",
+          "threshold": 0.0,
+          "aggregation_type": ""
+        }
+      ]
+    }
+  ]
+}
