@@ -2,7 +2,7 @@ import json
 import subprocess
 import platform
 import shlex
-import os
+import os   
 import sys
 
 from flask_restx import Resource, Namespace, fields, reqparse

@@ -4,9 +4,11 @@ from resources import api
 from flask_cors import CORS
 from db import db
 from resources.node_parameter_resource import create_default_node_parameters
+from db_services import check_and_add_user_role,check_and_add_super_admin
+from security import jwt
 
 app = Flask(__name__)
-
+app.config["JWT_SECRET_KEY"]="secretkey"
 CORS(app)
 
 @app.route("/")
@@ -32,6 +34,10 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     create_default_node_parameters()
+    check_and_add_user_role() 
+    check_and_add_super_admin() 
+    jwt.init_app(app)
+    
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
@@ -46,11 +52,13 @@ if __name__ == '__main__':
 # from db import db
 # from sqlalchemy import create_engine
 # import psycopg2
-
+# from resources.node_parameter_resource import create_default_node_parameters
+# from db_services import check_and_add_user_role,check_and_add_super_admin
+# from security import jwt
 
 # app = Flask(__name__)
 # app.config.from_pyfile('config.py')
-
+# app.config["JWT_SECRET_KEY"]="secretkey"
 # CORS(app)
 # api.init_app(app, cors_allowed_origins='*')
 
@@ -90,7 +98,10 @@ if __name__ == '__main__':
 
 # with app.app_context():
 #     db.create_all()
-    
+#     create_default_node_parameters()
+#     check_and_add_user_role()  
+#     check_and_add_super_admin()
+#     jwt.init_app(app)
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
