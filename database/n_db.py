@@ -10,6 +10,6 @@ class NData(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
     temperature = Column(Float, nullable=False)
-    ram_usage = Column(String, nullable=False)
+    ram_usage = Column(Float, nullable=False)
     
 Base.metadata.create_all(sqlite_engine)
