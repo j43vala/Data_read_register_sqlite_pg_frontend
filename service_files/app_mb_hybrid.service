@@ -6,6 +6,7 @@ After=network.target
 Type=simple
 User=wzero
 WorkingDirectory= /home/wzero/wzero-edge-app
+ExecStartPre=/bin/sleep 10
 ExecStart=/home/wzero/wzero-edge-app/ENV/bin/python3 /home/wzero/wzero-edge-app/app_mb_hybrid.py
 StandardOutput=/home/wzero/wzero-edge-app/service_files/hybrid_out.log
 StandardError=/home/wzero/wzero-edge-app/service_files/hybrid_error.log
