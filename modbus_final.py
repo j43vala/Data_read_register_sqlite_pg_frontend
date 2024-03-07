@@ -33,16 +33,16 @@ def read_modbus_data(client,slave_id, reg_address, reg_data_type):
 
         if reg_data_type == "Integer":
             data = read_integer(client, reg_address, slave_id)
-            info_logger.info('Integer > ', reg_address, ":", data)
+            # info_logger.info('Integer > ', reg_address, ":", data)
         elif reg_data_type == "Double":
             data = read_double(client, reg_address, slave_id)
-            info_logger.info('Double > ', reg_address, ":", data)
+            # info_logger.info('Double > ', reg_address, ":", data)
         elif reg_data_type == "Float":
             data = read_float(client, reg_address, slave_id)
-            info_logger.info('Float > ', reg_address, ":", data)
+            # info_logger.info('Float > ', reg_address, ":", data)
         elif reg_data_type == "Boolean":
             data = read_boolean(client, reg_address, slave_id)
-            info_logger.info('Boolean > ', reg_address, ":", data)
+            # info_logger.info('Boolean > ', reg_address, ":", data)
         else:
             error_logger.error(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
 
