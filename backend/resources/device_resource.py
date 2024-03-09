@@ -2,6 +2,7 @@ from flask import request, jsonify, make_response
 from flask_restx import Resource, Namespace, fields
 from models import Device, Parameter, Attribute  # Import the Device and Parameter models
 from db import db
+from flask_jwt_extended import jwt_required,current_user
 
 ns = Namespace('Devices', description='Device related operations')
 
@@ -12,9 +13,15 @@ device_fields = ns.model('Device', {
 })
 
 @ns.route('/')
+
 class DeviceResourceList(Resource):
+    @jwt_required()
     def get(self):
         """Retrieve all devices with their connected Parameters and Attributes."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         return_fields = ["id", "name", "slave_id"]
         devices = db.session.query(Device).all()
@@ -60,10 +67,14 @@ class DeviceResourceList(Resource):
         status = 1
         return make_response(jsonify({"status": status, 'devices': device_list}), 200)
 
-
+    @jwt_required()
     @ns.expect(device_fields)
     def post(self):
         """Create a new device."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         required_fields = ["name","slave_id"]
 
         status = 0
@@ -95,8 +106,10 @@ class DeviceResourceList(Resource):
 
 @ns.route('/<id>')
 class DeviceResource(Resource):
+    @jwt_required()
     def get(self, id):
         """Retrieve a specific device with its connected parameters and attributes."""
+        
         status = 0
         return_fields = ["name", "slave_id"]
         device = db.session.query(Device).filter_by(id=id).first()
@@ -160,10 +173,14 @@ class DeviceResource(Resource):
 
     #     status = 1
     #     return make_response(jsonify({"status": status, "message": "Device has been updated."}), 200)
-    
+    @jwt_required()
     @ns.expect(device_fields)
     def put(self, id):
         """Update a specific device."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         data = request.get_json()
         device = db.session.query(Device).filter_by(id=id).first()
@@ -198,9 +215,13 @@ class DeviceResource(Resource):
 
         status = 1
         return make_response(jsonify({"status": status, "message": "Device has been updated."}), 200)
-
+    @jwt_required()
     def delete(self, id):
         """Delete a specific device and deactivate associated parameters and attributes."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         return_fields = ["name"]
         device = db.session.query(Device).filter_by(id=id).first()

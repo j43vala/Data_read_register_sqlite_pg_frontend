@@ -2,7 +2,7 @@ from flask import request, jsonify, make_response
 from flask_restx import Resource, Namespace, fields
 from models import Parameter, Device  # Import the parameter model
 from db import db
-
+from flask_jwt_extended import current_user,jwt_required
 # Create a new Namespace for parameter
 ns = Namespace('Parameters', description='Parameter related operations')
 
@@ -32,8 +32,13 @@ parameter_update_fields = ns.model('ParameterUpdate', {
 
 @ns.route('/')
 class ParameterResourceList(Resource):
+    @jwt_required()
     def get(self):
         """Retrieve all Parameters."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         return_fields = ["active", "function_code", "address", "parameter_name", "data_type", "threshold", "aggregation_type", "device_id"]
         parameters = db.session.query(Parameter).all()
@@ -133,8 +138,10 @@ class ParameterResourceList(Resource):
 
 @ns.route('/<id>')
 class ParameterResource(Resource):
+    @jwt_required()
     def get(self, id):
         """Retrieve a specific parameter."""
+        
         status = 0
         return_fields = ["function_code", "address", "parameter_name", "data_type", "threshold", "aggregation_type","active"]
         parameter = db.session.query(Parameter).filter_by(id=id).first()
@@ -208,9 +215,14 @@ class ParameterResource(Resource):
     
 
 class CreateParameter(Resource):
+    @jwt_required()
     @ns.expect(parameter_create_fields)
     def post(self, device_id):
         """Create new parameters connected to a device."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         data = request.get_json()
 
@@ -261,9 +273,14 @@ class CreateParameter(Resource):
         
         
 class UpdateParameter(Resource):
+    @jwt_required()
     @ns.expect(parameter_update_fields)
     def put(self, device_id, id):
         """Update a specific parameter connected to a device."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         data = request.get_json()
 
@@ -283,8 +300,13 @@ class UpdateParameter(Resource):
 
 
 class DeleteParameter(Resource):
+    @jwt_required()
     def delete(self, device_id, id):
         """Delete a specific parameter."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         parameter = db.session.query(Parameter).filter_by(device_id=device_id, id=id).first()
 

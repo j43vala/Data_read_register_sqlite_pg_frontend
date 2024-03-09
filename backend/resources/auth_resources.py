@@ -25,8 +25,7 @@ class WhoAmI(Resource):
         role = current_user.role.name
         email = current_user.email_id
         
-        # We can now access our sqlalchemy User object via `current_user`.
-        return make_response(jsonify({"user_name": username, "user_role": role, "email": email}))
+        return make_response(jsonify({"user_name": username, "user_role": role, "email": email}),200)
 
 
     
@@ -43,13 +42,13 @@ class UserLogin(Resource):
         elif "email" in json_fields:
             user = db.session.query(User).filter_by(email_id=user_data["email"]).first()
         else:
-            return make_response(jsonify({ 'message': "name or email not found in api"}), 400)
+            return make_response(jsonify({ 'message': "name or email not found"}), 400)
         
         if check_password_hash(user.password, user_data["password"]):
             access_token = create_access_token(identity=user)
-            return {"access_token": "Bearer "+ access_token}
+            return make_response(jsonify({"access_token": "Bearer "+ access_token}),200)
         
-        return make_response(jsonify({"message":"invalid credentials."}))
+        return make_response(jsonify({"message":"invalid credentials."}),401)
     
 @ns.route("/logout")
 class LogOut(Resource):    
@@ -62,4 +61,5 @@ class LogOut(Resource):
         token = BlacklistToken(jti=jti)
         db.session.add(token)
         db.session.commit()
-        return make_response(jsonify({"message": "Successfully logged out."}))
+        return make_response(jsonify({"message": "Successfully logged out."}),200)
+    

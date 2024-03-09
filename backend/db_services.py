@@ -15,13 +15,13 @@ def check_and_add_user_role():
     db.session.commit()
     
 def check_and_add_super_admin():
-    name = "user 1"
+    name = "wzero_admin"
     user = User.query.filter(User.username==name).first()
     if user:
         pass
     else:
-        email = "admin123@gmail.com"
-        password = input(str("enter password"))
+        email = "wzero@gmail.com"
+        password = "12345"
         user_role = UserRole.query.filter(UserRole.name=="super_admin").first()
         hashed_password = generate_password_hash(password, method='sha256')
         new_user = User(username=name,email_id=email,password=hashed_password,role_id=user_role.id)

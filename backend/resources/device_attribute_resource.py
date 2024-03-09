@@ -2,6 +2,7 @@ from flask import request, jsonify, make_response
 from flask_restx import Resource, Namespace, fields
 from models import Attribute, Device  # Import the Attribute model
 from db import db
+from flask_jwt_extended import current_user,jwt_required
 
 # Create a new Namespace for Attribute
 ns = Namespace('Attributes', description='Attribute related operations')
@@ -22,8 +23,13 @@ attribute_update_fields = ns.model('Attribute', {
 
 @ns.route('/')
 class AttributeResourceList(Resource):
+    @jwt_required()
     def get(self):
         """Retrieve all Attributes."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         return_fields = ["name", "value", "device_id"]
         attributes = db.session.query(Attribute).all()
@@ -75,6 +81,7 @@ class AttributeResourceList(Resource):
 
 @ns.route('/<id>')
 class AttributeResource(Resource):
+    @jwt_required()
     def get(self, id):
         """Retrieve a specific Attribute."""
         status = 0
@@ -123,9 +130,14 @@ class AttributeResource(Resource):
 
 
 class CreateAttribute(Resource):
+    @jwt_required()
     @ns.expect(attribute_create_fields)
     def post(self, device_id):
         """Create new attributes connected to a device."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         data = request.get_json()
 
@@ -168,9 +180,14 @@ class CreateAttribute(Resource):
 
         
 class UpdateAttribute(Resource):
+    @jwt_required()
     @ns.expect(attribute_update_fields)
     def put(self, device_id, id):
         """Update a specific Attribute."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         data = request.get_json()
         attribute = db.session.query(Attribute).filter_by(id=id).first()
@@ -188,8 +205,13 @@ class UpdateAttribute(Resource):
 
 
 class DeleteAttribute(Resource):
+    @jwt_required()
     def delete(self,device_id, id):
         """Delete a specific Attribute."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         attribute = db.session.query(Attribute).filter_by(device_id=device_id, id=id).first()
         if not attribute:

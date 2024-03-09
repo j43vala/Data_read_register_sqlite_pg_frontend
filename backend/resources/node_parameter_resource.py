@@ -4,6 +4,7 @@ from models import NodeParameter  # Import the NodeParameter model
 from db import db
 from services.modbus_port import get_serial_ports
 from sqlalchemy.orm.attributes import  flag_modified
+from flask_jwt_extended import jwt_required,current_user
 
 ns = Namespace('NodeParameters', description='Node Parameter related operations')
 
@@ -116,8 +117,13 @@ def create_default_node_parameters():
 
 @ns.route('/')
 class NodeParameterResourceList(Resource):
+    @jwt_required()
     def get(self):
         """Retrieve all node parameters."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         return_fields = ["id","name", "value"]
         node_parameters = db.session.query(NodeParameter).all()
@@ -174,8 +180,13 @@ class NodeParameterResourceList(Resource):
     #     return make_response(jsonify({"status": status, 'message': 'New Node Parameter created'}), 201)
     
     @ns.expect(node_parameter_fields)
+    @jwt_required()
     def post(self):
         """Create a new node parameter."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         required_fields = ["name", "value"]
         status = 0
 
@@ -203,8 +214,10 @@ class NodeParameterResourceList(Resource):
 
 @ns.route('/<id>')
 class NodeParameterResource(Resource):
+    @jwt_required()
     def get(self, id):
         """Retrieve a specific node parameter."""
+        
         status = 0
         return_fields = ["name", "value"]
         node_parameter = db.session.query(NodeParameter).filter_by(id=id).first()
@@ -250,8 +263,13 @@ class NodeParameterResource(Resource):
     #     return make_response(jsonify({"status": status, "message": "Node Parameter has been updated."}), 200)
     
     @ns.expect(node_parameter_fields)
+    @jwt_required()
     def put(self, id):
         """Update a specific node parameter."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         data = request.get_json()
 
@@ -287,9 +305,13 @@ class NodeParameterResource(Resource):
         status = 1
         return make_response(jsonify({"status": status, "message": "Node Parameter has been updated."}), 200)
 
-
+    @jwt_required()
     def delete(self, id):
         """Delete a specific node parameter."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         return_fields = ["name"]
         node_parameter = db.session.query(NodeParameter).filter_by(id=id).first()

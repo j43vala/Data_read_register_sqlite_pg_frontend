@@ -3,6 +3,7 @@ from flask_restx import Resource, Namespace, reqparse
 import os
 import re
 from datetime import datetime
+from flask_jwt_extended import current_user,jwt_required
 
 ns = Namespace('Logs', description='Info and Error Logs related operations')
 
@@ -14,8 +15,13 @@ log_parser.add_argument('num_occurrences', type=int, default=0, help='Number of 
 
 @ns.route('/logs')
 class LogsResource(Resource):
+    @jwt_required()
     @ns.expect(log_parser)
     def get(self):
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         args = log_parser.parse_args()
 
         log_type = args['log_type'].lower()

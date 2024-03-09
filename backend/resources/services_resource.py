@@ -11,6 +11,7 @@ from db import db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Device, NodeParameter, Attribute, Parameter
+from flask_jwt_extended import current_user,jwt_required
 
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
@@ -26,7 +27,12 @@ ns = Namespace('Services', description='Services related operations')
 
 @ns.route('/restart-services')
 class RestartService(Resource):
+    @jwt_required()
     def get(self):
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         try:
             # Run 'systemctl daemon-reload' to reload units
             subprocess.run(['sudo', 'systemctl', 'restart', 'app_mb_hybrid.service'], check=True)
@@ -38,7 +44,12 @@ class RestartService(Resource):
         
 @ns.route('/stop-services')
 class StopService(Resource):
+    @jwt_required()
     def get(self):
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         try:
             subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
             # subprocess.run(['sc', 'stop', 'app_mb_hybrid'], check=True)
@@ -48,8 +59,13 @@ class StopService(Resource):
             return f'Error stopping services: {str(e)}'
 @ns.route('/get-wifi-lists')
 class Wifi(Resource):
+    @jwt_required()
     def get(self):
         """Retrieve all Wifi SSID In List."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         # Get the name of the operating system.
         # os_name = platform.system()
@@ -154,6 +170,7 @@ class Wifi(Resource):
 
 @ns.route("/connect-network")
 class ConnectWifi(Resource):
+    @jwt_required()
     @ns.doc("connect_network")
     @ns.expect(ns.model("WiFiCredentials", {
         "ssid": fields.String(required=True, description="WiFi SSID"),
@@ -161,6 +178,10 @@ class ConnectWifi(Resource):
     }))
     def post(self):
         """Set Wifi And Password."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         try:
             # Get data from the request
             data = request.get_json()
@@ -185,8 +206,13 @@ class ConnectWifi(Resource):
 
 @ns.route("/get-connected-network")
 class ConnectedWifi(Resource):
+    @jwt_required()
     def get(self):
         """Find Which Wifi network I Connected."""
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         try:
             result = subprocess.check_output(['iwgetid', '-r'], text=True)
             return result.strip()
@@ -286,7 +312,12 @@ def load_config_from_db():
 
 @ns.route("/get-json")
 class ConfigResource(Resource):
+    @jwt_required()
     def get(self):
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         status = 0
         config_data = load_config_from_db()
         status = 1
@@ -299,8 +330,13 @@ file_upload_parser.add_argument('file', location='files', type='file', required=
 
 @ns.route("/upload-json")
 class FileUploadResources(Resource):
+    @jwt_required()
     @ns.expect(file_upload_parser)
     def post(self):
+
+        if current_user.role.name not in ["super_admin","admin"]:
+            return make_response(jsonify({"message":"you are not authorize"}))
+        
         # Get the uploaded file from the request
         uploaded_file = request.files['file']
 
