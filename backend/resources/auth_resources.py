@@ -42,7 +42,10 @@ class UserLogin(Resource):
         elif "email" in json_fields:
             user = db.session.query(User).filter_by(email_id=user_data["email"]).first()
         else:
-            return make_response(jsonify({ 'message': "name or email not found"}), 400)
+            return make_response(jsonify({ "message": "name or email not found"}), 400)
+        
+        if user.active == False:
+            return make_response(jsonify({"message": "Could not verify, User is not active."}), 401)
         
         if check_password_hash(user.password, user_data["password"]):
             access_token = create_access_token(identity=user)
