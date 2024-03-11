@@ -13,11 +13,11 @@ DB_PORT = '5432'
 JWT_SECRET_KEY = 'wzero'
 JWT_ACCESS_TOKEN_EXPIRES = False
 
-# #this config_file is used to send email
-# MAIL_SERVER='smtp.gmail.com'
-# MAIL_USERNAME='dhruv.wzero@gmail.com'
-# MAIL_PASSWORD='qphonjlbtukkkuxj'
-# MAIL_PORT=465
-# MAIL_USE_SSL=True
-# MAIL_USE_TLS=False
-# SECURITY_PASSWORD_SALT = 'super-secret_for_email_token_salt'
+#this config_file is used to send email
+MAIL_SERVER='smtp.gmail.com'
+MAIL_USERNAME='dhruv.wzero@gmail.com'
+MAIL_PASSWORD='qphonjlbtukkkuxj'
+MAIL_PORT=465
+MAIL_USE_SSL=True
+MAIL_USE_TLS=False
+SECURITY_PASSWORD_SALT = 'super-secret_for_email_token_salt'

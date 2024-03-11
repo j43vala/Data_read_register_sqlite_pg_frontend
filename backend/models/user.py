@@ -7,3 +7,4 @@ class User(db.Model):
     password = db.Column(db.String,nullable=False)
     email_id = db.Column(db.String(80),nullable=False,unique=True)
     role_id = db.Column(db.Integer,db.ForeignKey("user_role.id"))
+    active = db.Column(db.Boolean,default=False)

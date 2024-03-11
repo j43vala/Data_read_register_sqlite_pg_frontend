@@ -4,7 +4,7 @@ from flask_restx import Namespace, fields, Resource
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify, make_response,request
 from flask_jwt_extended import current_user,jwt_required
-# from services.email_services import send_password_reset_email
+from services.email_services import send_password_reset_email,send_confirmation_email
 import secrets
 
 ns = Namespace('users', description='operation relateds users')
@@ -27,10 +27,10 @@ change_password = ns.model('change_password',{
     'new_password' : fields.String(required=True, description='your_new_password')
     })
 
-# reset_password = ns.model('reset_password',{
-#     'username' : fields.String(required=True, description='your_username'),
-#     'email' : fields.String(required=True, description='your_email')
-#     })
+reset_password = ns.model('reset_password',{
+    'username' : fields.String(required=True, description='your_username'),
+    'email' : fields.String(required=True, description='your_email')
+    })
 
 
 
@@ -64,10 +64,13 @@ class UserResgister(Resource):
         hashed_password = generate_password_hash(user_data["password"],method="sha256")
         user = User(username=user_data["username"], password=hashed_password, email_id=user_data["email"],role_id=user_role.id)
         db.session.add(user)
-        
-        db.session.commit()
-        
-        return make_response(jsonify({"message":"User created successfully."}),201)
+        try:
+            send_confirmation_email(user.email_id)
+            db.session.commit()
+            return make_response(jsonify({"message":"User created successfully."}),201)
+        except Exception as e:
+            db.session.rollback()
+            return make_response(jsonify({"message": f'Not able to Execute Create User API, error: {str(e)}'}), 400)
     
     @jwt_required()
     def get(self):
@@ -214,28 +217,28 @@ class UserPasswordChange(Resource):
             return make_response(jsonify({"message":"old_Password doesn't match"}),401)
     
 
-# @ns.route('/password_reset')
-# class UserPasswordReset(Resource):
-#     @ns.doc(security=[])
-#     @ns.expect(reset_password)
-#     def put(self):
-#         '''password reset'''
-#         user_data = request.get_json()
-#         user = User.query.filter_by(email_id = user_data['email']).first()
-#         if not user:
-#             return make_response(jsonify({"message":"user not found."}),401)
+@ns.route('/password_reset')
+class UserPasswordReset(Resource):
+    @ns.doc(security=[])
+    @ns.expect(reset_password)
+    def put(self):
+        '''password reset'''
+        user_data = request.get_json()
+        user = User.query.filter_by(email_id = user_data['email']).first()
+        if not user:
+            return make_response(jsonify({"message":"user not found."}),401)
         
-#         if user.username != user_data["username"]:
-#             return make_response(jsonify({"message":"username not match."}),401)
+        if user.username != user_data["username"]:
+            return make_response(jsonify({"message":"username not match."}),401)
         
-#         random_password = f'{secrets.SystemRandom().getrandbits(32)}'
-#         print(random_password)
+        random_password = f'{secrets.SystemRandom().getrandbits(32)}'
+        print(random_password)
 
-#         user.password = generate_password_hash(random_password,method="sha256")
+        user.password = generate_password_hash(random_password,method="sha256")
         
 
-#         try:    
-#             send_password_reset_email(user.email_id,random_password)
-#             db.session.commit()
-#         except Exception as e:
-#             return make_response(jsonify({"message":f'not able send passsword_reset email, error: {str(e)}'}), 400)
+        try:    
+            send_password_reset_email(user.email_id,random_password)
+            db.session.commit()
+        except Exception as e:
+            return make_response(jsonify({"message":f'not able send passsword_reset email, error: {str(e)}'}), 400)

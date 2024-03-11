@@ -53,12 +53,12 @@ import psycopg2
 from resources.node_parameter_resource import create_default_node_parameters
 from db_services import check_and_add_user_role,check_and_add_super_admin
 from security import jwt
-# from mail import mail
+from mail import mail
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
-# mail.init_app(app)
+mail.init_app(app)
 
 
 CORS(app)

@@ -24,6 +24,6 @@ def check_and_add_super_admin():
         password = "12345"
         user_role = UserRole.query.filter(UserRole.name=="super_admin").first()
         hashed_password = generate_password_hash(password, method='sha256')
-        new_user = User(username=name,email_id=email,password=hashed_password,role_id=user_role.id)
+        new_user = User(username=name,email_id=email,password=hashed_password,role_id=user_role.id,active=True)
         db.session.add(new_user)
         db.session.commit()

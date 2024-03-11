@@ -27,6 +27,7 @@ from .services_resource import ns as service_ns
 from .logs_resource import ns as log_ns
 from .user_resource import ns as user_ns
 from .auth_resources import ns as auth_ns
+from .confirmation_resources import ns as confirm_ns
 
 api.add_namespace(device_ns, path='/devices')
 api.add_namespace(parameter_ns, path='/parameter')
@@ -36,3 +37,4 @@ api.add_namespace(service_ns, path='/service')
 api.add_namespace(log_ns, path='/logs')
 api.add_namespace(user_ns,path='/user')
 api.add_namespace(auth_ns,path="")
+api.add_namespace(confirm_ns,path="")
