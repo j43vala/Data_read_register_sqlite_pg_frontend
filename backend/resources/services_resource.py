@@ -202,8 +202,8 @@ class GitPullResource(Resource):
 # Define the SQLite database file path
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
-main_path = os.path.dirname(dir_path)
-db_path = os.path.join(main_path, "ui.db")
+main_path = os.path.join(os.path.dirname(dir_path),'..', 'config')
+db_path = os.path.join(main_path, "edge_app.db")
 
 def load_config_from_db():
     # Replace 'postgresql://your_username:your_password@localhost/your_database' with your actual PostgreSQL connection URI
@@ -215,6 +215,7 @@ def load_config_from_db():
 
     # Query devices and associated parameters from the database
     devices = session.query(Device).all()
+    print('devices: ', devices)
 
     # Convert devices to a list of dictionaries
     devices_list = []
@@ -288,7 +289,7 @@ def load_config_from_db():
     }
 
     return config
-
+load_config_from_db()
 @ns.route("/get-json")
 class ConfigResource(Resource):
     def get(self):

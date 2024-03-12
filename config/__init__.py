@@ -13,7 +13,7 @@ config = None
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
 main_path = os.path.dirname(dir_path)
-db_path = os.path.join(main_path, "backend", "ui.db")
+db_path = os.path.join(main_path, "config", "edge_app.db")
 
 script_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(script_path)
