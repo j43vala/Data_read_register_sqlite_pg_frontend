@@ -16,11 +16,9 @@ def index():
 api.init_app(app, cors_allowed_origins='*')
 
 # Define the SQLite database file path
-script_path = os.path.abspath(__file__)
-dir_path = os.path.dirname(script_path)
-
-sqlite_db_path = os.path.join(dir_path, "ui.db")
-# print("sqlite db path : ", sqlite_db_path)
+# script_path = os.path.abspath(__file__)
+config_dir = os.path.join(os.path.dirname(__file__), '..', 'config')  # Move up one directory to reach the parent directory
+sqlite_db_path = os.path.join(config_dir, 'edge_app.db')
 
 # Set the SQLite connection URL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + sqlite_db_path
