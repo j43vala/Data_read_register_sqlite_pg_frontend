@@ -5,13 +5,14 @@ from logger_services import info_logger, error_logger
 from modbus_final import initialize_modbus_client
 import copy
 import json
+import subprocess
 import psutil
 import os
 
 def get_ram_usage():
     try:
         import psutil
-        
+
         # Get system memory usage statistics
         mem = psutil.virtual_memory()
         # Total physical memory available in bytes
@@ -37,6 +38,27 @@ def get_node_temp():
         error_logger.exception("Error occurred while reading the rpi temperature : ", str(e))
         return 0
 
+
+def wireguard_service_up(interface='wg0'):
+    command = ['sudo', 'wg-quick', 'up', interface]
+    try:
+        subprocess.run(command, check=True)
+        print(f"WireGuard interface '{interface}' started successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Failed to start WireGuard interface '{interface}'.")
+        print("Error message:", e)
+
+def wireguard_service_down(interface='wg0'):
+    command = ['sudo', 'wg-quick', 'down', interface]
+    try:
+        subprocess.run(command, check=True)
+        print(f"WireGuard interface '{interface}' stopped successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Failed to stop WireGuard interface '{interface}'.")
+        print("Error message:", e)
+
+
+
 def init_spb_edge_node(group_id, edge_node_id, config, mac_address):
     node = MqttSpbEntityEdgeNode(group_id, edge_node_id)
    
@@ -52,7 +74,6 @@ def init_spb_edge_node(group_id, edge_node_id, config, mac_address):
         node.attribures.set_value("MAC_address", mac_address)
         print('=======================================node.attribures.set_value("MAC_address", mac_address): ', node.attribures.set_value("MAC_address", mac_address))
 
-        
         temp = copy.deepcopy(config)
         
         for device in temp["devices"]:
@@ -64,15 +85,19 @@ def init_spb_edge_node(group_id, edge_node_id, config, mac_address):
         node.commands.set_value("rebirth", False)
         node.commands.set_value("INFO", False)
         node.commands.set_value("ERROR", False)
+        node.commands.set_value("vpn_start", False)
+        node.commands.set_value("vpn_stop", False)
 
         config["spb_node"] = node
+        wireguard_service_up()
+        wireguard_service_down()
+        
     except Exception as e:
         error_logger.exception("Error occurred during initialization of Sparkplug B Edge Node: %s", str(e))
     else:
         info_logger.info(f"Successfully initialized Sparkplug B Edge Node")
     
     return node
-
 
 def init_spb_device(group_name,edge_node_name, device_dict):
     
@@ -119,17 +144,14 @@ def init_spb_device(group_name,edge_node_name, device_dict):
     device.commands.set_value("rebirth", False)
     device.commands.set_value("INFO", False)
     device.commands.set_value("ERROR", False)
+    
 
     device_dict["spb_device"] = device
 
     return device
 
-
-
-
 def connect_spb_device(device_dict, broker , port, user, password):
    
-    
     info_logger.info("Trying to connect to broker...")
 
     device : MqttSpbEntityDevice = device_dict["spb_device"]

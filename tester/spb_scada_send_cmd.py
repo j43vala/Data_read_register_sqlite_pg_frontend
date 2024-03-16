@@ -29,8 +29,6 @@ _config_mqtt_pass = os.environ.get("MQTT_PASS", "")
 
 print("--- Sparkplug B example - SCADA send cmd example")
 
-# Global variables ----------------------------------------
-
 # Create the SCADA entity to listen to all spB messages
 scada = MqttSpbEntityScada(spb_group_name= _config_spb_group_name,
                            spb_scada_name= _config_spb_scada_name,
