@@ -22,7 +22,7 @@ try:
 
 except ImportError as e:
     # Log the import error
-    error_logger.error(f"Error importing library: {e}")
+    error_logger.exception(f"Error importing library: {e}")
     raise
 
 # connect to mqtt broker if the sparkplugb device is not connected 
@@ -37,7 +37,6 @@ except ImportError as e:
 
 def connect_to_broker(device_dict, broker, port, user, password):
     try:
-        
         if not device_dict["spb_device_connected"]:
             info_logger.info("Connecting to broker...")
             connect_spb_device(device_dict, broker, port, user, password)
@@ -45,9 +44,9 @@ def connect_to_broker(device_dict, broker, port, user, password):
             if device_dict["spb_device_connected"]:
                 info_logger.info(f"Connection to broker successful: {e}")
             else:
-                error_logger.error(f"Connection to broker failed (check your credentials of host and port): {e}")
+                error_logger.exception(f"Connection to broker failed (check your credentials of host and port): {e}")
     except Exception as e:
-        error_logger.error(f"Error connecting to the broker: {e}")
+        error_logger.exception(f"Error connecting to the broker: {e}")
 
 # retrive data from modbus 
 def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
@@ -55,7 +54,7 @@ def retrieve_modbus_data(client, slave_id, reg_no, reg_data_type):
         data = read_modbus_data(client, slave_id, reg_no, reg_data_type)
         return data
     except Exception as e:
-        error_logger.error(f"An error occurred reading Modbus data: {e}")
+        error_logger.exception(f"An error occurred reading Modbus data: {e}")
         return None
 
 # publish data to sparkplug b
@@ -67,7 +66,7 @@ def publish_to_sparkplug_b(spb_entity):
 
         return success
     except Exception as e:
-        error_logger.error(f"Failed to publish data to Sparkplug B: {e}")
+        error_logger.exception(f"Failed to publish data to Sparkplug B: {e}")
         return False
 
 # perform data retantion in SQlite database
@@ -78,7 +77,7 @@ def perform_data_retention(session, model, retention_period):
             session.delete(record)
         session.commit()
     except Exception as e:
-        error_logger.error(f"An error occurred during data retention: {e}")
+        error_logger.exception(f"An error occurred during data retention: {e}")
 
 def get_mac_address():
     mac = uuid.getnode()
@@ -134,7 +133,7 @@ def main():
                 init_spb_device(group_name, edge_node_id, device_dict)
                 connect_spb_device(device_dict, broker , port, user, password)
             except Exception as device_creation_error:
-                error_logger.error(f"Failed to create and connect SPB device: {device_creation_error}")
+                error_logger.exception(f"Failed to create and connect SPB device: {device_creation_error}")
 
         # value=[]
         # for key in config:
@@ -186,7 +185,7 @@ def main():
                             info_logger.info("Temperature and RAM usage data published successfully to Sparkplug B")
                         except Exception as publish_error:
                             # Log any errors that occur during data publishing
-                            error_logger.error(f"Error publishing temperature and RAM usage data to Sparkplug B: {publish_error}")
+                            error_logger.exception(f"Error publishing temperature and RAM usage data to Sparkplug B: {publish_error}")
                     
                 time.sleep(time_sleep_minutes * 60 + time_sleep_seconds)
 
@@ -296,7 +295,7 @@ def main():
                             last_check_time = datetime.datetime.now()
                             perform_data_retention(session, model, retention_period_failure)
             except Exception as main_exception:
-                error_logger.error(f"An error occurred in the main loop: {main_exception}")
+                error_logger.exception(f"An error occurred in the main loop: {main_exception}")
 
     except KeyboardInterrupt:
         client.close()
@@ -304,7 +303,7 @@ def main():
         info_logger.info("Exiting the loop due to KeyboardInterrupt")
     except Exception as e:
         time.sleep(10)
-        error_logger.error(f"An unexpected error occurred: {e}")
+        error_logger.exception(f"An unexpected error occurred: {e}")
     finally:
         # Shutdown loggers and handlers
         info_logger.handlers.clear()

@@ -22,7 +22,7 @@ def initialize_modbus_client():
 def read_integer(client, reg_address, slave_id):
     result = client.read_holding_parameters(reg_address, 2, slave=slave_id)
     if result.isError():
-        error_logger.error(f"Error reading Modbus data: {result}")
+        error_logger.exception(f"Error reading Modbus data: {result}")
         return None
     else:
         data = result.parameters[0]

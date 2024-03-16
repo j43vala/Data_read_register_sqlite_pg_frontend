@@ -10,7 +10,6 @@
 import os
 import time
 from mqtt_spb_wrapper import *
-from err_inf import handle_info_command, handle_error_command
 
 # APPLICATION default configuration parameters -----------------------------------------------
 _DEBUG = True   # Enable debug messages
@@ -49,7 +48,7 @@ while not _connected:
                                _config_mqtt_user,
                                _config_mqtt_pass)
     if not _connected:
-        print("  Error, could not connect. Trying again in a few seconds ...")
+        print("Error, could not connect. Trying again in a few seconds ...")
         time.sleep(3)
 
 
@@ -63,6 +62,8 @@ print("Sending command...")
 scada.publish_command_device(_config_spb_eon_name, _config_spb_device_name, {"REBIRTH": True})
 scada.publish_command_device(_config_spb_eon_name, _config_spb_device_name, {"INFO": True})
 scada.publish_command_device(_config_spb_eon_name, _config_spb_device_name, {"ERROR": True})
+scada.publish_command_device(_config_spb_eon_name, _config_spb_device_name, {"wireguard_start": True})
+scada.publish_command_device(_config_spb_eon_name, _config_spb_device_name, {"wireguard_stop": True})
 
 time.sleep(3)
 print("Done!")

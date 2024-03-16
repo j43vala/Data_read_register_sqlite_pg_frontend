@@ -24,7 +24,7 @@ def get_ram_usage():
         
         return result_float
     except Exception as e:
-        error_logger.error("Error occurred while reading RAM usage: %s", str(e))
+        error_logger.exception("Error occurred while reading RAM usage: %s", str(e))
         return -1  # Return a default value or handle the error accordingly
 
 def get_node_temp():
@@ -34,7 +34,7 @@ def get_node_temp():
             temperature = float(temperature_str) / 1000.0  # Convert millidegree Celsius to degree Celsius
             return temperature
     except  Exception as e:
-        error_logger.error("Error occurred while reading the rpi temperature : ", str(e))
+        error_logger.exception("Error occurred while reading the rpi temperature : ", str(e))
         return 0
 
 def init_spb_edge_node(group_id, edge_node_id, config, mac_address):
@@ -67,7 +67,7 @@ def init_spb_edge_node(group_id, edge_node_id, config, mac_address):
 
         config["spb_node"] = node
     except Exception as e:
-        error_logger.error("Error occurred during initialization of Sparkplug B Edge Node: %s", str(e))
+        error_logger.exception("Error occurred during initialization of Sparkplug B Edge Node: %s", str(e))
     else:
         info_logger.info(f"Successfully initialized Sparkplug B Edge Node")
     
@@ -139,7 +139,7 @@ def connect_spb_device(device_dict, broker , port, user, password):
         # Send birth message
         device.publish_birth()
     else:
-        error_logger.error("Error, could not connect spb device to broker...")
+        error_logger.exception("Error, could not connect spb device to broker...")
 
     device_dict["spb_device_connected"] = _connected
     return _connected
@@ -158,7 +158,7 @@ def connect_spb_node(node_dict, broker , port, user, password):
         node.publish_birth()
         print("nbirth published")
     else:
-        error_logger.error("Error, could not connect spb node to broker...")
+        error_logger.exception("Error, could not connect spb node to broker...")
 
     node_dict["spb_node_connected"] = _connected
     return _connected

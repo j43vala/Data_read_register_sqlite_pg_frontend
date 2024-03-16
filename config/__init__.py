@@ -59,7 +59,7 @@ def load_config_from_db():
     # Query devices and associated parameters from the database
     devices = session.query(Device).all()
     if not devices:
-        error_logger.error("No Devices found")
+        error_logger.exception("No Devices found")
 
     # Convert devices to a list of dictionaries
     devices_list = []

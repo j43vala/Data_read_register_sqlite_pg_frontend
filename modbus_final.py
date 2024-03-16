@@ -44,12 +44,12 @@ def read_modbus_data(client,slave_id, reg_address, reg_data_type):
             data = read_boolean(client, reg_address, slave_id)
             # info_logger.info('Boolean > ', reg_address, ":", data)
         else:
-            error_logger.error(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
+            error_logger.exception(f"Unsupported reg_data_type '{reg_data_type}' for parameter {reg_address}")
 
         return data
 
     
     except Exception as e:
         # print(client,slave_id, reg_address, reg_data_type)
-        error_logger.error(f"error reading modbus data : \n{e}")
+        error_logger.exception(f"error reading modbus data : \n{e}")
         return None

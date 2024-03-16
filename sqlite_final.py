@@ -14,7 +14,7 @@ def create_dynamic_models(devices, hostname):
 
         if not device_name or not slave_id:
             # Log error if device_name or slave_id is missing
-            error_logger.error(f"Missing device_name or slave_id for device: {device}")
+            error_logger.exception(f"Missing device_name or slave_id for device: {device}")
             continue
 
         # Sanitize the table name

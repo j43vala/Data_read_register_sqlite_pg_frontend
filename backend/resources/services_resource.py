@@ -42,7 +42,7 @@ class StopService(Resource):
         try:
             subprocess.run(['sudo', 'systemctl', 'stop', 'app_mb_hybrid.service'], check=True)
             # subprocess.run(['sc', 'stop', 'app_mb_hybrid'], check=True)
-            error_logger.error("System service has been stopped")
+            error_logger.exception("System service has been stopped")
             return 'Services stopped successfully'
         except subprocess.CalledProcessError as e:
             return f'Error stopping services: {str(e)}'
@@ -289,7 +289,7 @@ def load_config_from_db():
     }
 
     return config
-load_config_from_db()
+# load_config_from_db()
 @ns.route("/get-json")
 class ConfigResource(Resource):
     def get(self):
