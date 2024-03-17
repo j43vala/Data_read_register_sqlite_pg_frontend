@@ -8,6 +8,7 @@ import json
 import subprocess
 import psutil
 import os
+
 def get_ram_usage():
     try:
         import psutil
@@ -23,6 +24,7 @@ def get_ram_usage():
     except Exception as e:
         error_logger.exception("Error occurred while reading RAM usage: %s", str(e))
         return -1  # Return a default value or handle the error accordingly
+    
 def get_node_temp():
     try:
         with open('/sys/class/thermal/thermal_zone0/temp', 'r') as file:
@@ -32,6 +34,7 @@ def get_node_temp():
     except  Exception as e:
         error_logger.exception("Error occurred while reading the rpi temperature : ", str(e))
         return 0
+    
 def wireguard_service_up(interface='wg0'):
     command = ['sudo', 'wg-quick', 'up', interface]
     try:
@@ -48,6 +51,7 @@ def wireguard_service_down(interface='wg0'):
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to stop WireGuard interface '{interface}'.")
         print("Error message:", e)
+
 def init_spb_edge_node(group_id, edge_node_id, config, mac_address, interface='wg0'):
     node = MqttSpbEntityEdgeNode(group_id, edge_node_id)
     try:
@@ -70,55 +74,65 @@ def init_spb_edge_node(group_id, edge_node_id, config, mac_address, interface='w
         node.commands.set_value("vpn_start", False)
         node.commands.set_value("vpn_stop", False)
         config["spb_node"] = node
+
     except Exception as e:
         error_logger.exception("Error occurred during initialization of Sparkplug B Edge Node: %s", str(e))
     else:
         info_logger.info(f"Successfully initialized Sparkplug B Edge Node")
     return node
+
 def handle_command(node, command):
     if command == "vpn_start":
-        # Start WireGuard VPN service
         wireguard_service_up()
-        print("\n\nitsup\n\n")
     elif command == "vpn_stop":
-        # Stop WireGuard VPN service
         wireguard_service_down()
     else:
         info_logger.info("Unknown command received: %s" % command)
+
     # Set the command back to False after execution
     node.commands.set_value(command, False)
-# # Modify callback function to handle received commands
-# def callback_command(payload):
-#     metrics = payload.get("metrics")
-#     command = metrics[0].get("name")
-#     if command in ["vpn_start", "vpn_stop"]:
-#         handle_command(node, command)
-#     else:
-#         info_logger.info("Unknown command received: %s" % command)
-#     info_logger.info("\n\n payload", payload)
+# Modify callback function to handle received commands
+    
+def callback_command(payload):
+    metrics = payload.get("metrics")
+    command = metrics[0].get("name")
+    if command == "rebirth":
+        info_logger.info("Node Attribute received CMD: %s" % (payload))
+    elif command in ["vpn_start","vpn_stop"]:
+        info_logger.info("command received: %s" % command)
+        handle_command(command)
+    else:
+        info_logger.info("Unknown command received: %s" % command)
+    info_logger.info("\n\n payload", payload)
+
 def init_spb_device(group_name, edge_node_name, device_dict):
     _DEBUG = True  # Enable debug messages
     info_logger.info("--- Sparkplug B example - End of Node Device - Simple")
     def callback_message(topic, payload):
         info_logger.info("Received MESSAGE: %s - %s" % (topic, payload))
     device_name = device_dict.get("device_name")
+
     # Create the spB entity object
     device = MqttSpbEntityDevice(group_name, edge_node_name, device_name, _DEBUG)
     device.on_message = callback_message  # Received messages
     device.on_command = callback_command  # Callback for received commands
     # Set the device Attributes, Data and Commands that will be sent on the DBIRTH message --------------------------
     attributes = device_dict["attributes"]
+
     for attribute in attributes:
         device.attributes.set_value(attribute["name"], attribute["value"])
+
     # Data / Telemetry
     for parameter in device_dict["parameters"]:
         device.data.set_value(parameter["parameter_name"], 0)
+
     # Commands
     device.commands.set_value("rebirth", False)
     device.commands.set_value("INFO", False)
     device.commands.set_value("ERROR", False)
     device_dict["spb_device"] = device
     return device
+
 def connect_spb_device(device_dict, broker, port, user, password):
     info_logger.info("Trying to connect to broker...")
     device = device_dict["spb_device"]
@@ -130,6 +144,7 @@ def connect_spb_device(device_dict, broker, port, user, password):
         error_logger.exception("Error, could not connect spb device to broker...")
     device_dict["spb_device_connected"] = _connected
     return _connected
+
 def connect_spb_node(node_dict, broker, port, user, password):
     info_logger.info("Trying to connect to broker...")
     node = node_dict["spb_node"]
