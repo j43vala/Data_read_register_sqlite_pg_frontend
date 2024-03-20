@@ -35,22 +35,25 @@ def get_node_temp():
         error_logger.exception("Error occurred while reading the rpi temperature : ", str(e))
         return 0
     
-def wireguard_service_up(interface='wg0'):
-    command = ['sudo', 'wg-quick', 'up', interface]
+
+def netbird_up():
+    command = ['netbird','up']
     try:
         subprocess.run(command, check=True)
-        print(f"WireGuard interface '{interface}' started successfully.")  # Print when service is up
+        print(f"netbird interface started successfully.")  # Print when service is up
     except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to start WireGuard interface '{interface}'.")
         print("Error message:", e)
-def wireguard_service_down(interface='wg0'):
-    command = ['sudo', 'wg-quick', 'down', interface]
+def netbird_down():
+    command = ['netbird','down']
     try:
         subprocess.run(command, check=True)
-        print(f"WireGuard interface '{interface}' stopped successfully.")  # Print when service is down
+        print(f"netbird interface stopped successfully.")  # Print when service is down
     except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to stop WireGuard interface '{interface}'.")
         print("Error message:", e)
+
+
+
+
 
 def init_spb_edge_node(group_id, edge_node_id, config, mac_address, interface='wg0'):
     node = MqttSpbEntityEdgeNode(group_id, edge_node_id)
@@ -71,8 +74,8 @@ def init_spb_edge_node(group_id, edge_node_id, config, mac_address, interface='w
         node.commands.set_value("rebirth", False)
         node.commands.set_value("INFO", False)
         node.commands.set_value("ERROR", False)
-        node.commands.set_value("vpn_start", False)
-        node.commands.set_value("vpn_stop", False)
+        node.commands.set_value("netbird_start", False)
+        node.commands.set_value("netbird_stop", False)
         config["spb_node"] = node
 
     except Exception as e:
@@ -82,10 +85,10 @@ def init_spb_edge_node(group_id, edge_node_id, config, mac_address, interface='w
     return node
 
 def handle_command(node, command):
-    if command == "vpn_start":
-        wireguard_service_up()
-    elif command == "vpn_stop":
-        wireguard_service_down()
+    if command == "netbird_start":
+        netbird_up()
+    elif command == "netbird_stop":
+        netbird_down()
     else:
         info_logger.info("Unknown command received: %s" % command)
 
