@@ -35,7 +35,6 @@ def get_node_temp():
         error_logger.exception("Error occurred while reading the rpi temperature : ", str(e))
         return 0
     
-
 def netbird_up():
     command = ['netbird','up']
     try:
@@ -50,10 +49,6 @@ def netbird_down():
         print(f"netbird interface stopped successfully.")  # Print when service is down
     except subprocess.CalledProcessError as e:
         print("Error message:", e)
-
-
-
-
 
 def init_spb_edge_node(group_id, edge_node_id, config, mac_address, interface='wg0'):
     node = MqttSpbEntityEdgeNode(group_id, edge_node_id)

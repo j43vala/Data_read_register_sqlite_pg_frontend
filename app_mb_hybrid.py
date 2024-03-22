@@ -42,9 +42,9 @@ def connect_to_broker(device_dict, broker, port, user, password):
             connect_spb_device(device_dict, broker, port, user, password)
             
             if device_dict["spb_device_connected"]:
-                info_logger.info(f"Connection to broker successful: {e}")
+                info_logger.info("Connection to broker successful")
             else:
-                error_logger.exception(f"Connection to broker failed (check your credentials of host and port): {e}")
+                error_logger.exception("Connection to broker failed (check your credentials of host and port)")
     except Exception as e:
         error_logger.exception(f"Error connecting to the broker: {e}")
 
@@ -158,7 +158,6 @@ def main():
                 )
 
                 mac_address = get_mac_address()
-                print("MAC Address:=========================", mac_address)
 
                 if not config.get("last_publish_time"):
                     config["last_publish_time"] = datetime.datetime.now()
