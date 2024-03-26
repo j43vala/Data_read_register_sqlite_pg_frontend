@@ -46,7 +46,12 @@ class UserLogin(Resource):
         
         if check_password_hash(user.password, user_data["password"]):
             access_token = create_access_token(identity=user)
-            return make_response(jsonify({"access_token": "Bearer "+ access_token}),200)
+            data_user = {
+                'username': user.username,
+                'role': user.role.name,
+                'email': user.email_id
+            }
+            return make_response(jsonify({"access_token": "Bearer "+ access_token, "user_data":data_user}),200)
         
         return make_response(jsonify({"message":"invalid credentials."}),401)
     
